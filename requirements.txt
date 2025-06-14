@@ -1,0 +1,13 @@
+supabase
+pandas
+python-dotenv
+scikit-learn
+spacy
+numpy
+pandas
+python-dotenv
+scikit-learn
+spacy
+numpy
+pandas
+python-dotenv

@@ -1,0 +1,1919 @@
+{
+  "dual_corpus_summary": {
+    "version": "v2.0 - 双语料库对比法",
+    "processing_timestamp": "2025-06-14T01:53:15.571547",
+    "total_jobs_processed": 9,
+    "average_quality_ratio": 0.839,
+    "total_high_quality_anomalies": 120,
+    "improvements_implemented": [
+      "双语料库对比法 (同行 vs 外行)",
+      "基于IDF的智能通用词过滤",
+      "行业自动分类系统",
+      "增强质量评分算法",
+      "上下文感知异常检测"
+    ],
+    "industry_distribution": {
+      "tech": 6,
+      "media": 3
+    }
+  },
+  "jobs": [
+    {
+      "job_id": "9b692b45836bab0f",
+      "company_name": "BMW",
+      "job_title": "Werkstudent Realfahrzeugstudien und Human Factors (w/m/x)",
+      "industry": "tech",
+      "description": "SO VIEL UNTERNEHMEN GEHT NUR IN WENIGEN UNTERNEHMEN.\n\nTEILE DEINE LEIDENSCHAFT.\n\nErfolg ist Teamarbeit. Nur wenn Expert:innen ihr Fachwissen und ihre Begeisterung teilen, entsteht ein Workflow, in dem Ideen fließen. Das nennen wir Innovationskultur. Deshalb geben wir Studierenden bei uns nicht nur die Gelegenheit zum Zuhören, sondern vor allem auch zum Mitreden und Weiterdenken.\n\nWir, die BMW Group, bieten dir eine spannende und abwechslungsreiche Werktstudententätigkeit im Bereich Entwicklung Fahrzeugsicherheit mit Fokus auf Kund:innenstudien und der Sicherheitsbewertung automatisierter Fahrfunktionen.\n\nWas erwartet dich?\n\nIm Rahmen deiner Werkstudententätigkeit unterstützt du unser Team tatkräftig bei der Bearbeitung von Aufträgen im Themenumfeld Fahrzeugsicherheit.\nZu deinen Aufgaben zählt die Unterstützung von Kund:innenstudien im Bereich Human Factors.\nDies umfasst unter anderem die Aufbereitung von Versuchsdaten sowie die qualitative und quantitative Auswertung mittels unterschiedlicher Metriken und Tools.\nDu unterstützt uns bei der Verwaltung unserer Realfahrzeugversuchsträger und deren Messtechnik für die Kund:innenstudien.\nDie allgemeine Unterstützung unseres Expert:innenteams bei der Bewertung von Fahrerassistenzsystemen und automatisierten Fahrfunktionen in Bezug auf Fahrzeugsicherheit rundet die Tätigkeit ab.\n\nWas bringst du mit?\n\nDu studierst in einem natur- oder geisteswissenschaftlichen Studiengang und begeisterst dich für den Bereich Automobil.\nAußerdem verfügst du über fundierte Kenntnisse in MS-Office und bringst bereits erste Programmiererfahrung (Python etc.) mit.\nEine gewissenhafte Arbeitsweise sowie Teamfähigkeit runden dein Profil ab.\nDu besitzt einen Führerschein der Klasse B.\nSehr gute Deutsch und Englischkenntnisse.\nBereitschaft zur örtlichen Verfügbarkeit in München.\n\nDu hast Spaß daran, Neues zu lernen und unsere Abteilung tatkräftig zu unterstützen? Bewirb dich jetzt!\n\nWas bieten wir dir?\n\nUmfassendes Mentoring & Onboarding.\nPersönliche & fachliche Weiterentwicklung.\nFlexible Arbeitszeiten.\nMobilarbeit.\nAttraktive & faire Vergütung.\nApartments für Studierende (nach Verfügbarkeit & nur am Standort München).\nUnd vieles mehr siehe bmw.jobs/waswirbieten.\n\nStartdatum: ab 01.08.2025\nDauer: 12 Monate\nArbeitszeit: Teilzeit\n\nDu hast Fragen? Dann reiche dein Anliegen ganz einfach über unser Kontaktformular ein. Deine Anfrage wird im Nachgang telefonisch oder per E-Mail beantwortet.\n\nBei der BMW Group ist uns Chancengleichheit ein besonderes Anliegen. Die Gleichbehandlung von Bewerber:innen sowie Mitarbeiter:innen ist ein grundlegendes Prinzip unserer Unternehmenspolitik. Daher basieren auch unsere Recruiting-Entscheidungen auf ihrer Persönlichkeit, ihren Erfahrungen und Fähigkeiten.\n\nMehr Informationen hier.\n\nWerkstudent Realfahrzeugstudien und Human Factors (w/m/x)\n20250613\nAutomotive\nMunich\nDeutschland (Land)\nUnternehmensbereich:\nBMW AG\nStandort:\nMunich\nArbeitsbereich:\nFahrzeugsicherheit\nJob ID:\n160162\nVeröffentlichungsdatum:\n13.06.2025\nPraktikum/Abschlussarbeit\nTeilzeit",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "factor",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "realfahrzeugstudien",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "automotive",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "fair",
+            "anomaly_ratio": 5.42,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.1111,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "e-mail",
+            "anomaly_ratio": 5.42,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.1111,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "kund innenstudien",
+            "anomaly_ratio": 181.82,
+            "target_frequency": 1.818,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "fahrzeugsicherheit",
+            "anomaly_ratio": 240.96,
+            "target_frequency": 2.41,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "innenstudien",
+            "anomaly_ratio": 180.72,
+            "target_frequency": 1.807,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "factor",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "realfahrzeugstudien",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "automotive",
+            "anomaly_ratio": 60.24,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "fair",
+            "anomaly_ratio": 4.1,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.1471,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "e-mail",
+            "anomaly_ratio": 4.1,
+            "target_frequency": 0.602,
+            "corpus_frequency": 0.1471,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "kund innenstudien",
+            "anomaly_ratio": 181.82,
+            "target_frequency": 1.818,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "fahrzeugsicherheit",
+            "anomaly_ratio": 240.96,
+            "target_frequency": 2.41,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "innenstudien",
+            "anomaly_ratio": 180.72,
+            "target_frequency": 1.807,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 166,
+          "target_bigrams_count": 165,
+          "company_terms_filtered": 1
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 14,
+        "quality_ratio": 0.88
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 166,
+        "target_bigrams_count": 165,
+        "company_terms_filtered": 1
+      }
+    },
+    {
+      "job_id": "9db86139f9222c71",
+      "company_name": "Membrain GmbH",
+      "job_title": "Werkstudent Marketing-Allrounder (m/w/d)",
+      "industry": "media",
+      "description": "Ihre Aufgaben\n\nUnterstützung unseres Marketing-Teams bei vielfältigen Aufgaben u.a.:\n\nPlanung, Organisation und Einladungskampagnen für Messen & Events\nVor- und Nachbereitung von Webinaren\nOnline Marketing- und Social Media Kampagnen\nErstellung zielgruppengerechter Contents\nAuswertung von Kennzahlen (Google Ads Reporting, Online Marketing Aktivitäten, Webinare etc.)\n\nIhr Profil\n\nSie sind eingeschriebener Student (m/w/d) im Bereich Marketing, Kommunikationswissenschaften, BWL oder einem ähnlichen Studiengang.\nDurch Motivation, Selbstständigkeit, eine schnelle Auffassungsgabe und eine strukturierte Arbeitsweise überzeugen Sie.\nFür 15 bis 20 Stunden pro Woche können Sie zur Verfügung stehen.\nFließende Deutschkenntnisse in Wort und Schrift runden Ihr Profil ab.\n\nDas bieten wir\n\nWir haben flexible Arbeitszeiten, denn Ihr Studium hat für uns Priorität.\nSie erhalten einen Stundenlohn von 15 € – zudem übernehmen wir Ihr MVG-Ermäßigungsticket (bis zu 50 € pro Monat).\nBei uns erwartet Sie eine offene, internationale Arbeitsatmosphäre mit Raum für eigene Ideen und echte Mitgestaltung – in einem Unternehmen, das flache Hierarchien, kurze Entscheidungswege sowie eine Duz-Kultur lebt.\nSie erreichen uns bequem dank S-Bahn-Nähe und Unternehmensparkplätzen.\nSie sind bei uns rundum gut versorgt mit kostenlosen Heiß- und Kaltgetränken, frischem Obst sowie attraktiven Corporate Benefits. Außerdem haben wir einen Fitness- und Gameroom, Events für Mitarbeitende und Tischtennis auf der Terrasse – ideal zum Abschalten.\n\nHaben wir Ihr Interesse geweckt?\n\nWir haben einen unkomplizierten Bewerbungsprozess: Gerne können Sie auf ein Anschreiben verzichten und uns zunächst nur Ihren Lebenslauf einreichen.\nWir freuen uns auf Ihre Bewerbung!\nMonika Thale\nHR Manager\nTel.: +49 89 520368 41\n\nÜber uns\n\nDynamisch, innovativ, passioniert: Arbeite mit uns an Digitalisierungsprojekten im Bereich Industrie 4.0 und hilf unseren Kunden, die aktuellen Probleme zu meistern. Mit unserer Standardsoftware sind wir die Experten, wenn es um die Themen Entwicklung von Business Apps, Industrie 4.0 und mobile Datenerfassung geht. Die plattformübergreifenden Apps sind in über 550 Unternehmen der Industrie, des Handels und in öffentlichen Einrichtungen weltweit im Einsatz. Unsere Software macht Betriebsabläufe mobil und überall verfügbar.",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "kommunikationswissenschaft",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "international",
+            "anomaly_ratio": 2.55,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.3086,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "webinaren",
+            "anomaly_ratio": 157.48,
+            "target_frequency": 1.575,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "marketing-teams",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "einladungskampagn",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "messe",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "nachbereitung",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "zielgruppengerecht",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "kommunikationswissenschaft",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "international",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "webinaren",
+            "anomaly_ratio": 157.48,
+            "target_frequency": 1.575,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "marketing-teams",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "einladungskampagn",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "messe",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "nachbereitung",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "kampagn",
+            "anomaly_ratio": 78.74,
+            "target_frequency": 0.787,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "media",
+          "specialist_corpus_size": 2,
+          "general_corpus_size": 7,
+          "target_unigrams_count": 127,
+          "target_bigrams_count": 126,
+          "company_terms_filtered": 2
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 10,
+        "quality_ratio": 0.62
+      },
+      "dual_corpus_metadata": {
+        "industry": "media",
+        "specialist_corpus_size": 2,
+        "general_corpus_size": 7,
+        "target_unigrams_count": 127,
+        "target_bigrams_count": 126,
+        "company_terms_filtered": 2
+      }
+    },
+    {
+      "job_id": "9fc0653d853e3ae9",
+      "company_name": "DATA MODUL",
+      "job_title": "Werkstudent Grafik & Design (m/w/d)",
+      "industry": "media",
+      "description": "Deine Aufgaben:\nAls kreativer Kopf gestaltest Du Präsentationen und Grafikprodukte (Bild & Video) proaktiv und eigenständig\nDu gestaltest und setzt in Kooperation mit Deinem Team Online- & Offline-Werbemittel, Infografiken und Content für unsere Webseiten und Marketingkanäle um\nDu entwickelst visuelle Inhalte in Einklang mit unserem Corporate Design\nDu unterstützt bei der Konzeption und der grafischen Umsetzung neuer Kommunikationsmaßnahmen\nZudem unterstützt Du unser Marketing-Team bei vielfältigen Aufgaben im Tagesgeschäft\nDein Profil:\nLaufendes Studium im Bereich Grafikdesign, Kommunikationsdesign, Mediendesign, Medieninformatik oder einem verwandten Studiengang\nDu beherrscht einen sicheren Umgang mit den Programmen der Adobe Creative Cloud (speziell Photoshop, InDesign und After Effects) sowie in der Erstellung von Video Cuts (z.B. Reels)\nDu bringst idealerweise erste Erfahrung in HTML/CSS mit\nDu übernimmst gerne Verantwortung und bringst Dich selbst kreativ ein\nDeine Vorteile:\nZukunftsorientierter Arbeitsplatz in einem internationalen Technologie-Unternehmen\nOption zur Abschlussarbeit\nVerantwortungsvolle und abwechslungsreiche Tätigkeiten\nUnterstützung und Mentoring durch erfahrene Kollegen\nEine offene und kollegiale Arbeitsatmosphäre\nDie Chance, an spannenden Projekten mitzuwirken und eigene Ideen einzubringen\nFirmeneigenes Fitnessstudio\nDeine Bewerbung:\nWenn dich diese spannende Herausforderung reizt und du Teil unseres Teams werden möchtest, freuen wir uns auf deine Bewerbungsunterlagen. Als Ansprechpartnerin steht Dir Frau Nina Räthel telefonisch unter: +49 89 56017 104 zur Verfügung.\nJetzt bewerben",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "neu kommunikationsmaßnahme",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "kommunikationsmaßnahme unterstützen",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "vielfältig tagesgeschäft",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "tagesgeschäft profil",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "zukunftsorientiert international",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "international technologie-unternehmen",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "kommunikationsmaßnahme",
+            "anomaly_ratio": 103.09,
+            "target_frequency": 1.031,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "international",
+            "anomaly_ratio": 3.65,
+            "target_frequency": 1.031,
+            "corpus_frequency": 0.2825,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "neu kommunikationsmaßnahme",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "kommunikationsmaßnahme unterstützen",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "vielfältig tagesgeschäft",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "tagesgeschäft profil",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "zukunftsorientiert international",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "international technologie-unternehmen",
+            "anomaly_ratio": 104.17,
+            "target_frequency": 1.042,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 5.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "kommunikationsmaßnahme",
+            "anomaly_ratio": 103.09,
+            "target_frequency": 1.031,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "international",
+            "anomaly_ratio": 103.09,
+            "target_frequency": 1.031,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "media",
+          "specialist_corpus_size": 2,
+          "general_corpus_size": 7,
+          "target_unigrams_count": 97,
+          "target_bigrams_count": 96,
+          "company_terms_filtered": 2
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 16,
+        "quality_ratio": 1.0
+      },
+      "dual_corpus_metadata": {
+        "industry": "media",
+        "specialist_corpus_size": 2,
+        "general_corpus_size": 7,
+        "target_unigrams_count": 97,
+        "target_bigrams_count": 96,
+        "company_terms_filtered": 2
+      }
+    },
+    {
+      "job_id": "ac5072376c7f8b3c",
+      "company_name": "Germanedge Solutions GmbH",
+      "job_title": "Werkstudent:in Talent Sourcing & Recruiting (Mensch)",
+      "industry": "tech",
+      "description": "Deine Aufgaben\nIn dieser Rolle unterstützt Du uns für 12-20 Stunden in der Woche. Dabei bekommst Du Einblicke in die Recruiting-, HR- und Employer-Branding-Prozesse eines international aufgestellten Mittelständlers im Bereich Industrie 4.0.\n\nDu unterstützt unser Team entlang des gesamten Recruiting-Prozesses.\nDu schaltest und betreust aktuelle Stellenausschreibungen auf diversen Portalen.\nDu übernimmst die eigenverantwortliche Betreuung verschiedener Stellen (Screening, Bearbeitung von Bewerberanfragen, Interviewmanagement, etc.)\nDu erarbeitest und setzt Suchprojekte um: Identifikation und Active Sourcing bzw. Direktansprache von passenden KandidatInnen auf den gängigen Social-Media-Kanälen.\nDie Mitarbeit bei der Planung, Vorbereitung und Durchführung verschiedener Recruiting- und Employer-Branding-Projekte sowie von Teamveranstaltungen gehören ebenfalls zu Deinen Aufgaben.\nDein Profil\nDu bist immatrikuliert - wir sind für alle Studienrichtungen offen - und suchst eine längerfristige Zusammenarbeit.\nDu hast bereits erste Erfahrung im HR- oder Recruiting-Bereich gesammelt oder möchtest einen ersten, vollumfänglichen Einblick in die Bereiche Talent Sourcing, Recruiting und HR gewinnen.\nDu bist ein offener, kommunikativer Mensch und es macht Dir Spaß an mehreren Projekten gleichzeitig zu arbeiten.\nDu besitzt eine schnelle Auffassungsgabe und arbeitest selbstständig sowie strukturiert.\nIT-Affinität und Textsicherheit zählen zu Deinen Stärken - Du lebst Deine Kreativität gerne auf Social Media aus.\nDu verfügst über sehr gute Deutsch - und Englischkenntnisse in Wort und Schrift-\nDu bist flexibel und kannst mindestens einen Tag in der Woche in unserem Büro im Münchner Osten arbeiten.\nDein Team\n\nDeine Benefits\nFlexibilität & digitales Arbeiten\narbeite hybrid oder remote (deutschlandweit)\nhochwertiges IT-Equipment und Firmenhandy (iPhone)\nmoderne, zentralgelegene Büros in München, Burghausen, Leipzig, Halle, Lübeck und Ringkøbing\nWeiterbildungsmöglichkeiten und Sprachkurs\nZukunft & Zuschüsse\n50 Euro Gehaltsextra mtl. mit der SpenditCard\n315 Euro Prämie zur Geburt Eures Kindes\n315 Euro Prämie zu Eurer Trauung\nBezuschussung betriebliche Altersvorsorge\nBezuschussung KiTa-Gebühr\nBezuschussung einer Bildschirmbrille\nCorporate Benefits\nPrämien bei besonderen Anlässen\nBewegung & Erholung\nUrbanSportsClub Mitgliedschaft\nJobRad\nMobile Massage am Arbeitsplatz\nregelmäßige Firmen- und Teamevents\nDein Ansprechpartner\nNorbert Savel\nHead of Talent Acquisition\ncareer@germanedge.com\nAuf diese Stelle bewerben\nÜber uns\nGermanedge: Alles perfekt im Fluss.\nWir erschaffen die Zukunft\nder digitalen Produktion.\n\nWir bei Germanedge sind der festen Überzeugung, dass wir unser volles Potenzial nur dann ausschöpfen können, wenn wir den Menschen in sein digitales und soziales Umfeld integrieren. Wir befähigen unsere Teams durch verschiedene digitale Werkzeuge und Techniken sowie durch die Förderung von Teamarbeit über alle Unternehmen und Standorte hinweg (physisch und virtuell) zu einer gemeinsamen Entscheidungsfindung, Kreativität und Proaktivität.\n\nWir „Connected Workers“ von Germanedge sind nicht nur Teil, sondern Treiber unserer Mission, gemeinsam die digitale Produktion zu erschaffen. Wir sind davon überzeugt, dass wir alle bei Germanegde nur dann effektiv tätig sein können, wenn wir im perfekten Flow arbeiten – jede und jeder für sich selbst (selbstmotiviert & technisch vernetzt) als auch in Teams und darüber hinaus (menschlich vernetzt). Das ist unser Erfolgsgeheimnis und macht uns zu einem IT-Unternehmen mit echtem Human-Touch. Du willst die Zukunft der digitalen Produktion gestalten? Dann bist Du in unserem Team genau richtig!\n\nGermanedge: Global Footprint\nGermanedge im Überblick\n\nGründung im Jahr 2017 mit der vereinten Manpower von vier Software-Unternehmen (200+ Mitarbeiter:innen) und kombinierte 120+ Jahren Erfahrung in der Produktentwicklung\nÜber 20 digitale Lösungen für die digitale Produktion im Fluss\nMitarbeiter:innen und Partner-Netzwerk weltweit\n",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "mensch",
+            "anomaly_ratio": 87.34,
+            "target_frequency": 0.873,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "digital produktion",
+            "anomaly_ratio": 175.44,
+            "target_frequency": 1.754,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "euro prämie",
+            "anomaly_ratio": 87.72,
+            "target_frequency": 0.877,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "zukunft digital",
+            "anomaly_ratio": 87.72,
+            "target_frequency": 0.877,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "produktion",
+            "anomaly_ratio": 174.67,
+            "target_frequency": 1.747,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "euro",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "prämie",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "bezuschussung",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "digital produktion",
+            "anomaly_ratio": 175.44,
+            "target_frequency": 1.754,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "digital",
+            "anomaly_ratio": 305.68,
+            "target_frequency": 3.057,
+            "corpus_frequency": 0.01,
+            "target_count": 7,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "produktion",
+            "anomaly_ratio": 174.67,
+            "target_frequency": 1.747,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "euro",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "prämie",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "bezuschussung",
+            "anomaly_ratio": 131.0,
+            "target_frequency": 1.31,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "machen",
+            "anomaly_ratio": 87.34,
+            "target_frequency": 0.873,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "germanedg",
+            "anomaly_ratio": 87.34,
+            "target_frequency": 0.873,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 229,
+          "target_bigrams_count": 228,
+          "company_terms_filtered": 3
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 12,
+        "quality_ratio": 0.75
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 229,
+        "target_bigrams_count": 228,
+        "company_terms_filtered": 3
+      }
+    },
+    {
+      "job_id": "ac91433a4db4c6a4",
+      "company_name": "VIU Deutschland GmbH",
+      "job_title": "Werkstudent (m/w/d) Operations & Werkstattlogistik - Optikbranche",
+      "industry": "tech",
+      "description": "INTRO\nAls Werkstudent:in im Bereich Operations & Werkstattlogistik unterstützt du unser Team tatkräftig in der täglichen Abwicklung und Organisation rund um unsere Brillen.\n\nDu wünschst dir ein modernes Arbeitsumfeld? Eine Unternehmenskultur, welche von gemeinsam gelebten Werten geprägt ist und ein Team, auf das du dich immer verlassen kannst? – Willkommen bei VIU!\n\nPENSUM: 20-50 % (8-20 h/Woche\nDEINE AUFGABEN\nDu bist ein wichtiges Bindeglied zwischen Lager, Werkstatt und administrativen Abläufen – mit Aufgaben, die sowohl handwerkliches Geschick als auch strukturiertes Arbeiten erfordern:\n\nWareneingang & Lagerverwaltung: Kontrolle, Erfassung und Einlagerung neuer Waren sowie Bestandsprüfung und -pflege\nRestocking & Store-Belieferung: Vorbereitung und Durchführung des Nachschubs für unsere Stores inkl. Kommissionierung und Versand\nRetourenmanagement: Annahme, Prüfung und Weiterverarbeitung von Rücksendungen.\nMontage von Brillen: Unterstützung bei der präzisen Fertigung und dem Zusammenbau von Brillen\nTagesgeschäft: Eigenständige Bearbeitung interner Serviceanfragen (z. B. via Ticketsystem) rund um Lager, Logistik und Werkstatt und die organisatorische Unterstützung des Teams\nDEIN PROFIL\nDu arbeitest sorgfältig, zuverlässig und hast ein gutes Auge für Details\nDu hast Spaß an handwerklichen Tätigkeiten und technisches Verständnis\nTeamfähigkeit, Eigeninitiative und eine strukturierte Arbeitsweise zeichnen dich aus\nDAS BIETEN WIR\nDein Arbeitsumfeld: Duz-Kultur, flache Hierarchien - wir legen Wert auf unternehmerische Freiheiten und Nachhaltigkeit\nDeine Arbeitszeit: Arbeitszeit- und Arbeitsortflexibilität - für dein Gleichgewicht\nDeine Einarbeitung: Individuell auf deine Bedürfnisse angepasst, mit regelmäßigem Feedback\nMental Health: Unterstützung für deine psychische Gesundheit\nVIU frames: Brillen, Sonnenbrillen für dich, deine Familie und Freund*innen\nDeine Perspektive: Wir ermöglichen individuelle Weiterentwicklung durch unsere VIUcademy\nUnser Teamevent: Wir feiern kleine und große Erfolge gemeinsam\nCorporate Benefits: Zahlreiche Rabatte bei anderen Brands\n\nAuf diese Stelle bewerben\nÜBER UNS\n\nVIU ist ein Unternehmen vielfältiger Charaktere. Ein Ort, an dem du lernen, dich voll entfalten und über dich hinauswachsen kannst. Wir leben Vielfalt und Offenheit und möchten gemeinsam die Zukunft des Brillenmarkts gestalten.\n\nWir sind 400 VIUans, verbunden durch starke Werte, die unseren Kund*innen sowohl online als auch in unseren 50 Stores in Europa ein einzigartiges Erlebnis bieten. Bist du bereit, deine Ideen in einem ambitionierten Team einzubringen? Dann freuen wir uns dich kennenzulernen.\n\nHast du noch Fragen zu VIU, der Stelle oder willst erstmal mit uns in Kontakt treten?\nGanz einfach per WhatsApp ! (Du findest unsere WhatsApp Nummer im Link oder in den Stellenanzeigen auf unserer Karriereseite)\n\nEntdecke mehr über VIU und blicke hinter die Kulissen auf unserem Instagram Profil.",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "werkstatt",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "operation",
+            "anomaly_ratio": 55.56,
+            "target_frequency": 0.556,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "werkstattlogistik",
+            "anomaly_ratio": 55.56,
+            "target_frequency": 0.556,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "logistik",
+            "anomaly_ratio": 55.56,
+            "target_frequency": 0.556,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "detail",
+            "anomaly_ratio": 2.46,
+            "target_frequency": 0.556,
+            "corpus_frequency": 0.2255,
+            "target_count": 1,
+            "corpus_count": 2,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "brill",
+            "anomaly_ratio": 166.67,
+            "target_frequency": 1.667,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "arbeitsumfeld",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "lag",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "werkstatt",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "brill",
+            "anomaly_ratio": 166.67,
+            "target_frequency": 1.667,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "arbeitsumfeld",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "lag",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "handwerklich",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "stores",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "what",
+            "anomaly_ratio": 111.11,
+            "target_frequency": 1.111,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 180,
+          "target_bigrams_count": 175,
+          "company_terms_filtered": 3
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 7,
+        "total_anomalies": 15,
+        "high_quality_anomalies": 12,
+        "quality_ratio": 0.8
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 180,
+        "target_bigrams_count": 175,
+        "company_terms_filtered": 3
+      }
+    },
+    {
+      "job_id": "dccfe8d3babd5002",
+      "company_name": "adabay GmbH",
+      "job_title": "Werkstundent:in im UX/UI Design (m/w/d)",
+      "industry": "tech",
+      "description": "20 Stunden / Woche am Standort München\n\nDu bist kreativ, hast ein Gespür für digitale Erlebnisse und möchtest in spannenden Projekten arbeiten? Dann suchen wir genau dich! Unterstütze unser Team als Werkstudent im UX/UI-Design (m/w/d) und gestalte nutzerfreundliche und innovative digitale Produkte.   \n\nDeine Aufgaben bei uns\n\nMitwirkung an der Kreation digitaler Anwendungen unter Berücksichtigung der User Journey und optimaler Darstellung auf verschiedenen Endgeräten\nErstellung von Grafiken und Illustrationen für unterschiedliche Zwecke – deiner Kreativität sind keine Grenzen gesetzt\nDurchführung von Analysen und Research, um die Bedürfnisse und Erwartungen der Nutzer besser zu verstehen\nVisualisierung von Designkonzepten durch User-Flows, Storyboards, Sitemaps, Wireframes und Mockups\nEntwicklung maßgeschneiderter und kreativer UI-Designs zur Umsetzung von Konzepten\nDurchführung von Usability-Tests, um die Perspektive der Nutzer einzunehmen und intuitive digitale Produkte zu gewährleisten\n\nDas bringst du mit\n\nPraktische Erfahrungen im Bereich UX/UI-Design und ein Portfolio mit überzeugenden Projektbeispielen\nAnalytisches Geschick, konzeptionelles Denken und eine datenorientierte Herangehensweise\nVertrautheit mit grundlegenden UX-Research-Methoden und Designprinzipien\nEinfallsreichtum und kreative Ideen, die du sicher in Designkonzepte umsetzt\nDie Fähigkeit, Konzepte und Nutzeranforderungen visuell darzustellen\nKenntnisse in Tools wie Figma und den Adobe Tools zur Erstellung moderner, innovativer Designs\nSehr gute Deutsch- und Englischkenntnisse\n\nDas bieten wir dir\n\nEin junges, energiegeladenes Team mit einer freundschaftlichen Atmosphäre und viel Humor\nEin außergewöhnliches Büro mit Bällebad, Hängematten und einer eigenen Bar\nRegelmäßige Events, die für unvergessliche gemeinsame Erinnerungen sorgen – von Spielabenden bis zu Wakeboarding und Escaperooms\nWir bedienen Klischees – mit kostenlosen Getränken und Snacks, subventioniertem Sport-Angebot (Urban Sports Club) und Zuschuss zum Deutschlandticket\nRegelmäßige Feedbackgespräche und faire Aufstiegschancen für deine persönliche Weiterentwicklung\nFlexible Arbeitszeiten im Gleitzeitmodell für mehr Balance im Alltag",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "fair",
+            "anomaly_ratio": 6.43,
+            "target_frequency": 0.694,
+            "corpus_frequency": 0.108,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "stunde",
+            "anomaly_ratio": 3.22,
+            "target_frequency": 0.694,
+            "corpus_frequency": 0.216,
+            "target_count": 1,
+            "corpus_count": 2,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "digital produkt",
+            "anomaly_ratio": 139.86,
+            "target_frequency": 1.399,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "produkt",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "nutzer",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "designkonzept",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "gespür",
+            "anomaly_ratio": 69.44,
+            "target_frequency": 0.694,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "erlebnisse",
+            "anomaly_ratio": 69.44,
+            "target_frequency": 0.694,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "fair",
+            "anomaly_ratio": 4.72,
+            "target_frequency": 0.694,
+            "corpus_frequency": 0.1471,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "digital produkt",
+            "anomaly_ratio": 139.86,
+            "target_frequency": 1.399,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "digital",
+            "anomaly_ratio": 208.33,
+            "target_frequency": 2.083,
+            "corpus_frequency": 0.01,
+            "target_count": 3,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "innovativ",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "produkt",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "nutzer",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "designkonzept",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "konzept",
+            "anomaly_ratio": 138.89,
+            "target_frequency": 1.389,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 144,
+          "target_bigrams_count": 143,
+          "company_terms_filtered": 2
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 11,
+        "quality_ratio": 0.69
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 144,
+        "target_bigrams_count": 143,
+        "company_terms_filtered": 2
+      }
+    },
+    {
+      "job_id": "ddb0a89892abd6e2",
+      "company_name": "Ströer SE & Co. KGaA",
+      "job_title": "Werkstudent Datenpflege & Analyse (m/w/d)",
+      "industry": "tech",
+      "description": "Unternehmensbeschreibung\n\nDie Infoscreen GmbH ist innerhalb der Ströer Gruppe der Spezialist für Bewegtbild im öffentlichen Raum. Das Konzept, einen Bewegtbildmix aus Werbung, Information und Unterhaltung zu zeigen, prägt die Erfolgsstory von Infoscreen seit zwanzig Jahren. Derzeit betreibt das Münchner Unternehmen in Deutschland über 6.000 Public Video Screens in U- und S-Bahnhöfen, in Fernbahnhöfen, an Flughäfen und in Einkaufszentren.\n\nDu willst während deines Studiums nicht nur klicken, sondern etwas bewegen? Dann mach mehr draus – mit einem Job, bei dem Deine Genauigkeit zählt! Als Werkstudent Datenpflege & Analyse (m/w/d) sorgst Du dafür, dass unsere Datenbasis fehlerfrei und up to date bleibt. Werde Teil unseres Teams!\n\nFür unseren Standort in München oder Hamburg suchen wir einen Werkstudenten Datenpflege & Analyse (m/w/d).\n\nStellenbeschreibung\n\nDu pflegst neue Werbeträger-Datensätze sorgfältig in unsere Datenbank ein\nDu prüfst bestehende Daten auf Vollständigkeit, Korrektheit und Konsistenz\nDu aktualisierst fehlerhafte Einträge und behebst Unstimmigkeiten eigenständig\nDu unterstützt das Team bei der Identifikation und Bereinigung von Dubletten\nDu stimmst Dich eng mit anderen Fachbereichen ab, um eine einheitliche Datenqualität sicherzustellen\nDu machst mehr draus, indem Du mit deinem Blick fürs Detail die Grundlage für verlässliche Analysen sicherstellst\n\nQualifikationen\n\nDu bist immatrikuliert und suchst eine Werkstudierendentätigkeit im Bereich Datenmanagement\nDu hast ein gutes Auge für Details und liebst präzises Arbeiten\nDu bringst Erfahrung im Umgang mit MS Office, Datenbanken oder vergleichbaren Tools mit\nDu kannst Dich schnell in neue Systeme und Abläufe einarbeiten und hast Interesse an datenbasierten Prozessen und Qualitätssicherung\nDu arbeitest eigenverantwortlich und zuverlässig an wiederkehrenden Aufgaben\nDu besitzt gute Deutschkenntnisse\n\nZusätzliche Informationen\n\nMach mehr aus Deinem Job. Wir setzen auf das Potenzial jedes Einzelnen und bieten Dir eine Umgebung, in der Du Dich weiterentwickeln, Verantwortung übernehmen und im Team innovative Lösungen schaffen kannst. Nutze die Chance und entdecke unsere Benefits, die Dich auf Deinem Weg bei uns unterstützen:\n\nFlexible Arbeitszeiten\nCorporate Benefits: Rabatte z.B. für Reisen und Eventtickets\nWeiterentwicklung: Frauenförderung, individuelle Trainingsangebote\nWissensdatenbank: Zugang zu getAbstract für kontinuierliches Lernen\nModerne Büros: Papierlose Arbeitsplätze mit digitalen Prozessen\nArbeitsmedizinische Versorgung: Gesundheitschecks und -veranstaltungen\nFirmenevents: Weihnachtsfeiern, Teamausflüge und B2Run-Teilnahme\nCommunities: Netzwerke wie Frauennetzwerk\n\nDas klingt nach Dir und wir haben Dein Interesse geweckt? Dann starte durch! Wir freuen uns auf Deine Online-Bewerbung.",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "daten",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "analys",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "trainingsangebot",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "papierlos",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "detail",
+            "anomaly_ratio": 11.45,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.1099,
+            "target_count": 2,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "infoscreen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "mechen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "datenpflegen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 1.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "detail",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "daten",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "analys",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "trainingsangebot",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "papierlos",
+            "anomaly_ratio": 62.89,
+            "target_frequency": 0.629,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 4.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "infoscreen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "mechen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "datenpflegen",
+            "anomaly_ratio": 125.79,
+            "target_frequency": 1.258,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 159,
+          "target_bigrams_count": 128,
+          "company_terms_filtered": 4
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 13,
+        "quality_ratio": 0.81
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 159,
+        "target_bigrams_count": 128,
+        "company_terms_filtered": 4
+      }
+    },
+    {
+      "job_id": "de239496096a989e",
+      "company_name": "Joyn GmbH",
+      "job_title": "Werkstudent Customer Relationship Management (m/w/d)",
+      "industry": "media",
+      "description": "Werde Teil unseres CRM Teams bei Joyn und unterstütze uns als Werkstudent. Lerne dabei, die richtigen Kunden zur richtigen Zeit mit der passenden Nachricht anzusprechen. Ob im modernen Office in München oder auch remote (deutschlandweit) - wenn du Lust hast die Welt des Entertainments mitzugestalten, dann bewirb dich jetzt!\n\nDas erwartet dich bei uns\nDu unterstützt uns in der Konzeption, Planung und Durchführung von Multi-Message Kampagnen (Push-Notifications, In-App Messages & E-Mail) für unsere Kunden\nZudem hilfst du uns die kommenden Content-Highlights im Blick zu haben und leitest daraus Kampagnen und relevante Zielgruppen ab\nDu setzt A/B Tests mit uns auf, damit wir unsere Kampagnen ständig optimieren können\nAußerdem wertest du regelmäßig die Kampagnen und Tests aus und lernst diese anhand der CRM-Kennzahlen einzuschätzen und mögliche „next steps“ davon abzuleiten\nÜberzeuge uns mit deinen Ideen und übernimm Verantwortung für deine eigenen Projekte und Kampagnen\nDu arbeitest eng und crossfunktional mit verschiedenen Abteilungen zusammen, u.a. Customer Service, Marketing, Editorial, Content, Sales und Design\nDas bringst du mit\nDu absolvierst ein Bachelor- oder Masterstudium mit Fokus auf Kommunikation oder Wirtschaft (z.B. BWL, Marketing, Medien, Journalismus, Germanistik, o.Ä.), erste Arbeitserfahrung im Marketing ist ein Plus, kein Muss\nHinzu kommt, dass du gewissenhaft, zuverlässig und eigenständig arbeitest\nAußerdem bringst du ein gutes Zahlenverständnis und eine analytische Denkweise mit\nDu sprichst fließend deutsch und hast Spaß am Verfassen deutscher Texte für unsere Kundenkommunikation\nDu möchtest das große Ganze verstehen, hast den Mut Ergebnisse in Frage zu stellen und deine eigenen kreativen Ideen einzubringen\nDas bieten wir dir\nFreue dich auf eine offene Unternehmenskultur, per „Du\" und ohne Dresscode, im dynamischen Umfeld der Medienbranche\nJe nachdem, welche Aufgaben du in deinem Team übernimmst, besteht in Abstimmung mit deiner Führungskraft die Möglichkeit, mobil zu arbeiten\nArbeite an modern ausgestatteten Arbeitsplätzen und nutze unsere vielfältigen Campusservices wie eine Kantine mit fairen Preisen, verschiedene Kaffee-Bars oder unseren Massage-Service\nWir fördern deine KI-Kompetenz durch interne Trainings und unsere lebendige KI-Community. Denn: KI ist bei uns kein Zukunftsthema, sondern prägt unseren Arbeitsalltag als fester Bestandteil der Wertschöpfungskette – von der Content-Erstellung bis zur Distribution\nProfitiere von einer stark vergünstigten, deutschlandweiten Mitgliedschaft bei Urban Sports Club, einem kostenlosen Joyn Plus+ Abo sowie zahlreichen weiteren Sonderrabatten bei unseren Partnern\nDamit du auch außerhalb von deinem Bereich neue Leute kennenlernst und einen Einblick in andere Tätigkeitsfelder bekommst, bieten wir ein weitreichendes Praktikanten- und Werkstudentennetzwerk\n\nArbeitszeit: i.d.R. 20h/ Woche, welche nach Absprache flexibel verteilt werden können\n\nDauer: Abhängig von der Immatrikulation – mindestens jedoch 6 Monate, maximal 2 Jahre\n\nBrutto-Vergütung im Monat bei 20h/ Woche: In den ersten 6 Monaten 1.200€ & ab dem 7. Monat 1.300€\n\nWir freuen uns auf deine Bewerbung!\n\nBewirb dich innerhalb von 5 Minuten über unser Jobportal oder nutze die Möglichkeit zur Videobewerbung.\n\nDein Profil passt nicht zu 100%? Kein Problem, bewirb dich gerne trotzdem! Wir unterstützen deine fachliche & persönliche Weiterentwicklung on the job.\n\nMehr zu unserem Bewerbungsprozess findest du hier .\n\nBitte beachte, dass wir aus datenschutzrechtlichen Gründen keine Bewerbungen per Mail annehmen.\n\nProSiebenSat.1 ist mehr als Fernsehen, viel mehr. Mit einer Reichweite von 60 Millionen Menschen im TV und weiteren 11 Millionen über eigene Online-Kanäle, sind wir das führende deutsche Entertainment-Unternehmen und haben ein starkes E-Commerce- sowie Dating-Geschäft.\n\nInformiere dich hier über die ProSiebenSat.1 Group mit Sitz in Unterföhring bei München und unser vielseitiges Portfolio.\n\nAls Unterzeichner der C",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "entertainment",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "e-mail",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "customer",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "kundenkommunikation",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "fair",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "training",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "entertainment-unternehmen",
+            "anomaly_ratio": 44.44,
+            "target_frequency": 0.444,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "sieben sat",
+            "anomaly_ratio": 89.29,
+            "target_frequency": 0.893,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "kampagne",
+            "anomaly_ratio": 177.78,
+            "target_frequency": 1.778,
+            "corpus_frequency": 0.01,
+            "target_count": 4,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "kunde",
+            "anomaly_ratio": 88.89,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "möglichkeit",
+            "anomaly_ratio": 88.89,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "sieben",
+            "anomaly_ratio": 88.89,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "sat",
+            "anomaly_ratio": 88.89,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "million",
+            "anomaly_ratio": 88.89,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "eigen",
+            "anomaly_ratio": 8.66,
+            "target_frequency": 1.333,
+            "corpus_frequency": 0.154,
+            "target_count": 3,
+            "corpus_count": 2,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "weit",
+            "anomaly_ratio": 5.77,
+            "target_frequency": 0.889,
+            "corpus_frequency": 0.154,
+            "target_count": 2,
+            "corpus_count": 2,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "media",
+          "specialist_corpus_size": 2,
+          "general_corpus_size": 7,
+          "target_unigrams_count": 225,
+          "target_bigrams_count": 224,
+          "company_terms_filtered": 2
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 16,
+        "quality_ratio": 1.0
+      },
+      "dual_corpus_metadata": {
+        "industry": "media",
+        "specialist_corpus_size": 2,
+        "general_corpus_size": 7,
+        "target_unigrams_count": 225,
+        "target_bigrams_count": 224,
+        "company_terms_filtered": 2
+      }
+    },
+    {
+      "job_id": "e9aed451a2a39720",
+      "company_name": "msg nexinsure ag",
+      "job_title": "Werkstudent Controlling (all genders)",
+      "industry": "tech",
+      "description": "beim führenden Anbieter von Software, Beratung und Cloudlösungen für Versicherungsunternehmen\n\nIsmaning (bei München), München, teilweise Homeoffice | befristet | Studierendenjob | msg life ag\n\nDu möchtest schon während Deines Studiums Praxiserfahrung beim führenden Anbieter von Software, Beratung und Cloud-Lösungen sammeln? Dann bist Du bei msg life genau richtig! Werde Teil unseres erfolgreichen Teams und gestalte Deine individuelle Zukunft! Wir suchen zum nächstmöglichen Zeitpunkt eine neue studentische Mitarbeiterin oder einen neuen studentischen Mitarbeiter als\n\nDeine Aufgaben\nDu wirst aktiv in das Tagesgeschäft und die operativen Aufgaben des Controllings mit eingebunden\nDu unterstützt das Controlling-Team bei der Erstellung von Standardreports in unserem zentralen Reportingtool\nDu wirkst mit bei der Erstellung und Weiterentwicklung unseres Monatsreportings sowie unseres Projektcontrollings und übernimmst dabei die Verantwortung für eigene kleine Teilprojekte\nDu bist beim Aufbau der mittelfristigen Finanzplanung und bei Jahresabschlussarbeiten eingebunden\nDu übernimmst weitere operative und konzeptionelle Aufgaben in verschiedenen Bereichen unseres Aufgaben-Portfolios\nDeine Qualifikation\nDu bist eingeschriebener Studierender (all genders) der Betriebswirtschaftslehre, Volkswirtschaftslehre oder eines vergleichbaren Studiengangs\nDu bringst IT-Affinität und gute Kenntnisse der MS Office-Produkte, insbesondere in Excel und PowerPoint mit\nDu besitzt bereits Kenntnisse in der Buchhaltung (HGB und/oder IFRS)\nDu kommunizierst verhandlungssicher auf Deutsch und Englisch\nEine strukturierte, analytische und eigenverantwortliche Arbeitsweise; Teamgeist, Einsatzbereitschaft und Flexibilität; sicheres und freundliches Auftreten; Neugier und Kreativität runden Dein Profil ab\nDein Einstieg bei uns\nDurch flexible Arbeitszeiten unterstützen wir Dich dabei, Studium und Werkstudierendentätigkeit erfolgreich unter einen Hut zu bringen.\nIdealerweise arbeitest Du ca. 12-15 Stunden pro Woche.\nWährend Deiner gesamten Werkstudierendentätigkeit stehen Dir persönliche Ansprechpersonen für alle Deine Fragen zur Verfügung.\nDeine Benefits\nPraxisnahe Inhalte:\n\nEinbindung in laufende Projekte\n\nFlexible Arbeitszeiten:\n\nMit uns Studium und Job unter einen Hut bringen\n\nHomeoffice:\n\nHybrides Arbeiten - im Büro und von zu Hause\n\nDeine individuelle Betreuung:\n\nAnsprechperson für alle Deine Fragen\n\nCorporate Benefits:\n\nMitarbeitendenvergünstigungen und -rabatte\n\nUnternehmenskultur:\n\nTransparente Duz-Kultur, offene Türen, gemeinsame Feste, Team-Events\n\nWir freuen uns darauf, Dich kennenzulernen\n\nDu möchtest Dich bei uns bewerben? Darüber freuen wir uns. Vielleicht lernen wir uns ja in einem Vorstellungsgespräch per Video kennen?\n\nAuf YouTube ansehen\n\nUnser Angebot für Studierende\n\nIn diesem Video erfährst Du, wie Du bei uns Dein Studium mit praktischer Erfahrung verknüpfen kannst.\n\nAuf YouTube ansehen\nDein Kontakt bei Rückfragen:\n\nFrau Sabrina Rigon\nTel.: +49 711 94958-0\nE-Mail: karriere.life@msg.group\nReferenznummer: 0910-C",
+      "dual_corpus_anomalies": {
+        "specialist_anomalies": [
+          {
+            "word": "all",
+            "anomaly_ratio": 56.18,
+            "target_frequency": 0.562,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "genders",
+            "anomaly_ratio": 56.18,
+            "target_frequency": 0.562,
+            "corpus_frequency": 0.01,
+            "target_count": 1,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "e-mail",
+            "anomaly_ratio": 5.0,
+            "target_frequency": 0.562,
+            "corpus_frequency": 0.1124,
+            "target_count": 1,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "specialist",
+            "word_type": "unigrams"
+          },
+          {
+            "word": "führend anbieter",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "anbieter softwar",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "softwar beratung",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "hut bringen",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "ansprechperson dein",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "specialist",
+            "word_type": "bigrams"
+          }
+        ],
+        "industry_markers": [
+          {
+            "word": "führend anbieter",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "anbieter softwar",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "softwar beratung",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "hut bringen",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "ansprechperson dein",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "tube ansehen",
+            "anomaly_ratio": 118.34,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "flexibel arbeitszeit",
+            "anomaly_ratio": 8.0,
+            "target_frequency": 1.183,
+            "corpus_frequency": 0.1479,
+            "target_count": 2,
+            "corpus_count": 1,
+            "quality_score": 3.0,
+            "comparison_type": "industry",
+            "word_type": "bigrams"
+          },
+          {
+            "word": "anbieter",
+            "anomaly_ratio": 112.36,
+            "target_frequency": 1.124,
+            "corpus_frequency": 0.01,
+            "target_count": 2,
+            "corpus_count": 0,
+            "quality_score": 2.0,
+            "comparison_type": "industry",
+            "word_type": "unigrams"
+          }
+        ],
+        "metadata": {
+          "industry": "tech",
+          "specialist_corpus_size": 5,
+          "general_corpus_size": 4,
+          "target_unigrams_count": 178,
+          "target_bigrams_count": 169,
+          "company_terms_filtered": 3
+        }
+      },
+      "quality_metrics": {
+        "specialist_anomalies_count": 8,
+        "industry_markers_count": 8,
+        "total_anomalies": 16,
+        "high_quality_anomalies": 16,
+        "quality_ratio": 1.0
+      },
+      "dual_corpus_metadata": {
+        "industry": "tech",
+        "specialist_corpus_size": 5,
+        "general_corpus_size": 4,
+        "target_unigrams_count": 178,
+        "target_bigrams_count": 169,
+        "company_terms_filtered": 3
+      }
+    }
+  ]
+}
