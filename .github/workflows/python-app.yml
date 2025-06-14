@@ -39,7 +39,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         # 下载spacy模型（根据你的需要调整语言模型）
-        python -m spacy download de_core_news_sm
+        python -m spacy download de_core_news_sm en_core_web_sm
     
     - name: Run job analyzer
       env:
@@ -49,4 +49,4 @@ jobs:
         # 如果有其他配置，也在这里添加
         TZ: 'Asia/Shanghai'  # 设置时区
       run: |
-        python analyzer.py
+        python main.py --mode inference --supabase
