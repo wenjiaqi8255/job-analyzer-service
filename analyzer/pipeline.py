@@ -1,10 +1,11 @@
 import logging
 import pandas as pd
+import json
 from analyzer.model import EnhancedJobAnomalyDetector
 
 logger = logging.getLogger(__name__)
 
-def run_pipeline(mode, jobs_df, supabase=None):
+def run_pipeline(mode, jobs_df, supabase=None, output_json_path='sample_data/output.json'):
     detector = EnhancedJobAnomalyDetector()
     if mode == "train":
         # 预留训练流程
@@ -45,11 +46,15 @@ def run_pipeline(mode, jobs_df, supabase=None):
                 }
                 results.append(result)
                 if supabase is not None and 'id' in row:
-                    # 可选：写入Supabase
                     from analyzer.inference import write_analysis_result
                     write_analysis_result(row['id'], result, supabase)
             except Exception as e:
                 logger.error(f"Error processing job {row.get('id', idx)}: {e}")
+        # 仅本地csv推理时保存json
+        if supabase is None:
+            with open(output_json_path, 'w', encoding='utf-8') as f:
+                json.dump(results, f, ensure_ascii=False, indent=2)
+            logger.info(f"Results saved to {output_json_path}")
         return results
     else:
         raise ValueError(f"Unknown mode: {mode}")
