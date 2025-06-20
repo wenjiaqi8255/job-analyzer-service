@@ -108,7 +108,7 @@ jobs:
       run: |
         batch_size=${{ github.event.inputs.batch_size || '50' }}
         echo "Starting job analysis with batch size: $batch_size"
-        python main.py --mode inference --supabase --batch-size $batch_size
+        python main.py --mode inference --supabase --batch_size $batch_size
     
     - name: Run daily data lifecycle management
       if: github.event_name == 'schedule' # Only run on the scheduled job
