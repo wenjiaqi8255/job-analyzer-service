@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import json
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from analyzer.model import EnhancedJobAnomalyDetector
 
 logger = logging.getLogger(__name__)
@@ -49,9 +49,11 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                 else:
                     logger.info("No valid cache found. Calculating new IDF...")
                     detector.calculate_global_idf(idf_corpus_df)
+                    cache_loaded = False  # 明确设置
             except Exception as e:
                 logger.warning(f"Could not reach IDF cache. Calculating new IDF. Error: {e}")
                 detector.calculate_global_idf(idf_corpus_df)
+                cache_loaded = False  # 明确设置
         else:
              # Fallback for local mode
             detector.calculate_global_idf(idf_corpus_df)
@@ -65,7 +67,7 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                     "word": word,
                     "idf_value": float(idf_value),
                     "data_version_hash": version_hash,
-                    "last_updated": datetime.utcnow().isoformat(),
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
                     "category": "global" # Placeholder for now
                 }
                 for word, idf_value in idf_cache_data.items()
@@ -144,6 +146,23 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                     logger.error("Too many errors, stopping pipeline")
                     break
         
+        # If using Supabase, update the records
+        if supabase:
+            update_payload = [
+                {
+                    "id": row['id'],
+                    "processed_for_matching": True,
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                    "tags": row['tags']
+                }
+                for _, row in jobs_to_analyze_df.iterrows()
+            ]
+            try:
+                supabase.table("job_listings").upsert(update_payload).execute()
+                logger.info(f"Successfully updated {len(update_payload)} records in Supabase.")
+            except Exception as e:
+                logger.error(f"Failed to update records in Supabase: {e}", exc_info=True)
+
         # This part is for local CSV testing and can be removed or kept. Let's keep it.
         if supabase is None:
             with open(output_json_path, 'w', encoding='utf-8') as f:

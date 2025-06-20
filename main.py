@@ -4,13 +4,18 @@ import os
 import sys
 from dotenv import load_dotenv
 import pandas as pd
+
+# Add the project root to the Python path before local imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+
 from supabase import create_client, Client
-from analyzer.data_utils import (
-    load_and_process_jobs, fetch_jobs_to_analyze, fetch_idf_corpus, 
+from analyzer.db_queries import fetch_jobs_to_analyze, fetch_idf_corpus
+from analyzer.etl import (
     archive_jobs_to_keywords, cleanup_job_listings, cleanup_archive_table,
     archive_all_jobs_to_keywords
 )
 from analyzer.pipeline import run_pipeline
+from playground.local_data_util import load_and_process_jobs
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
