@@ -103,7 +103,7 @@ def fetch_jobs_to_analyze(supabase: Client, batch_size: int = 50) -> List[Dict]:
         response = (
             supabase.table("job_listings")
             .select("*")
-            .is_("processed_for_matching", None)
+            .is_("processed_for_matching", "null")
             .order("created_at", desc=True)
             .limit(batch_size)
             .execute()
@@ -168,9 +168,9 @@ def archive_jobs_to_keywords(supabase, days_old=7, batch_size=100):
             extracted_data = extractor.extract_keywords(description)
             archive_record = {
                 "job_id": job['id'],
-                "company_name": job.get('company_name'),
-                "job_title": job.get('job_title'),
-                "industry": job.get('industry'),
+                "company_name": job.get('company_name', '')[:50],
+                "job_title": job.get('job_title', '')[:50],
+                "industry": job.get('industry', '')[:50],
                 "created_at": job.get('created_at'),
                 "archived_from_date": job.get('created_at'),
                 "technical_keywords": json.dumps(extracted_data.get('technical', {})),
@@ -192,6 +192,12 @@ def archive_jobs_to_keywords(supabase, days_old=7, batch_size=100):
 
             except Exception as e:
                 logger.error(f"Error inserting into Supabase archive: {e}")
+                logger.info("Saving failing batch to failed_archive_data.json for debugging.")
+                try:
+                    with open('failed_archive_data.json', 'w') as f:
+                        json.dump(archive_records, f, indent=2, default=str)
+                except Exception as file_e:
+                    logger.error(f"Could not write failure log to file: {file_e}")
 
     logger.info(f"Keyword archiving complete. Total jobs processed: {archived_count}.")
     return archived_count
@@ -272,6 +278,12 @@ def archive_all_jobs_to_keywords(supabase, batch_size=100):
 
             except Exception as e:
                 logger.error(f"Error inserting into Supabase archive: {e}")
+                logger.info("Saving failing batch to failed_archive_data.json for debugging.")
+                try:
+                    with open('failed_archive_data.json', 'w') as f:
+                        json.dump(archive_records, f, indent=2, default=str)
+                except Exception as file_e:
+                    logger.error(f"Could not write failure log to file: {file_e}")
 
     logger.info(f"Full keyword archiving complete. Total jobs processed: {archived_count}.")
     return archived_count
