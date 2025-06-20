@@ -41,3 +41,36 @@ def fetch_jobs_to_analyze(supabase, batch_size=10):
     jobs_to_analyze = [job for job in all_jobs if job["id"] not in analyzed_ids and job.get("description") and len(str(job.get("description")).strip()) > 100]
     logger.info(f"Found {len(jobs_to_analyze)} jobs to analyze.")
     return jobs_to_analyze[:batch_size]
+
+def fetch_jobs_to_analyze(supabase, batch_size=50):  # 从10调整到50
+    logger = logging.getLogger(__name__)
+    
+    # 获取最近7天的jobs（避免处理太老的数据）
+    from datetime import datetime, timedelta
+    week_ago = (datetime.utcnow() - timedelta(days=7)).isoformat()
+    
+    response = supabase.table("job_listings")\
+        .select("*", count="exact")\
+        .gte("created_at", week_ago)\
+        .execute()
+    
+    all_jobs = response.data
+    if not all_jobs:
+        logger.info("No recent jobs found.")
+        return []
+    
+    # 找出未分析的jobs
+    analyzed = supabase.table("job_anomaly_analysis")\
+        .select("job_listing_id")\
+        .execute()
+    analyzed_ids = set(row["job_listing_id"] for row in analyzed.data or [])
+    
+    jobs_to_analyze = [
+        job for job in all_jobs 
+        if job["id"] not in analyzed_ids 
+        and job.get("description") 
+        and len(str(job.get("description")).strip()) > 100
+    ]
+    
+    logger.info(f"Found {len(jobs_to_analyze)} new jobs to analyze.")
+    return jobs_to_analyze[:batch_size]

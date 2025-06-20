@@ -7,6 +7,14 @@ logger = logging.getLogger(__name__)
 
 def run_pipeline(mode, jobs_df, supabase=None, output_json_path='sample_data/output.json'):
     detector = EnhancedJobAnomalyDetector()
+    
+    if len(jobs_df) == 0:
+        logger.warning("No jobs to process")
+        return []
+    
+    logger.info(f"Starting {mode} mode with {len(jobs_df)} jobs")
+    
+    detector = EnhancedJobAnomalyDetector()
     if mode == "train":
         # 预留训练流程
         logger.info("Training mode not implemented yet.")
@@ -21,6 +29,8 @@ def run_pipeline(mode, jobs_df, supabase=None, output_json_path='sample_data/out
             ), axis=1
         )
         results = []
+        success_count = 0
+        error_count = 0
         for idx, row in jobs_df.iterrows():
             try:
                 job_id = row['id'] if 'id' in row else idx
@@ -30,6 +40,8 @@ def run_pipeline(mode, jobs_df, supabase=None, output_json_path='sample_data/out
                 industry = row.get('industry', 'general')
                 specialist_corpus = jobs_df[(jobs_df.index != idx) & (jobs_df['industry'] == industry)]['description'].tolist()
                 general_corpus = jobs_df[(jobs_df.index != idx) & (jobs_df['industry'] != industry)]['description'].tolist()
+                success_count += 1
+
                 if len(specialist_corpus) < 2 or len(general_corpus) < 2:
                     logger.warning(f"Skipping {company}: not enough corpus (specialist: {len(specialist_corpus)}, general: {len(general_corpus)})")
                     continue
@@ -49,7 +61,12 @@ def run_pipeline(mode, jobs_df, supabase=None, output_json_path='sample_data/out
                     from analyzer.inference import write_analysis_result
                     write_analysis_result(row['id'], result, supabase)
             except Exception as e:
+                error_count += 1
                 logger.error(f"Error processing job {row.get('id', idx)}: {e}")
+                # 达到错误阈值时停止
+                if error_count > len(jobs_df) * 0.3:  # 30%错误率阈值
+                    logger.error("Too many errors, stopping pipeline")
+                    break
         # 仅本地csv推理时保存json
         if supabase is None:
             with open(output_json_path, 'w', encoding='utf-8') as f:
