@@ -4,6 +4,7 @@ import numpy as np
 import spacy
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
+from utils.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
 
 import logging
 logger = logging.getLogger(__name__)
@@ -75,48 +76,22 @@ class EnhancedJobAnomalyDetector:
         self.global_idf_cache = None
         self.industry_cache = {}
 
+    def set_idf_cache(self, idf_cache):
+        """Allows pre-loading an IDF cache from an external source."""
+        self.global_idf_cache = idf_cache
+        logger.info(f"Successfully loaded {len(idf_cache)} words into IDF cache.")
+
+    def get_idf_cache(self):
+        """Returns the calculated or loaded IDF cache."""
+        return self.global_idf_cache
+
     def classify_job_industry(self, company_name, job_title, description):
         # ... existing code ...
         cache_key = f"{company_name}_{job_title}"
         if cache_key in self.industry_cache:
             return self.industry_cache[cache_key]
         combined_text = f"{company_name} {job_title} {description}".lower()
-        industry_keywords = {
-            'consulting': [
-                'consulting', 'mckinsey', 'bcg', 'bain', 'strategy', 'consultant',
-                'beratung', 'strategieberatung', 'unternehmensberatung'
-            ],
-            'finance': [
-                'bank', 'financial', 'investment', 'finance', 'asset', 'trading',
-                'fund', 'capital', 'fintech', 'esg', 'sustainable', 'risk',
-                'banking', 'wealth', 'portfolio', 'credit'
-            ],
-            'tech': [
-                'software', 'technology', 'tech', 'ai', 'machine learning',
-                'data science', 'developer', 'engineering', 'cloud', 'devops',
-                'digital', 'innovation', 'platform', 'algorithm'
-            ],
-            'law': [
-                'law', 'legal', 'attorney', 'lawyer', 'litigation', 'compliance',
-                'regulatory', 'recht', 'rechtsanwalt', 'kanzlei', 'jurist'
-            ],
-            'automotive': [
-                'automotive', 'car', 'vehicle', 'bmw', 'mercedes', 'porsche',
-                'audi', 'volkswagen', 'mobility', 'transport'
-            ],
-            'healthcare': [
-                'health', 'medical', 'pharmaceutical', 'biotech', 'clinical',
-                'patient', 'hospital', 'healthcare', 'medicine'
-            ],
-            'media': [
-                'media', 'publishing', 'journalism', 'content', 'editorial',
-                'marketing', 'communication', 'pr', 'öffentlichkeitsarbeit'
-            ],
-            'real_estate': [
-                'real estate', 'property', 'immobilien', 'proptech', 'construction',
-                'building', 'development', 'housing'
-            ]
-        }
+        industry_keywords = INDUSTRY_KEYWORD_LIBRARY
         industry_scores = {}
         for industry, keywords in industry_keywords.items():
             score = sum(1 for keyword in keywords if keyword in combined_text)
@@ -145,7 +120,7 @@ class EnhancedJobAnomalyDetector:
         vectorizer = TfidfVectorizer(
             max_features=10000,
             stop_words=list(self.stop_words),
-            ngram_range=(1, 1),
+            ngram_range=(1, 2),
             min_df=2,
             token_pattern=r'\b[a-zA-ZäöüÄÖÜß]{3,}\b'
         )

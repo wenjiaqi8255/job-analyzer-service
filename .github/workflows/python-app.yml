@@ -56,6 +56,27 @@ jobs:
         batch_size=${{ github.event.inputs.batch_size || '50' }}
         python main.py --mode inference --supabase --batch-size $batch_size
     
+    - name: Run daily data lifecycle management
+      if: github.event_name == 'schedule' # Only run on the scheduled job
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        TZ: 'Europe/Berlin'
+      run: |
+        echo "--- Running 7-day keyword archiving ---"
+        python main.py --supabase --run-keyword-archiving
+        
+        echo "--- Running 8-day cleanup of job_listings ---"
+        python main.py --supabase --run-listings-cleanup
+        
+        # This check ensures it only runs on the 1st of every month to save resources
+        if [ $(date +%d) -eq 01 ]; then
+          echo "--- Running monthly cleanup of job_analytics_archive ---"
+          python main.py --supabase --run-archive-cleanup
+        else
+          echo "--- Skipping monthly archive cleanup ---"
+        fi
+
     # 添加结果报告
     - name: Generate summary
       if: always()
