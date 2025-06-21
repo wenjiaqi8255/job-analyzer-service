@@ -4,3 +4,7 @@ python-dotenv
 scikit-learn
 spacy
 numpy
+keybert
+sentencepiece
+torch
+transformers

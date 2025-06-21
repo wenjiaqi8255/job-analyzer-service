@@ -1,0 +1,47 @@
+# .github/workflows/simple_translation.yml
+name: Simple Translation Service
+
+on:
+  schedule:
+    # 每天凌晨2点运行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # 30分钟超时
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Cache Hugging Face models
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/huggingface
+        key: hf-models-${{ runner.os }}-translation
+        restore-keys: |
+          hf-models-${{ runner.os }}-
+    
+    - name: Install dependencies
+      run: |
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install transformers supabase
+    
+    - name: Run translation service
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      run: |
+        python translation_service.py
+    
+    - name: Report completion
+      if: always()
+      run: |
+        echo "Translation job completed at $(date)"

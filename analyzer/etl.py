@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 import json
 from utils.job_keyword_extractor import KeywordExtractor
+from utils.job_data_accessor import JobDataAccessor
 
 logger = logging.getLogger(__name__)
 
@@ -46,23 +47,25 @@ def archive_jobs_to_keywords(supabase, days_old=7, batch_size=100):
 
         archive_records = []
         for job in jobs_batch:
-            description = job.get('description', '')
-            if not description:
-                continue
+            # 使用统一的数据访问器
+            effective_description = JobDataAccessor.get_effective_description(job)
             
-            extracted_data = extractor.extract_keywords(description)
+            if not effective_description:
+                continue
+                
+            keywords = extractor.extract_keywords(effective_description)
+            
+            # 记录使用的描述来源
+            metadata = JobDataAccessor.get_description_metadata(job)
+            
             archive_record = {
                 "job_id": job['id'],
-                "company_name": job.get('company_name', '')[:50],
-                "job_title": job.get('job_title', '')[:50],
+                "company_name": job.get('company_name', '')[:200],
+                "job_title": job.get('job_title', '')[:200],
                 "industry": job.get('industry', '')[:50],
                 "created_at": job.get('created_at'),
                 "archived_from_date": job.get('created_at'),
-                "technical_keywords": json.dumps(extracted_data.get('technical', {})),
-                "domain_keywords": json.dumps(extracted_data.get('domain', {})),
-                "tools_keywords": json.dumps(extracted_data.get('business_tools', {})),
-                "soft_skills_keywords": json.dumps(extracted_data.get('soft_skills', {})),
-                "requirements_keywords": json.dumps(extracted_data.get('job_requirements', {})),
+                "keywords": keywords,
             }
             archive_records.append(archive_record)
         
@@ -132,23 +135,21 @@ def archive_all_jobs_to_keywords(supabase, batch_size=100):
 
         archive_records = []
         for job in jobs_batch:
-            description = job.get('description', '')
-            if not description:
-                continue
+        # 修改这部分，使用统一的访问器
+            effective_description = JobDataAccessor.get_effective_description(job)
             
-            extracted_data = extractor.extract_keywords(description)
+            if not effective_description:
+                continue
+                
+            keywords = extractor.extract_keywords(effective_description)
             archive_record = {
                 "job_id": job['id'],
-                "company_name": job.get('company_name', '')[:50],
-                "job_title": job.get('job_title', '')[:50],
+                "company_name": job.get('company_name', '')[:200],
+                "job_title": job.get('job_title', '')[:200],
                 "industry": job.get('industry', '')[:50],
                 "created_at": job.get('created_at'),
                 "archived_from_date": job.get('created_at'),
-                "technical_keywords": json.dumps(extracted_data.get('technical', {})),
-                "domain_keywords": json.dumps(extracted_data.get('domain', {})),
-                "tools_keywords": json.dumps(extracted_data.get('business_tools', {})),
-                "soft_skills_keywords": json.dumps(extracted_data.get('soft_skills', {})),
-                "requirements_keywords": json.dumps(extracted_data.get('job_requirements', {})),
+                "keywords": keywords,
             }
             archive_records.append(archive_record)
         

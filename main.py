@@ -9,7 +9,7 @@ import pandas as pd
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
 from supabase import create_client, Client
-from analyzer.db_queries import fetch_jobs_to_analyze, fetch_idf_corpus
+from analyzer.db_queries import fetch_jobs_to_analyze, fetch_idf_corpus, fetch_all_idf_corpus
 from analyzer.etl import (
     archive_jobs_to_keywords, cleanup_job_listings, cleanup_archive_table,
     archive_all_jobs_to_keywords
@@ -29,13 +29,15 @@ def main():
     parser.add_argument('--run-listings-cleanup', action='store_true', help='Run the 8-day cleanup of the job_listings table')
     parser.add_argument('--run-archive-cleanup', action='store_true', help='Run the 180-day cleanup of the job_analytics_archive table')
     parser.add_argument('--run-full-keyword-archiving', action='store_true', help='Manually run keyword archiving for all non-archived jobs')
+    parser.add_argument('--run-full-tfidf-analysis', action='store_true', help='Run keyword archiving for all jobs and then run TF-IDF analysis on all of them')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size for Supabase inference')
+    parser.add_argument('--translate', action='store_true', help='Run translation batch job')
     args = parser.parse_args()
 
     supabase = None
     
     # Connect to Supabase if any Supabase-related action is requested
-    if args.supabase or args.run_keyword_archiving or args.run_listings_cleanup or args.run_archive_cleanup or args.run_full_keyword_archiving:
+    if args.supabase or args.run_keyword_archiving or args.run_listings_cleanup or args.run_archive_cleanup or args.run_full_keyword_archiving or args.run_full_tfidf_analysis or args.translate:  # 添加 args.translate
         if os.path.exists('.env'):
             load_dotenv()
             
@@ -78,6 +80,54 @@ def main():
         logger.info(f"✅ Archive cleanup process completed. Deleted {deleted_count} records.")
         return
 
+    # --- Full TF-IDF Analysis and Cache Generation ---
+    if args.run_full_tfidf_analysis:
+        logger.info("🚀 Starting full TF-IDF analysis process...")
+        logger.info("Step 1: Archiving all jobs to ensure corpus is up to date.")
+        archive_count = archive_all_jobs_to_keywords(supabase)
+        logger.info(f"✅ Archiving complete. Processed {archive_count} jobs.")
+
+        logger.info("Step 2: Fetching full corpus for TF-IDF calculation.")
+        idf_corpus_df = fetch_all_idf_corpus(supabase)
+        if idf_corpus_df.empty:
+            logger.error("❌ Could not fetch corpus for IDF. Aborting.")
+            sys.exit(1)
+        
+        jobs_to_analyze_df = idf_corpus_df.copy()
+        logger.info(f"📊 Loaded {len(jobs_to_analyze_df)} jobs for full analysis.")
+
+        try:
+            logger.info(f"🚀 Starting full inference pipeline...")
+            results = run_pipeline(
+                'inference', 
+                jobs_to_analyze_df=jobs_to_analyze_df, 
+                idf_corpus_df=idf_corpus_df, 
+                supabase=supabase
+            )
+            
+            if results:
+                logger.info(f"✅ Full pipeline completed successfully! Processed {len(results)} jobs.")
+            else:
+                logger.warning("⚠️ Full pipeline completed but no results were generated.")
+        except Exception as e:
+            logger.error(f"❌ Full pipeline failed: {e}", exc_info=True)
+            sys.exit(1)
+        
+        return # End of full analysis process
+
+    # --- Translation Batch Process ---
+    if args.translate:
+        logger.info("🚀 Starting translation batch process...")
+        from translation.translation_service import SimpleTranslationService
+        service = SimpleTranslationService()
+        success = service.run_translation_batch()
+        if success:
+            logger.info("✅ Translation completed successfully.")
+        else:
+            logger.error("❌ Translation failed.")
+            sys.exit(1)
+        return
+    
     # --- Main Analysis Pipeline ---
     if not args.supabase and not args.csv:
         logger.error("❌ Please provide an execution mode: --supabase for analysis, or one of the lifecycle tasks like --run-keyword-archiving.")

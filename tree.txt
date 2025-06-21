@@ -1,0 +1,48 @@
+.
+├── analyzer
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-311.pyc
+│   │   ├── data_utils.cpython-311.pyc
+│   │   ├── db_queries.cpython-311.pyc
+│   │   ├── etl.cpython-311.pyc
+│   │   ├── inference.cpython-311.pyc
+│   │   ├── model.cpython-311.pyc
+│   │   └── pipeline.cpython-311.pyc
+│   ├── db_queries.py
+│   ├── etl.py
+│   ├── inference.py
+│   ├── model.py
+│   ├── pipeline.py
+│   └── training.py
+├── doc
+│   ├── architecture.md
+│   ├── idea.md
+│   ├── keyword_extract_v2.md
+│   ├── progress.md
+│   ├── roadmap.md
+│   └── supabase.ts
+├── main.py
+├── playground
+│   ├── __pycache__
+│   │   └── local_data_util.cpython-311.pyc
+│   ├── analyzer_jupyter.ipynb
+│   ├── dual_corpus_enhanced_results.json
+│   └── local_data_util.py
+├── readme.md
+├── requirements.txt
+├── sample_data
+│   ├── job_listings_rows.csv
+│   └── output.json
+├── supabase.ts
+├── tree.txt
+└── utils
+    ├── __pycache__
+    │   ├── industry_keyword_library.cpython-311.pyc
+    │   ├── job_keyword_extract_library.cpython-311.pyc
+    │   └── job_keyword_extractor.cpython-311.pyc
+    ├── industry_keyword_library.py
+    ├── job_keyword_extract_library.py
+    └── job_keyword_extractor.py
+
+9 directories, 37 files

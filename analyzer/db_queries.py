@@ -8,23 +8,29 @@ from supabase import Client
 logger = logging.getLogger(__name__)
 
 def _reconstruct_description_from_keywords(row):
-    """Helper to reconstruct a text document from keyword JSON columns."""
-    text_parts = []
-    keyword_columns = [
-        'technical_keywords', 'domain_keywords', 'tools_keywords',
-        'soft_skills_keywords', 'requirements_keywords'
-    ]
-    for col in keyword_columns:
-        if col in row and row[col]:
-            try:
-                # Handle both dict and string representations of JSON
-                keywords = json.loads(row[col]) if isinstance(row[col], str) else row[col]
-                if isinstance(keywords, dict):
-                    for word, count in keywords.items():
-                        text_parts.extend([word] * count)
-            except (json.JSONDecodeError, TypeError):
-                continue
-    return " ".join(text_parts)
+    """
+    Helper to reconstruct a text document from the 'keywords' JSONB column,
+    which is expected to be a list of [keyword, score] pairs.
+    """
+    keywords_data = row.get('keywords')
+    if not keywords_data:
+        return ""
+    
+    # Handle both JSON string and Python list/dict cases
+    if isinstance(keywords_data, str):
+        try:
+            keywords_data = json.loads(keywords_data)
+        except json.JSONDecodeError:
+            # If it's not a valid JSON string, cannot process.
+            return ""
+
+    if isinstance(keywords_data, list) and keywords_data:
+        # Expected format: [['keyword1', 0.8], ['keyword2', 0.7]]
+        # We only need the keyword (the first element) for IDF calculation.
+        keywords = [item[0] for item in keywords_data if isinstance(item, list) and len(item) > 0]
+        return " ".join(keywords)
+
+    return ""
 
 def fetch_idf_corpus(supabase) -> pd.DataFrame:
     """
@@ -63,6 +69,32 @@ def fetch_idf_corpus(supabase) -> pd.DataFrame:
         
     logger.info(f"Using last {len(response.data)} jobs from job_listings for IDF corpus.")
     return pd.DataFrame(response.data)
+
+def fetch_all_idf_corpus(supabase) -> pd.DataFrame:
+    """
+    Fetches the entire job_analytics_archive for a full IDF calculation.
+    """
+    logger.info("Fetching full archive for IDF calculation...")
+    
+    response = supabase.table("job_analytics_archive").select("*").execute()
+    
+    archived_jobs = response.data
+    logger.info(f"Found {len(archived_jobs)} total jobs in archive.")
+
+    if not archived_jobs:
+        logger.warning("No jobs found in archive. Returning empty DataFrame.")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(archived_jobs)
+    # Reconstruct description for TF-IDF vectorizer
+    df['description'] = df.apply(_reconstruct_description_from_keywords, axis=1)
+    # Ensure essential columns exist
+    df['job_title'] = df.get('job_title', '')
+    df['company_name'] = df.get('company_name', '')
+    # The 'id' column is needed for processing, but archive table has 'job_id'
+    if 'job_id' in df.columns:
+        df['id'] = df['job_id']
+    return df
 
 def fetch_jobs_to_analyze(supabase: Client, batch_size: int = 50) -> List[Dict]:
     """Fetches jobs that haven't been processed for matching yet."""

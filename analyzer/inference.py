@@ -7,11 +7,11 @@ def write_analysis_result(job_id, analysis_data, supabase):
     now = datetime.now(timezone.utc).isoformat()
     payload = {
         "job_listing_id": job_id,
-        "analysis_results": analysis_data,
-        "last_updated": now
+        "analysis_data": analysis_data,
+        "last_analyzed_at": now
     }
     
-    response = supabase.table("job_analysis").insert(payload).execute()
+    response = supabase.table("job_anomaly_analysis").insert(payload).execute()
     
     if len(response.data) > 0:
         logger.info(f"Successfully wrote analysis for job {job_id}")

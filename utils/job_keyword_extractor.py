@@ -1,78 +1,49 @@
-import re
-from collections import Counter
-from utils.job_keyword_extract_library import JOB_KEYWORD_LIBRARY
+from keybert import KeyBERT
+
 
 class KeywordExtractor:
+    """
+    Extracts keywords from text using the KeyBERT model.
+    This implementation uses a pre-trained multilingual model to find relevant
+    keywords and keyphrases, replacing the old static dictionary-based approach.
+    """
     def __init__(self):
-        self.keyword_map = self._build_keyword_map()
-
-    def _build_keyword_map(self):
         """
-        Builds a reverse map from a keyword to its category and sub-category.
-        Example: {'python': ('technical', 'programming_languages'), 'react': ('technical', 'frontend')}
+        Initializes the KeywordExtractor with a multilingual KeyBERT model.
         """
-        keyword_map = {}
-        for category, sub_categories in JOB_KEYWORD_LIBRARY.items():
-            if isinstance(sub_categories, dict):
-                for sub_category, keywords in sub_categories.items():
-                    for keyword in keywords:
-                        keyword_map[keyword.lower()] = (category, sub_category)
-            elif isinstance(sub_categories, list):
-                # Handle flat lists like 'business_tools' and 'soft_skills'
-                for keyword in sub_categories:
-                    keyword_map[keyword.lower()] = (category, category) # Use main category as sub-category
-        return keyword_map
+        self.kw_model = KeyBERT(model='paraphrase-multilingual-MiniLM-L12-v2')
 
-    def _normalize_text(self, text):
-        """Basic text normalization."""
-        text = text.lower()
-        # Pad special characters to ensure they are tokenized, e.g., "C++" -> " c++ "
-        text = re.sub(r'([#+])', r' \1 ', text) 
-        # Remove other punctuation
-        text = re.sub(r'[^\w\s#+]', ' ', text)
-        # Remove extra whitespace
-        text = ' ' + ' '.join(text.split()) + ' '
-        return text
-
-    def extract_keywords(self, text):
+    def extract_keywords(self, text: str) -> list[tuple[str, float]]:
         """
-        Extracts and categorizes keywords from a given text.
-        Returns a dictionary with counts for each keyword type.
+        Extracts keywords and their similarity scores from a given text.
+        
+        Args:
+            text: The input string to extract keywords from.
+
+        Returns:
+            A list of (keyword, score) tuples. Returns an empty list if input is invalid.
         """
         if not text or not isinstance(text, str):
-            return {}
+            return []
 
-        normalized_text = self._normalize_text(text)
+        # Parameters are based on the refactoring plan in `doc/keyword_extract_v2.md`
+        # - `keyphrase_ngram_range`: To capture single keywords up to 3-word phrases.
+        # - `stop_words`: Set to None to handle multiple languages (German/English).
+        # - `top_n`: Extracts the top 30 most relevant keywords.
+        # - `use_mmr`: Use Maximal Marginal Relevance to diversify results.
+        # - `diversity`: A higher value (0.7) is chosen to encourage discovery of
+        #                more unique or "abnormal" terms, aligning with project goals.
+        keywords_with_scores = self.kw_model.extract_keywords(
+            text,
+            keyphrase_ngram_range=(1, 2),
+            stop_words=None,
+            top_n=30,
+            use_mmr=True,
+            diversity=0.7
+        )
         
-        extracted_keywords = {
-            'technical': Counter(),
-            'domain': Counter(),
-            'german_specific': Counter(),
-            'business_tools': Counter(),
-            'soft_skills': Counter(),
-            'job_requirements': Counter(),
-            'emerging_trends': Counter()
-        }
-
-        # Use a simple text search which is fast and effective for keyword libraries.
-        # This avoids complex tokenization issues with multi-word keywords.
-        for keyword, (category, sub_category) in self.keyword_map.items():
-            # Use word boundaries for single-word keywords to avoid matching substrings
-            # For multi-word keywords or keywords with special characters, a simple 'in' check is better.
-            if ' ' in keyword or '#' in keyword or '+' in keyword:
-                if keyword in normalized_text:
-                     count = normalized_text.count(keyword)
-                     extracted_keywords[category][keyword] += count
-            else:
-                # Pad with spaces for exact word matching
-                pattern = f' {keyword} '
-                if pattern in normalized_text:
-                    count = normalized_text.count(pattern)
-                    extracted_keywords[category][keyword] += count
-
-        # Convert counters to simple dicts for JSON serialization
-        result = {key: dict(value) for key, value in extracted_keywords.items() if value}
-        return result
+        # As per the updated plan, return the full result with scores.
+        return keywords_with_scores
 
 # Example usage
 if __name__ == '__main__':
@@ -82,34 +53,24 @@ if __name__ == '__main__':
     You will be working with AWS, Docker, and Kubernetes.
     Experience in the Fintech industry and knowledge of ESG is a big plus.
     Must be fluent in German (C1). This is a remote role. We use Jira and Slack.
+    Ein deutsches Beispiel: Wir suchen einen erfahrenen Softwareentwickler für die Arbeit mit KI-Modellen.
     """
     
     keywords = extractor.extract_keywords(sample_description)
     
     import json
-    print(json.dumps(keywords, indent=2))
+    print("Extracted Keywords with Scores:")
+    print(json.dumps(keywords, indent=2, ensure_ascii=False))
     
-    # Expected output:
-    # {
-    #   "technical": {
-    #     "python": 1,
-    #     "django": 1,
-    #     "react": 1,
-    #     "aws": 1,
-    #     "docker": 1,
-    #     "kubernetes": 1
-    #   },
-    #   "domain": {
-    #     "fintech": 1,
-    #     "esg": 1
-    #   },
-    #   "job_requirements": {
-    #     "german": 1,
-    #     "c1": 1,
-    #     "remote": 1
-    #   },
-    #   "business_tools": {
-    #      "jira": 1,
-    #      "slack": 1
-    #   }
-    # } 
+    # Expected output is a list of [keyword, score] pairs, for example:
+    # [
+    #   [
+    #     "erfahrenen softwareentwickler für",
+    #     0.65
+    #   ],
+    #   [
+    #     "senior python developer",
+    #     0.62
+    #   ],
+    #   ...
+    # ] 
