@@ -32,12 +32,13 @@ def main():
     parser.add_argument('--run-full-tfidf-analysis', action='store_true', help='Run keyword archiving for all jobs and then run TF-IDF analysis on all of them')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size for Supabase inference')
     parser.add_argument('--translate', action='store_true', help='Run translation batch job')
+    parser.add_argument('--translate-all', action='store_true', help='Run translation for all German jobs, overwriting existing ones.')
     args = parser.parse_args()
 
     supabase = None
     
     # Connect to Supabase if any Supabase-related action is requested
-    if args.supabase or args.run_keyword_archiving or args.run_listings_cleanup or args.run_archive_cleanup or args.run_full_keyword_archiving or args.run_full_tfidf_analysis or args.translate:  # 添加 args.translate
+    if args.supabase or args.run_keyword_archiving or args.run_listings_cleanup or args.run_archive_cleanup or args.run_full_keyword_archiving or args.run_full_tfidf_analysis or args.translate or args.translate_all:  # 添加 args.translate
         if os.path.exists('.env'):
             load_dotenv()
             
@@ -118,13 +119,25 @@ def main():
     # --- Translation Batch Process ---
     if args.translate:
         logger.info("🚀 Starting translation batch process...")
-        from translation.translation_service import SimpleTranslationService
-        service = SimpleTranslationService()
+        from translation.translation_service import TranslationService
+        service = TranslationService()
         success = service.run_translation_batch()
         if success:
             logger.info("✅ Translation completed successfully.")
         else:
             logger.error("❌ Translation failed.")
+            sys.exit(1)
+        return
+
+    if args.translate_all:
+        logger.info("🚀 Starting full translation process...")
+        from translation.translation_service import TranslationService
+        service = TranslationService()
+        success = service.run_full_translation()
+        if success:
+            logger.info("✅ Full translation completed successfully.")
+        else:
+            logger.error("❌ Full translation failed.")
             sys.exit(1)
         return
     

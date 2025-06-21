@@ -153,7 +153,7 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                     "id": row['id'],
                     "processed_for_matching": True,
                     "last_updated": datetime.now(timezone.utc).isoformat(),
-                    "tags": row['tags']
+                    "tags": row.get('tags')
                 }
                 for _, row in jobs_to_analyze_df.iterrows()
             ]

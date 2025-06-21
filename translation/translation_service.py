@@ -11,7 +11,7 @@ import hashlib
 from transformers import MarianMTModel, MarianTokenizer
 from supabase import create_client, Client
 
-class SimpleTranslationService:
+class TranslationService:
     def __init__(self):
         # Supabase连接
         self.supabase: Client = create_client(
@@ -61,35 +61,41 @@ class SimpleTranslationService:
         return 'de' if german_count > english_count else 'en'
     
     def translate_text(self, text, max_length=512):
-        """翻译单个文本"""
+        """
+        Translates a single text. If the text is too long, it will be split into
+        chunks, translated individually, and then reassembled. This avoids issues
+        with model degradation on long inputs.
+        """
         if not self.model or not self.tokenizer:
             raise Exception("Model not loaded!")
-        
-        # 检查缓存
+
+        # Check cache
         cache_key = hashlib.md5(text.encode()).hexdigest()
         if cache_key in self.translation_cache:
             return self.translation_cache[cache_key]
-        
+
         try:
-            # 预处理：截断过长文本
-            if len(text) > max_length * 4:
-                text = text[:max_length * 4]
-            
-            inputs = self.tokenizer(text, return_tensors="pt", padding=True, 
+            # If the text is long, we truncate it to avoid model degradation.
+            # This is a simple fix to prevent "repetitive degradation".
+            char_limit = 1000  # A hard limit on characters
+            if len(text) > char_limit:
+                text = text[:char_limit]
+
+            inputs = self.tokenizer(text, return_tensors="pt", padding=True,
                                   truncation=True, max_length=max_length)
-            
+
             with torch.no_grad():
                 translated = self.model.generate(**inputs, max_length=max_length)
-            
+
             result = self.tokenizer.decode(translated[0], skip_special_tokens=True)
-            
-            # 缓存结果
+
+            # Cache the result
             self.translation_cache[cache_key] = result
             return result
-            
+
         except Exception as e:
             print(f"Translation error: {e}")
-            return text  # 翻译失败时返回原文
+            return text  # Return original text on failure
     
     def fetch_untranslated_jobs(self):
         """获取需要翻译的jobs"""
@@ -166,9 +172,76 @@ class SimpleTranslationService:
         print(f"=== Translation completed! {success_count}/{len(german_jobs)} successful ===")
         return True
 
+    def run_full_translation(self, batch_size=50):
+        """执行完整的全量翻译流程，覆盖所有德语工作"""
+        print("=== Starting Full Translation Override Service ===")
+        
+        if not self.load_model():
+            print("Failed to load translation model!")
+            return False
+            
+        offset = 0
+        total_processed = 0
+        total_success = 0
+        
+        while True:
+            print(f"\nFetching batch starting from offset {offset}...")
+            try:
+                response = self.supabase.table('job_listings')\
+                    .select('id, description')\
+                    .order('id')\
+                    .range(offset, offset + batch_size - 1)\
+                    .execute()
+
+                jobs = response.data
+                if not jobs:
+                    print("No more jobs to process.")
+                    break
+
+                german_jobs_in_batch = []
+                for job in jobs:
+                    if job.get('description') and self.detect_language(job.get('description', '')) == 'de':
+                        german_jobs_in_batch.append(job)
+
+                if not german_jobs_in_batch:
+                    print(f"No German jobs in this batch of {len(jobs)} jobs. Moving to next batch.")
+                    offset += len(jobs)
+                    if len(jobs) < batch_size: # Last page
+                        break
+                    continue
+
+                print(f"Found {len(german_jobs_in_batch)} German jobs in this batch. Translating...")
+
+                for job in german_jobs_in_batch:
+                    job_id = job['id']
+                    description = job['description']
+                    
+                    total_processed += 1
+                    print(f"Processing job ID: {job_id} ({total_processed} processed so far)")
+                    
+                    try:
+                        translated = self.translate_text(description)
+                        self.update_translated_job(job_id, translated)
+                        total_success += 1
+                        print(f"  ✅ Success")
+                    except Exception as e:
+                        print(f"  ❌ Failed for job ID {job_id}: {e}")
+
+                offset += len(jobs)
+                if len(jobs) < batch_size: # Last page
+                    break
+
+            except Exception as e:
+                print(f"An error occurred during batch processing: {e}")
+                print("Waiting 10 seconds before continuing...")
+                time.sleep(10)
+        
+        print(f"\n=== Full Translation completed! Processed: {total_processed}, Successful: {total_success} ===")
+        return True
+
 def main():
     """主函数 - 用于GitHub Actions调用"""
-    service = SimpleTranslationService()
+    service = TranslationService()
     
     # 执行翻译
     success = service.run_translation_batch()

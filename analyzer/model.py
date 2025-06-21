@@ -4,7 +4,7 @@ import numpy as np
 import spacy
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
-from utils.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
+from extractor.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
 from analyzer.db_queries import _reconstruct_description_from_keywords
 
 import logging

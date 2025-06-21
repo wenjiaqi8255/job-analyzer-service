@@ -36,7 +36,7 @@ class KeywordExtractor:
         keywords_with_scores = self.kw_model.extract_keywords(
             text,
             keyphrase_ngram_range=(1, 2),
-            stop_words=None,
+            stop_words='english',
             top_n=30,
             use_mmr=True,
             diversity=0.7

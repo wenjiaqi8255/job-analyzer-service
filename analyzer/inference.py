@@ -11,7 +11,7 @@ def write_analysis_result(job_id, analysis_data, supabase):
         "last_analyzed_at": now
     }
     
-    response = supabase.table("job_anomaly_analysis").insert(payload).execute()
+    response = supabase.table("job_anomaly_analysis").unsert(payload).execute()
     
     if len(response.data) > 0:
         logger.info(f"Successfully wrote analysis for job {job_id}")
