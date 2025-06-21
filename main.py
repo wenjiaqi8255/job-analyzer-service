@@ -9,11 +9,7 @@ import pandas as pd
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
 from supabase import create_client, Client
-from analyzer.db_queries import fetch_jobs_to_analyze, fetch_idf_corpus, fetch_all_idf_corpus
-from analyzer.etl import (
-    archive_jobs_to_keywords, cleanup_job_listings, cleanup_archive_table,
-    archive_all_jobs_to_keywords
-)
+from analyzer.db_queries import fetch_all_job_listings, fetch_job_by_id
 from analyzer.pipeline import run_pipeline
 from playground.local_data_util import load_and_process_jobs
 
@@ -22,26 +18,21 @@ logger = logging.getLogger(__name__)
 
 def main():
     parser = argparse.ArgumentParser(description="Job Analyzer Pipeline")
-    parser.add_argument('--mode', choices=['train', 'inference'], default='inference', help='Pipeline mode')
-    parser.add_argument('--csv', type=str, help='Path to CSV file for inference')
-    parser.add_argument('--supabase', action='store_true', help='Use Supabase as data source and sink')
-    parser.add_argument('--run-keyword-archiving', action='store_true', help='Run the 7-day keyword archiving process and exit')
-    parser.add_argument('--run-listings-cleanup', action='store_true', help='Run the 8-day cleanup of the job_listings table')
-    parser.add_argument('--run-archive-cleanup', action='store_true', help='Run the 180-day cleanup of the job_analytics_archive table')
-    parser.add_argument('--run-full-keyword-archiving', action='store_true', help='Manually run keyword archiving for all non-archived jobs')
-    parser.add_argument('--run-full-tfidf-analysis', action='store_true', help='Run keyword archiving for all jobs and then run TF-IDF analysis on all of them')
-    parser.add_argument('--batch_size', type=int, default=50, help='Batch size for Supabase inference')
-    parser.add_argument('--translate', action='store_true', help='Run translation batch job')
-    parser.add_argument('--translate-all', action='store_true', help='Run translation for all German jobs, overwriting existing ones.')
+    parser.add_argument('--mode', choices=['train', 'inference'], default='inference', help='Pipeline mode. Currently only inference is supported.')
+    parser.add_argument('--csv', type=str, help='Path to local CSV file for inference.')
+    parser.add_argument('--supabase', action='store_true', help='Use Supabase as the data source and sink.')
+    parser.add_argument('--analyze-all', action='store_true', help='Analyze all unprocessed jobs in the database.')
+    parser.add_argument('--batch-size', type=int, default=50, help='Batch size for Supabase inference when not using --analyze-all.')
+    parser.add_argument('--no-keybert', action='store_true', help='Disable KeyBERT text enhancement for testing.')
+    parser.add_argument('--translate', action='store_true', help='Run translation batch job for untranslated jobs.')
+    parser.add_argument('--translate-all', action='store_true', help='Run translation for all German jobs, overwriting existing translations.')
+    parser.add_argument('--job-id', type=str, help='Analyze a single job by its ID (UUID). Requires --supabase.')
     args = parser.parse_args()
 
     supabase = None
     
-    # Connect to Supabase if any Supabase-related action is requested
-    if args.supabase or args.run_keyword_archiving or args.run_listings_cleanup or args.run_archive_cleanup or args.run_full_keyword_archiving or args.run_full_tfidf_analysis or args.translate or args.translate_all:  # 添加 args.translate
-        if os.path.exists('.env'):
-            load_dotenv()
-            
+    if args.supabase or args.translate or args.translate_all:
+        load_dotenv()
         SUPABASE_URL = os.getenv("SUPABASE_URL")
         SUPABASE_KEY = os.getenv("SUPABASE_KEY")
         
@@ -56,122 +47,73 @@ def main():
             logger.error(f"❌ Failed to connect to Supabase: {e}")
             sys.exit(1)
 
-    # --- Data Lifecycle Management ---
-    if args.run_keyword_archiving:
-        logger.info("🚀 Starting 7-day keyword archiving process...")
-        archived_count = archive_jobs_to_keywords(supabase)
-        logger.info(f"✅ Keyword archiving process completed. Processed {archived_count} jobs.")
-        return
-
-    if args.run_full_keyword_archiving:
-        logger.info("🚀 Starting full keyword archiving process for all jobs...")
-        archived_count = archive_all_jobs_to_keywords(supabase)
-        logger.info(f"✅ Full keyword archiving process completed. Processed {archived_count} jobs.")
-        return
-
-    if args.run_listings_cleanup:
-        logger.info("🚀 Starting 8-day job_listings cleanup process...")
-        deleted_count = cleanup_job_listings(supabase)
-        logger.info(f"✅ job_listings cleanup process completed. Deleted {deleted_count} jobs.")
-        return
-        
-    if args.run_archive_cleanup:
-        logger.info("🚀 Starting 180-day archive cleanup process...")
-        deleted_count = cleanup_archive_table(supabase, days_to_keep=180)
-        logger.info(f"✅ Archive cleanup process completed. Deleted {deleted_count} records.")
-        return
-
-    # --- Full TF-IDF Analysis and Cache Generation ---
-    if args.run_full_tfidf_analysis:
-        logger.info("🚀 Starting full TF-IDF analysis process...")
-        logger.info("Step 1: Archiving all jobs to ensure corpus is up to date.")
-        archive_count = archive_all_jobs_to_keywords(supabase)
-        logger.info(f"✅ Archiving complete. Processed {archive_count} jobs.")
-
-        logger.info("Step 2: Fetching full corpus for TF-IDF calculation.")
-        idf_corpus_df = fetch_all_idf_corpus(supabase)
-        if idf_corpus_df.empty:
-            logger.error("❌ Could not fetch corpus for IDF. Aborting.")
-            sys.exit(1)
-        
-        jobs_to_analyze_df = idf_corpus_df.copy()
-        logger.info(f"📊 Loaded {len(jobs_to_analyze_df)} jobs for full analysis.")
-
-        try:
-            logger.info(f"🚀 Starting full inference pipeline...")
-            results = run_pipeline(
-                'inference', 
-                jobs_to_analyze_df=jobs_to_analyze_df, 
-                idf_corpus_df=idf_corpus_df, 
-                supabase=supabase
-            )
-            
-            if results:
-                logger.info(f"✅ Full pipeline completed successfully! Processed {len(results)} jobs.")
-            else:
-                logger.warning("⚠️ Full pipeline completed but no results were generated.")
-        except Exception as e:
-            logger.error(f"❌ Full pipeline failed: {e}", exc_info=True)
-            sys.exit(1)
-        
-        return # End of full analysis process
-
     # --- Translation Batch Process ---
-    if args.translate:
-        logger.info("🚀 Starting translation batch process...")
+    if args.translate or args.translate_all:
+        logger.info("🚀 Starting translation process...")
         from translation.translation_service import TranslationService
-        service = TranslationService()
-        success = service.run_translation_batch()
+        service = TranslationService(supabase_client=supabase)
+        if args.translate_all:
+            success = service.run_full_translation()
+        else:
+            success = service.run_translation_batch()
+        
         if success:
             logger.info("✅ Translation completed successfully.")
         else:
             logger.error("❌ Translation failed.")
             sys.exit(1)
         return
-
-    if args.translate_all:
-        logger.info("🚀 Starting full translation process...")
-        from translation.translation_service import TranslationService
-        service = TranslationService()
-        success = service.run_full_translation()
-        if success:
-            logger.info("✅ Full translation completed successfully.")
-        else:
-            logger.error("❌ Full translation failed.")
-            sys.exit(1)
-        return
     
     # --- Main Analysis Pipeline ---
-    if not args.supabase and not args.csv:
-        logger.error("❌ Please provide an execution mode: --supabase for analysis, or one of the lifecycle tasks like --run-keyword-archiving.")
+    if not args.supabase and not args.csv and not args.job_id:
+        parser.print_help()
+        logger.error("\nPlease provide a data source: --supabase, --csv, or --job-id")
+        sys.exit(1)
+
+    if args.job_id and not args.supabase:
+        logger.error("--job-id requires --supabase to be set.")
         sys.exit(1)
 
     jobs_to_analyze_df = None
     idf_corpus_df = None
 
     if args.supabase:
-        if args.mode == 'inference':
-            try:
-                idf_corpus_df = fetch_idf_corpus(supabase)
-                if idf_corpus_df.empty:
-                    logger.error("❌ Could not fetch corpus for IDF. Aborting.")
+        try:
+            logger.info("Fetching all job listings from Supabase to build corpus...")
+            all_jobs_df = fetch_all_job_listings(supabase)
+            if all_jobs_df.empty:
+                logger.error("❌ No jobs found in the database. Aborting.")
+                sys.exit(1)
+            
+            idf_corpus_df = all_jobs_df.copy()
+            logger.info(f"Corpus built with {len(idf_corpus_df)} total jobs.")
+
+            if args.job_id:
+                logger.info(f"Fetching single job with ID: {args.job_id}")
+                jobs_to_analyze_df = fetch_job_by_id(supabase, args.job_id)
+                if jobs_to_analyze_df.empty:
+                    logger.error(f"Could not find job with ID {args.job_id}. Aborting.")
                     sys.exit(1)
 
-                jobs_to_analyze = fetch_jobs_to_analyze(supabase, batch_size=args.batch_size)
-                if not jobs_to_analyze:
+            else:
+                unprocessed_jobs_df = all_jobs_df[all_jobs_df['processed_for_matching'] != True]
+
+                if unprocessed_jobs_df.empty:
                     logger.info("✅ No new jobs to process. All caught up!")
                     return
-                    
-                jobs_to_analyze_df = pd.DataFrame(jobs_to_analyze)
-                logger.info(f"📊 Loaded {len(jobs_to_analyze_df)} jobs for analysis")
-                
-            except Exception as e:
-                logger.error(f"❌ Failed to fetch jobs from Supabase: {e}", exc_info=True)
-                sys.exit(1)
+
+                if args.analyze_all:
+                    jobs_to_analyze_df = unprocessed_jobs_df
+                    logger.info(f"📊 --analyze-all flag set. Analyzing all {len(jobs_to_analyze_df)} unprocessed jobs.")
+                else:
+                    jobs_to_analyze_df = unprocessed_jobs_df.head(args.batch_size)
+                    logger.info(f"📊 Analyzing a batch of {len(jobs_to_analyze_df)} unprocessed jobs.")
+
+        except Exception as e:
+            logger.error(f"❌ Failed to fetch jobs from Supabase: {e}", exc_info=True)
+            sys.exit(1)
                 
     elif args.csv:
-        # Local CSV mode now needs to handle both dataframes.
-        # For simplicity, we'll use the same CSV for both.
         if not os.path.exists(args.csv):
             logger.error(f"❌ CSV file not found: {args.csv}")
             sys.exit(1)
@@ -181,29 +123,28 @@ def main():
             if jobs_df.empty:
                 logger.error("❌ No valid jobs loaded from CSV")
                 sys.exit(1)
+            # In local mode, all jobs are for analysis and also form the corpus
             jobs_to_analyze_df = jobs_df
-            idf_corpus_df = jobs_df.copy() # Use the same data for corpus in local mode
+            idf_corpus_df = jobs_df.copy()
         except Exception as e:
             logger.error(f"❌ Failed to load CSV: {e}")
             sys.exit(1)
-    else:
-        logger.error("❌ Please provide either --csv or --supabase for the main pipeline.")
-        sys.exit(1)
 
-    # 运行pipeline
+    # Run the pipeline
     try:
         logger.info(f"🚀 Starting {args.mode} pipeline...")
         results = run_pipeline(
             args.mode, 
             jobs_to_analyze_df=jobs_to_analyze_df, 
             idf_corpus_df=idf_corpus_df, 
-            supabase=supabase
+            supabase=supabase,
+            use_keybert=not args.no_keybert
         )
         
         if results:
             logger.info(f"✅ Pipeline completed successfully! Processed {len(results)} jobs.")
         else:
-            logger.warning("⚠️ Pipeline completed but no results were generated.")
+            logger.warning("⚠️ Pipeline completed, but no results were generated.")
             
     except Exception as e:
         logger.error(f"❌ Pipeline failed: {e}", exc_info=True)

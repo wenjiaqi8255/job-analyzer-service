@@ -5,7 +5,6 @@ import spacy
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
 from extractor.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
-from analyzer.db_queries import _reconstruct_description_from_keywords
 
 import logging
 logger = logging.getLogger(__name__)
@@ -77,14 +76,40 @@ class EnhancedJobAnomalyDetector:
         self.global_idf_cache = None
         self.industry_cache = {}
 
-    def set_idf_cache(self, idf_cache):
-        """Allows pre-loading an IDF cache from an external source."""
-        self.global_idf_cache = idf_cache
-        logger.info(f"Successfully loaded {len(idf_cache)} words into IDF cache.")
+    def calculate_global_idf(self, descriptions: list[str]) -> dict:
+        """
+        Calculates global IDF values from a list of job descriptions.
+        """
+        logger.info("Calculating global IDF from descriptions...")
 
-    def get_idf_cache(self):
-        """Returns the calculated or loaded IDF cache."""
-        return self.global_idf_cache
+        # Filter out any empty documents
+        all_texts = [text for text in descriptions if text and len(text.strip()) > 10]
+
+        if len(all_texts) < 5:
+            logger.warning("Not enough documents with keywords to calculate IDF, skipping.")
+            return {}
+
+        vectorizer = TfidfVectorizer(
+            max_features=20000,
+            stop_words=list(self.stop_words),
+            ngram_range=(1, 2),
+            min_df=3,
+            token_pattern=r'(?u)\b[\w-]{2,}\b'  # Correct pattern for words with hyphens
+        )
+        try:
+            vectorizer.fit(all_texts)
+            feature_names = vectorizer.get_feature_names_out()
+            idf_values = vectorizer.idf_
+            idf_dict = dict(zip(feature_names, idf_values))
+            self.global_idf_cache = idf_dict  # Still cache in memory for the current run
+            
+            logger.info(f"IDF calculation complete. Found {len(idf_dict)} terms.")
+            sorted_idf = sorted(idf_dict.items(), key=lambda x: x[1])
+            logger.info(f"Most common terms (low IDF): {[word for word, idf in sorted_idf[:10]]}")
+            return idf_dict
+        except Exception as e:
+            logger.error(f"IDF calculation failed: {e}", exc_info=True)
+            return {}
 
     def classify_job_industry(self, company_name, job_title, description):
         # ... existing code ...
@@ -104,48 +129,6 @@ class EnhancedJobAnomalyDetector:
             classified_industry = 'general'
         self.industry_cache[cache_key] = classified_industry
         return classified_industry
-
-    def calculate_global_idf(self, jobs_df):
-        """
-        Calculates global IDF values from the 'keywords' column of the jobs DataFrame.
-        Each job's keyword list is treated as a document.
-        """
-        if self.global_idf_cache is not None:
-            return self.global_idf_cache
-        
-        logger.info("Calculating global IDF from keywords...")
-
-        # Use the helper to create a document for each job from its keywords
-        all_texts = jobs_df.apply(_reconstruct_description_from_keywords, axis=1).tolist()
-        
-        # Filter out any empty documents
-        all_texts = [text for text in all_texts if text and len(text.strip()) > 10]
-
-        if len(all_texts) < 5:
-            logger.warning("Not enough documents with keywords to calculate IDF, skipping.")
-            return {}
-
-        vectorizer = TfidfVectorizer(
-            max_features=20000,
-            stop_words=list(self.stop_words),
-            ngram_range=(1, 2),
-            min_df=3,
-            token_pattern=r'(?u)\b[\w-]{2,}\b'  # Correct pattern for words with hyphens
-        )
-        try:
-            vectorizer.fit(all_texts)
-            feature_names = vectorizer.get_feature_names_out()
-            idf_values = vectorizer.idf_
-            idf_dict = dict(zip(feature_names, idf_values))
-            self.global_idf_cache = idf_dict
-            
-            logger.info(f"IDF calculation complete. Found {len(idf_dict)} terms.")
-            sorted_idf = sorted(idf_dict.items(), key=lambda x: x[1])
-            logger.info(f"Most common terms (low IDF): {[word for word, idf in sorted_idf[:10]]}")
-            return idf_dict
-        except Exception as e:
-            logger.error(f"IDF calculation failed: {e}", exc_info=True)
-            return {}
 
     def is_generic_word(self, word, idf_threshold=2.5):
         if not self.global_idf_cache:
@@ -319,7 +302,7 @@ class EnhancedJobAnomalyDetector:
         score = 1
         if self.is_generic_word(word):
             score -= 3
-            print(f"🚫 通用词惩罚: {word} (IDF过低)")
+            logger.debug(f"Penalizing generic word: {word} (low IDF)")
         if job_title and word.lower() in job_title.lower():
             score += 2
         tech_indicators = [
@@ -357,42 +340,3 @@ class EnhancedJobAnomalyDetector:
             score -= 2
         return max(0, score)
 
-    def detect_anomalies(self, target_job_keywords: list, global_idf: dict) -> list:
-        """
-        Detects anomalies based on a combination of similarity score and IDF weight.
-        
-        Args:
-            target_job_keywords: A list of [keyword, score] pairs from KeyBERT.
-            global_idf: A dictionary of IDF weights for all keywords in the corpus.
-            
-        Returns:
-            A sorted list of anomaly dictionaries, each containing the keyword,
-            similarity score, idf weight, and the final anomaly score.
-        """
-        if not target_job_keywords or not global_idf:
-            return []
-
-        anomalies = []
-        # Default IDF for keywords not found in the corpus.
-        # A higher value signifies higher rarity and thus higher potential anomaly.
-        default_idf = np.log((len(global_idf) + 1) / (0 + 1)) + 1 
-
-        for keyword, sim_score in target_job_keywords:
-            # Normalize keyword for lookup
-            lookup_key = keyword.lower().strip()
-            idf_weight = global_idf.get(lookup_key, default_idf)
-            
-            # The core anomaly score calculation from the v2 plan
-            anomaly_score = sim_score * idf_weight
-            
-            anomalies.append({
-                'keyword': keyword,
-                'similarity_score': round(float(sim_score), 4),
-                'idf_weight': round(float(idf_weight), 4),
-                'anomaly_score': round(float(anomaly_score), 4)
-            })
-            
-        # Sort by the final anomaly score in descending order
-        anomalies.sort(key=lambda x: x['anomaly_score'], reverse=True)
-        
-        return anomalies

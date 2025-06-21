@@ -1,10 +1,10 @@
-supabase
 pandas
-python-dotenv
-scikit-learn
-spacy
 numpy
+spacy
+python-dotenv
+supabase
 keybert
-sentencepiece
+scikit-learn
 torch
-transformers
+sentence-transformers
+rich

@@ -2,20 +2,24 @@ name: Job Analyzer Service
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # 每天UTC 3点
-  workflow_dispatch:
-    inputs:
-      batch_size:
-        description: 'Number of jobs to process'
-        required: false
-        default: '50'
+    - cron: '0 3 * * *'  # Run daily analysis at 3 AM UTC
   push:
     branches: [ "main" ]
     paths:
       - "analyzer/**"
       - "main.py"
       - "requirements.txt"
-      - ".github/workflows/**"
+      - ".github/workflows/python-app.yml"
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of jobs to process (if not analyzing all)'
+        required: false
+        default: '50'
+      analyze_all:
+        description: 'Analyze all unprocessed jobs'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -23,30 +27,17 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    timeout-minutes: 45  # 设置超时
+    timeout-minutes: 45
     
     steps:
     - uses: actions/checkout@v4
     
     - name: Set up Python 3.10
-      uses: actions/setup-python@v4  # 升级到v4
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
         cache: 'pip'
-      continue-on-error: true  # 缓存失败不影响整个流程
     
-    # 备用缓存策略（如果setup-python的缓存失败）
-    - name: Manual pip cache
-      if: failure()  # 只有上一步失败时才执行
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-      continue-on-error: true
-    
-    # 缓存spaCy模型，避免每次下载
     - name: Cache spaCy models
       uses: actions/cache@v3
       with:
@@ -55,50 +46,21 @@ jobs:
           /opt/hostedtoolcache/Python/*/x64/lib/python*/site-packages/de_core_news_sm
           /opt/hostedtoolcache/Python/*/x64/lib/python*/site-packages/en_core_web_sm
         key: spacy-models-${{ runner.os }}-v2-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          spacy-models-${{ runner.os }}-v2-
-          spacy-models-${{ runner.os }}-
-      continue-on-error: true
     
-    - name: Install dependencies with retry
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install -r requirements.txt
         
-        # 重试机制安装依赖
-        for i in {1..3}; do
-          echo "Attempt $i: Installing requirements..."
-          if pip install -r requirements.txt; then
-            echo "Dependencies installed successfully"
-            break
-          else
-            echo "Attempt $i failed, waiting 15 seconds..."
-            sleep 15
-          fi
-        done
-        
-        # 检查spaCy模型是否已存在
+        # Download spaCy models if not restored from cache
         if ! python -c "import spacy; spacy.load('de_core_news_sm')" 2>/dev/null; then
           echo "Downloading German spaCy model..."
           python -m spacy download de_core_news_sm
-        else
-          echo "German spaCy model already available"
         fi
-        
         if ! python -c "import spacy; spacy.load('en_core_web_sm')" 2>/dev/null; then
           echo "Downloading English spaCy model..."  
           python -m spacy download en_core_web_sm
-        else
-          echo "English spaCy model already available"
         fi
-    
-    - name: Verify setup
-      run: |
-        echo "Python version: $(python --version)"
-        echo "Pip version: $(pip --version)"
-        echo "Installed packages:"
-        pip list | head -20
-        echo "Testing spaCy models..."
-        python -c "import spacy; print('German model:', spacy.load('de_core_news_sm')); print('English model:', spacy.load('en_core_web_sm'))"
     
     - name: Run job analyzer
       env:
@@ -106,61 +68,25 @@ jobs:
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         TZ: 'Europe/Berlin'
       run: |
-        batch_size=${{ github.event.inputs.batch_size || '50' }}
-        echo "Starting job analysis with batch size: $batch_size"
-        python main.py --mode inference --supabase --batch_size $batch_size
-    
-    - name: Run daily data lifecycle management
-      if: github.event_name == 'schedule' # Only run on the scheduled job
-      env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        TZ: 'Europe/Berlin'
-      run: |
-        echo "--- Running 7-day keyword archiving ---"
-        python main.py --supabase --run-keyword-archiving
-        
-        echo "--- Running 8-day cleanup of job_listings ---"
-        python main.py --supabase --run-listings-cleanup
-        
-        # This check ensures it only runs on the 1st of every month to save resources
-        if [ $(date +%d) -eq 01 ]; then
-          echo "--- Running monthly cleanup of job_analytics_archive ---"
-          python main.py --supabase --run-archive-cleanup
+        # Scheduled runs and manual 'analyze_all' runs should process everything
+        if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event.inputs.analyze_all }}" == "true" ]]; then
+          echo "Starting full analysis of all unprocessed jobs..."
+          python main.py --supabase --analyze-all
         else
-          echo "--- Skipping monthly archive cleanup ---"
+          # Manual runs without 'analyze_all' use the batch size
+          batch_size=${{ github.event.inputs.batch_size || '50' }}
+          echo "Starting batch analysis with batch size: $batch_size"
+          python main.py --supabase --batch-size $batch_size
         fi
 
-    # 添加结果报告和错误诊断
     - name: Generate summary
       if: always()
       run: |
-        echo "=== Job Analysis Summary ==="
-        echo "Completed at: $(date)"
-        echo "Workflow trigger: ${{ github.event_name }}"
-        echo "Repository: ${{ github.repository }}"
-        echo "Commit: ${{ github.sha }}"
-        
-        if [ "${{ job.status }}" = "success" ]; then
-          echo "✅ Job analysis completed successfully"
+        echo "## Job Analysis Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "- **Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
         else
-          echo "❌ Job analysis failed"
+          echo "- **Status:** ❌ Failed" >> $GITHUB_STEP_SUMMARY
         fi
-        
-        echo "Check Supabase for detailed results"
-        
-    # 错误时的诊断信息
-    - name: Debug info on failure
-      if: failure()
-      run: |
-        echo "=== Debug Information ==="
-        echo "Available disk space:"
-        df -h
-        echo "Memory usage:"
-        free -h
-        echo "Python environment:"
-        python -c "import sys; print(sys.path)"
-        echo "Recent pip cache activity:"
-        ls -la ~/.cache/pip/ || echo "No pip cache found"
-        echo "Network connectivity test:"
-        curl -I https://pypi.org/ || echo "PyPI connectivity issue"
