@@ -23,7 +23,6 @@ def main():
     parser.add_argument('--supabase', action='store_true', help='Use Supabase as the data source and sink.')
     parser.add_argument('--analyze-all', action='store_true', help='Analyze all unprocessed jobs in the database.')
     parser.add_argument('--batch-size', type=int, default=50, help='Batch size for Supabase inference when not using --analyze-all.')
-    parser.add_argument('--no-keybert', action='store_true', help='Disable KeyBERT text enhancement for testing.')
     parser.add_argument('--translate', action='store_true', help='Run translation batch job for untranslated jobs.')
     parser.add_argument('--translate-all', action='store_true', help='Run translation for all German jobs, overwriting existing translations.')
     parser.add_argument('--job-id', type=str, help='Analyze a single job by its ID (UUID). Requires --supabase.')
@@ -137,8 +136,7 @@ def main():
             args.mode, 
             jobs_to_analyze_df=jobs_to_analyze_df, 
             idf_corpus_df=idf_corpus_df, 
-            supabase=supabase,
-            use_keybert=not args.no_keybert
+            supabase=supabase
         )
         
         if results:

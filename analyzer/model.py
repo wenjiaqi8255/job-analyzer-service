@@ -2,15 +2,21 @@ import re
 import pandas as pd
 import numpy as np
 import spacy
+import json
 from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer
 from extractor.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
+from sentence_transformers import SentenceTransformer, util
+import torch
+from supabase import Client
+from .db_queries import fetch_active_semantic_baselines, fetch_baseline_vectors
 
 import logging
 logger = logging.getLogger(__name__)
 
 class EnhancedJobAnomalyDetector:
-    def __init__(self):
+    def __init__(self, supabase_client: Client = None):
+        self.supabase_client = supabase_client
         try:
             self.nlp = spacy.load("de_core_news_sm")
             logger.info("Loaded German spaCy model.")
@@ -21,6 +27,43 @@ class EnhancedJobAnomalyDetector:
             except OSError:
                 logger.error("Please install spaCy model: python -m spacy download de_core_news_sm")
                 raise
+        
+        self.embedding_model_name = 'all-MiniLM-L6-v2'
+        try:
+            self.embedding_model = SentenceTransformer(self.embedding_model_name)
+            logger.info(f"Loaded sentence-transformer model '{self.embedding_model_name}'.")
+        except Exception as e:
+            logger.error(f"Failed to load sentence-transformer model: {e}", exc_info=True)
+            self.embedding_model = None
+
+        # Determine the device for tensor operations. This will be used to ensure
+        # all tensors are on the same device as the model to prevent runtime errors.
+        if self.embedding_model:
+            self.device = self.embedding_model.device
+            logger.info(f"Using device: {self.device} for tensor operations.")
+        else:
+            self.device = "cpu"
+            logger.warning("Embedding model not loaded. Defaulting to CPU for tensor operations.")
+
+        self.semantic_baselines = {}
+        if self.supabase_client and self.embedding_model:
+            self._load_baselines_from_db()
+
+        self.explanation_templates = {
+            "Industry-Specific": {
+                "explanation": "The requirement for '{skill}' is highly specific to the {industry} sector. While unusual for a typical {role} role, it signals a demand for deep industry knowledge.",
+                "business_impact": "This is a key differentiator. Highlighting your understanding of '{skill}' and its application in the {industry} context can give you a significant advantage."
+            },
+            "Cross-Role": {
+                "explanation": "Mentioning '{skill}' is uncommon for a {role} position. This could indicate the role is hybrid, involves collaboration with other teams, or that the company uses a unique tech stack.",
+                "business_impact": "If you possess this skill, it's a valuable talking point that shows your versatility. If not, it's worth asking about to understand the team's structure and expectations."
+            },
+            "Emerging Tech": {
+                "explanation": "The term '{skill}' represents a new or emerging technology. Its inclusion suggests the company is focused on innovation and exploring cutting-edge solutions.",
+                "business_impact": "This can be an excellent opportunity for growth and learning. Be prepared to discuss your ability to adapt to new technologies and learn quickly."
+            }
+        }
+        
         self.stop_words = {
             # 德语停用词
             'und', 'der', 'die', 'das', 'für', 'von', 'mit', 'bei', 'den', 'dem', 'des', 
@@ -75,6 +118,232 @@ class EnhancedJobAnomalyDetector:
         }
         self.global_idf_cache = None
         self.industry_cache = {}
+
+    def _load_baselines_from_db(self):
+        """
+        Loads active baselines and their pre-computed vectors from the database.
+        (FINAL FIX - Handles JSON string parsing)
+        """
+        logger.info("Loading semantic baselines from database...")
+        baselines = fetch_active_semantic_baselines(self.supabase_client)
+        if not baselines:
+            logger.warning("No baselines loaded from DB. Semantic analysis will be disabled.")
+            return
+
+        self.semantic_baselines = {"role": {}, "industry": {}, "global": {}}
+
+        for baseline in baselines:
+            baseline_id = baseline['id']
+            name = baseline['name']
+            baseline_type = baseline['baseline_type']
+            data = baseline.get('baseline_data', {})
+
+            # 1. 提取关键词
+            source_keywords = []
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        source_keywords.extend(value)
+            
+            if not source_keywords:
+                logger.warning(f"[{name}] No source keywords found. Skipping.")
+                continue
+
+            # 2. 获取向量数据
+            vectors_data = fetch_baseline_vectors(self.supabase_client, baseline_id, self.embedding_model_name)
+            if not vectors_data:
+                logger.error(f"[{name}] CRITICAL: No vector data found in baseline_vectors table!")
+                continue
+
+            # 3. *** THE FINAL FIX IS HERE ***
+            # 检查返回的是否是字符串，如果是，则解析为字典
+            vectors_dict = {}
+            if isinstance(vectors_data, str):
+                try:
+                    vectors_dict = json.loads(vectors_data)
+                    logger.info(f"[{name}] Successfully parsed JSON string into a dictionary with {len(vectors_dict)} keys.")
+                except json.JSONDecodeError:
+                    logger.error(f"[{name}] FATAL: Failed to parse the received string as JSON. String starts with: {vectors_data[:100]}")
+                    continue
+            elif isinstance(vectors_data, dict):
+                vectors_dict = vectors_data # 如果已经是字典，直接使用
+            else:
+                logger.error(f"[{name}] FATAL: Received vector data is neither a string nor a dictionary. Type is {type(vectors_data)}. Skipping.")
+                continue
+            
+            # 4. 匹配关键词和向量
+            vector_keys = set(vectors_dict.keys())
+            matched_keywords = [kw for kw in source_keywords if kw in vector_keys]
+
+            if not matched_keywords:
+                logger.error(f"[{name}] FATAL MISMATCH: 0 keywords matched! Keywords from semantic_baselines are MISSING in the vector dictionary.")
+                # 为了避免刷屏，只打印少量示例
+                logger.error(f"[{name}] Example keywords from semantic_baselines: {source_keywords[:5]}")
+                logger.error(f"[{name}] Example keys from vector dictionary: {list(vector_keys)[:5]}")
+                continue
+
+            # 5. 基于匹配到的关键词构建 Tensor
+            try:
+                vectors_list = [vectors_dict[kw] for kw in matched_keywords]
+                # Move tensor to the same device as the embedding model to prevent device mismatch errors
+                vectors = torch.tensor(vectors_list, dtype=torch.float).to(self.device)
+
+                logger.info(f"[{name}] Successfully created a tensor of shape {vectors.shape} on device '{self.device}' using {len(matched_keywords)} matched keywords.")
+
+                if baseline_type in self.semantic_baselines:
+                    self.semantic_baselines[baseline_type][name] = {
+                        "keywords": matched_keywords,
+                        "vectors": vectors
+                    }
+            except Exception as e:
+                logger.error(f"[{name}] Error creating tensor: {e}", exc_info=True)
+
+        logger.info("Finished loading baselines.")
+        for b_type, b_dict in self.semantic_baselines.items():
+            logger.info(f"Final loaded count for type '{b_type}': {len(b_dict)} baselines.")
+
+    def classify_job_role(self, job_description: str, min_avg_similarity=0.35) -> str:
+        """
+        Classifies the job role by finding which role baseline has the highest
+        average maximum similarity across all job description chunks.
+        """
+        if not self.embedding_model or not job_description:
+            return "general"
+
+        role_baselines = self.semantic_baselines.get("role", {})
+        if not role_baselines:
+            logger.warning("No role baselines loaded. Cannot classify role, defaulting to 'general'.")
+            return "general"
+
+        chunks = self.chunk_text(job_description)
+        if not chunks:
+            return "general"
+
+        chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
+
+        # 改为存储每个 role 的平均相似度分数
+        role_avg_scores = {role_name: 0.0 for role_name in role_baselines.keys()}
+
+        for role_name, baseline in role_baselines.items():
+            baseline_vectors = baseline.get('vectors')
+            if baseline_vectors is None or len(baseline_vectors) == 0:
+                continue
+
+            # 计算相似度矩阵 (这部分不变)
+            similarities = util.cos_sim(chunk_vectors, baseline_vectors)
+            # 找到每个 chunk 对这个 baseline 的最高相似度 (这部分不变)
+            max_sim_per_chunk = torch.max(similarities, dim=1).values
+            
+            # 核心改动：计算这些最高相似度的平均值，而不是计算 "hits"
+            average_score = torch.mean(max_sim_per_chunk).item()
+            role_avg_scores[role_name] = average_score
+
+        if not role_avg_scores:
+            return "general"
+
+        # 找到平均分最高的 role
+        best_role = max(role_avg_scores, key=role_avg_scores.get)
+        best_score = role_avg_scores[best_role]
+        
+        # 增加一个"安全阀"：如果最高的平均分也极低，说明完全不相关，还是返回 general
+        if best_score < min_avg_similarity:
+            logger.info(f"Best role '{best_role}' only scored {best_score:.3f} (below threshold {min_avg_similarity}). Classifying as 'general'. (Scores: { {k: round(v, 3) for k, v in role_avg_scores.items()} })")
+            return "general"
+
+        logger.info(f"Classified job role as '{best_role}' with score {best_score:.3f}. (All Scores: { {k: round(v, 3) for k, v in role_avg_scores.items()} })")
+        return best_role
+
+    def detect_semantic_anomalies(self, target_job: str, role_baseline_name: str, industry_baseline_name: str = None, similarity_threshold=0.5):
+        """
+        Detects semantic anomalies using vector similarity against pre-defined baselines.
+        """
+        # If the role is classified as general, we skip the analysis as there's no specific baseline for comparison.
+        if role_baseline_name == 'general':
+            logger.info("Job role classified as 'general', skipping semantic anomaly detection.")
+            return []
+
+        if not self.embedding_model:
+            logger.error("Embedding model is not available. Cannot perform semantic analysis.")
+            return []
+        
+        chunks = self.chunk_text(target_job)
+        if not chunks:
+            return []
+
+        chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
+        
+        # --- Baseline Vector Retrieval ---
+        role_baseline_vectors = self.semantic_baselines.get('role', {}).get(role_baseline_name, {}).get("vectors")
+        if role_baseline_vectors is None:
+            logger.warning(f"Role baseline '{role_baseline_name}' not found or has no vectors. Analysis cannot proceed.")
+            return []
+
+        industry_baseline_vectors = self.semantic_baselines.get("industry", {}).get(industry_baseline_name, {}).get("vectors")
+        
+        global_baselines = self.semantic_baselines.get('global', {})
+        global_baseline_vectors = None
+        if global_baselines:
+            global_baseline_name = next(iter(global_baselines))
+            global_baseline_vectors = global_baselines[global_baseline_name].get('vectors')
+
+        # --- Anomaly Detection Loop ---
+        anomalies = []
+        for i, chunk in enumerate(chunks):
+            chunk_vector = chunk_vectors[i].unsqueeze(0)
+            
+            sim_role = self._calculate_max_similarity(chunk_vector, role_baseline_vectors)
+            
+            if sim_role < similarity_threshold:
+                sim_industry = self._calculate_max_similarity(chunk_vector, industry_baseline_vectors)
+                sim_global = self._calculate_max_similarity(chunk_vector, global_baseline_vectors)
+                
+                anomaly_type = "Cross-Role"
+                if sim_global < 0.35:
+                    anomaly_type = "Emerging Tech"
+                elif industry_baseline_name and sim_industry > 0.65 and sim_role < 0.4:
+                    anomaly_type = "Industry-Specific"
+
+                skill_topic = "unknown"
+                if anomaly_type == "Industry-Specific" and industry_baseline_vectors is not None:
+                    skill_topic = self._find_best_match_keyword(chunk, chunk_vector, industry_baseline_vectors, self.semantic_baselines.get("industry", {}).get(industry_baseline_name, {}).get("keywords", []))
+                else:
+                    skill_topic = self._find_best_match_keyword(chunk, chunk_vector, role_baseline_vectors, self.semantic_baselines.get("role", {}).get(role_baseline_name, {}).get("keywords", []))
+
+                template = self.explanation_templates.get(anomaly_type, {})
+                explanation = template.get("explanation", "").format(skill=skill_topic, industry=industry_baseline_name, role=role_baseline_name)
+                business_impact = template.get("business_impact", "").format(skill=skill_topic, industry=industry_baseline_name, role=role_baseline_name)
+
+                anomalies.append({
+                    "chunk": chunk,
+                    "type": anomaly_type,
+                    "explanation": explanation,
+                    "business_impact": business_impact,
+                    "similarity_to_role": round(sim_role, 3),
+                    "similarity_to_industry": round(sim_industry, 3),
+                    "similarity_to_global": round(sim_global, 3),
+                })
+        
+        return anomalies
+
+    def _find_best_match_keyword(self, chunk_text, chunk_vector, baseline_vectors, baseline_keywords):
+        """Finds the most similar keyword from a baseline to a given chunk vector."""
+        if baseline_vectors is None or len(baseline_vectors) == 0 or not baseline_keywords:
+            # As a fallback, try to extract a noun phrase from the chunk
+            doc = self.nlp(chunk_text)
+            for np in doc.noun_chunks:
+                return np.text
+            return "this requirement"
+
+        similarities = util.cos_sim(chunk_vector, baseline_vectors)
+        best_match_index = torch.argmax(similarities).item()
+        return baseline_keywords[best_match_index]
+
+    def _calculate_max_similarity(self, chunk_vector, baseline_vectors):
+        """Helper to calculate max cosine similarity."""
+        if baseline_vectors is None or len(baseline_vectors) == 0:
+            return 0.0
+        similarities = util.cos_sim(chunk_vector, baseline_vectors)
+        return torch.max(similarities).item()
 
     def calculate_global_idf(self, descriptions: list[str]) -> dict:
         """
@@ -160,6 +429,35 @@ class EnhancedJobAnomalyDetector:
             else:
                 filtered_terms.add(word)
         return filtered_terms
+
+    def chunk_text(self, text: str) -> list[str]:
+        """
+        Splits a job description into semantic chunks (sentences or meaningful blocks).
+        This is the new preprocessing step for semantic analysis, replacing n-gram extraction.
+        As per the new architecture, this prepares the text for vector-based comparison.
+        """
+        if not text or pd.isna(text):
+            return []
+
+        # Normalize text slightly first
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # Use spaCy's robust sentence segmentation
+        doc = self.nlp(text)
+        chunks = [sent.text.strip() for sent in doc.sents]
+
+        # Further refine chunks: split by newlines which often delimit list items,
+        # and filter out chunks that are too short to have semantic meaning.
+        final_chunks = []
+        for chunk in chunks:
+            sub_chunks = chunk.split('\n')
+            for sub_chunk in sub_chunks:
+                sub_chunk = sub_chunk.strip()
+                # A chunk should have at least a few words to be meaningful
+                if sub_chunk and len(sub_chunk.split()) > 2:
+                    final_chunks.append(sub_chunk)
+
+        return final_chunks
 
     def advanced_text_preprocessing(self, text, company_terms_to_filter=None):
         if not text or pd.isna(text):

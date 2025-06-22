@@ -61,5 +61,42 @@ def fetch_job_by_id(supabase: Client, job_id: str) -> pd.DataFrame:
             logger.warning(f"Job with ID {job_id} not found.")
             return pd.DataFrame()
     except Exception as e:
-        logger.error(f"An error occurred while fetching job {job_id}: {e}", exc_info=True)
+        logger.error(f"Error fetching job by ID {job_id}: {e}", exc_info=True)
         return pd.DataFrame()
+
+def fetch_active_semantic_baselines(supabase_client: Client):
+    """
+    Fetches all active semantic baselines from the database.
+    Active baselines are used to build the in-memory cache for the anomaly detector.
+    """
+    try:
+        logger.info("Fetching active semantic baselines from database...")
+        response = supabase_client.table('semantic_baselines').select('*').eq('is_active', True).execute()
+        
+        if response.data:
+            logger.info(f"Successfully fetched {len(response.data)} active baselines.")
+            return response.data
+        else:
+            logger.warning("No active semantic baselines found in the database.")
+            return []
+    except Exception as e:
+        logger.error(f"Error fetching semantic baselines: {e}", exc_info=True)
+        return []
+
+# 在 db_queries.py 中
+def fetch_baseline_vectors(supabase_client: Client, baseline_id: int, model_name: str):
+    """
+    Fetches the pre-computed vectors for a specific baseline and embedding model.
+    """
+    try:
+        response = supabase_client.table('baseline_vectors').select('vectors_data').eq('baseline_id', baseline_id).eq('embedding_model', model_name).limit(1).execute()
+        
+        # response.data 是一个列表，如: [{'vectors_data': {'word1': [..], 'word2': [..]}}]
+        if response.data:
+            return response.data[0].get('vectors_data', {}) # 返回字典，如果 'vectors_data' 不存在则返回空字典
+        else:
+            logger.warning(f"No vectors found for baseline_id={baseline_id} and model='{model_name}'")
+            return {} # 返回空字典
+    except Exception as e:
+        logger.error(f"Error fetching baseline vectors for baseline_id={baseline_id}: {e}", exc_info=True)
+        return {} # 异常时也返回空字典

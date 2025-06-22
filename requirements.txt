@@ -3,8 +3,8 @@ numpy
 spacy
 python-dotenv
 supabase
-keybert
 scikit-learn
 torch
-sentence-transformers
 rich
+supabase-py==2.0.2
+sentence-transformers==2.2.2

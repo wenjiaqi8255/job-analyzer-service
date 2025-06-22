@@ -5,40 +5,12 @@ import hashlib
 from datetime import datetime, timezone
 from analyzer.model import EnhancedJobAnomalyDetector
 from analyzer.inference import write_analysis_result
-from keybert import KeyBERT
 from extractor.job_data_accessor import JobDataAccessor
 
 logger = logging.getLogger(__name__)
 
-def _enhance_text_with_keybert(text, kw_model):
-    """Uses KeyBERT to extract key phrases and returns them as a single string."""
-    if not text or pd.isna(text) or len(text.strip()) < 50:
-        return text  # Return original text if it's too short
-    try:
-        # Extract keywords/keyphrases
-        keywords = kw_model.extract_keywords(
-            text,
-            keyphrase_ngram_range=(1, 3), 
-            stop_words='english',
-            use_mmr=True, 
-            diversity=0.5,
-            top_n=15
-        )
-        # The result is a list of tuples (phrase, score)
-        key_phrases = [kw[0] for kw in keywords]
-        return " ".join(key_phrases)
-    except Exception as e:
-        logger.warning(f"KeyBERT enhancement failed for a text snippet. Returning original text. Error: {e}")
-        return text
-
-def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_json_path='sample_data/output.json', use_keybert: bool = True):
-    detector = EnhancedJobAnomalyDetector()
-    kw_model = None
-    if use_keybert:
-        logger.info("KeyBERT enhancement is enabled.")
-        kw_model = KeyBERT(model='all-MiniLM-L6-v2')
-    else:
-        logger.info("KeyBERT enhancement is disabled.")
+def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_json_path='sample_data/output.json'):
+    detector = EnhancedJobAnomalyDetector(supabase_client=supabase)
 
     if len(jobs_to_analyze_df) == 0:
         logger.warning("No jobs to process")
@@ -78,32 +50,30 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                 title = row.get('job_title', 'Unknown')
                 description = row.get('effective_description', '')
                 industry = row.get('industry', 'general')
-
-                # Enhance the target job description with KeyBERT if enabled
-                if use_keybert and kw_model:
-                    enhanced_description = _enhance_text_with_keybert(description, kw_model)
-                else:
-                    enhanced_description = description
                 
-                # Build specialist and general corpuses from effective descriptions
-                specialist_corpus = idf_corpus_df[idf_corpus_df['industry'] == industry]['effective_description'].dropna().tolist()
-                general_corpus = idf_corpus_df[idf_corpus_df['industry'] != industry]['effective_description'].dropna().tolist()
+                # The old corpus building is no longer needed for semantic analysis.
+                # We now use pre-computed baselines.
 
-                if len(specialist_corpus) < 2 or len(general_corpus) < 2:
-                    logger.warning(f"Skipping {company} - {title}: not enough corpus for industry '{industry}' (specialist: {len(specialist_corpus)}, general: {len(general_corpus)})")
-                    continue
+                # Dynamically classify the role based on the job description.
+                role_baseline_for_job = detector.classify_job_role(description)
                 
-                anomalies = detector.detect_anomalies_dual_corpus(
-                    enhanced_description, specialist_corpus, general_corpus,
-                    job_title=title, company_name=company, industry=industry
+                logger.info(f"Analyzing '{title}' with classified role='{role_baseline_for_job}' and industry='{industry}'")
+
+                anomalies = detector.detect_semantic_anomalies(
+                    target_job=description,
+                    role_baseline_name=role_baseline_for_job,
+                    industry_baseline_name=industry
                 )
                 
+                if not anomalies:
+                    logger.info(f"No semantic anomalies found for {company} - {title}")
+
                 result = {
-                    'dual_corpus_anomalies': anomalies,
+                    'semantic_anomalies': anomalies,
                     'industry': industry,
                     'company_name': company,
                     'job_title': title,
-                    'effective_description': enhanced_description,
+                    'effective_description': description,
                 }
                 results.append(result)
                 
