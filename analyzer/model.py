@@ -10,6 +10,10 @@ from sentence_transformers import SentenceTransformer, util
 import torch
 from supabase import Client
 from .db_queries import fetch_active_semantic_baselines, fetch_baseline_vectors
+from .text_preprocessor import TextPreprocessor
+from .role_classifier import RoleClassifier
+from .semantic_anomaly_detector import SemanticAnomalyDetector
+from .legacy_anomaly_detector import LegacyAnomalyDetector
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,37 +21,19 @@ logger = logging.getLogger(__name__)
 class EnhancedJobAnomalyDetector:
     def __init__(self, supabase_client: Client = None):
         self.supabase_client = supabase_client
-        try:
-            self.nlp = spacy.load("de_core_news_sm")
-            logger.info("Loaded German spaCy model.")
-        except OSError:
-            try:
-                self.nlp = spacy.load("en_core_web_sm")
-                logger.warning("German model not found, using English model.")
-            except OSError:
-                logger.error("Please install spaCy model: python -m spacy download de_core_news_sm")
-                raise
+        self.nlp = self._load_spacy_model()
+        self.embedding_model, self.embedding_model_name = self._load_embedding_model()
+        self.device = self.embedding_model.device if self.embedding_model else "cpu"
         
-        self.embedding_model_name = 'all-MiniLM-L6-v2'
-        try:
-            self.embedding_model = SentenceTransformer(self.embedding_model_name)
-            logger.info(f"Loaded sentence-transformer model '{self.embedding_model_name}'.")
-        except Exception as e:
-            logger.error(f"Failed to load sentence-transformer model: {e}", exc_info=True)
-            self.embedding_model = None
-
-        # Determine the device for tensor operations. This will be used to ensure
-        # all tensors are on the same device as the model to prevent runtime errors.
-        if self.embedding_model:
-            self.device = self.embedding_model.device
-            logger.info(f"Using device: {self.device} for tensor operations.")
-        else:
-            self.device = "cpu"
-            logger.warning("Embedding model not loaded. Defaulting to CPU for tensor operations.")
-
         self.semantic_baselines = {}
         if self.supabase_client and self.embedding_model:
             self._load_baselines_from_db()
+
+        # Initialize modular components
+        self.text_preprocessor = TextPreprocessor(self.nlp)
+        self.role_classifier = RoleClassifier(self.embedding_model, self.semantic_baselines, self.text_preprocessor)
+        self.semantic_anomaly_detector = SemanticAnomalyDetector(self.embedding_model, self.semantic_baselines, self.text_preprocessor, self.nlp)
+        self.legacy_anomaly_detector = LegacyAnomalyDetector(self.text_preprocessor)
 
         self.explanation_templates = {
             "Industry-Specific": {
@@ -119,269 +105,168 @@ class EnhancedJobAnomalyDetector:
         self.global_idf_cache = None
         self.industry_cache = {}
 
+        self.role_title_embeddings = {}
+        self._precompute_role_title_embeddings()
+
+    def _precompute_role_title_embeddings(self):
+        """预计算所有role的标准title embeddings并缓存"""
+        if not self.embedding_model:
+            logger.warning("Embedding model not available, skipping title embeddings precomputation")
+            return
+            
+        logger.info("预计算role title embeddings...")
+        
+        # 从实际的role baselines生成title embeddings
+        role_baselines = self.semantic_baselines.get("role", {})
+        if not role_baselines:
+            logger.warning("No role baselines available for title embedding precomputation")
+            return
+        
+        # 为每个实际存在的role生成title描述
+        role_titles_to_encode = []
+        role_names = []
+        
+        for role_baseline_name in role_baselines.keys():
+            # 从baseline name推导title：去掉_baseline后缀，转换为可读标题
+            role_key = role_baseline_name.replace('_baseline', '')
+            
+            # 智能转换role key到title
+            title = self._role_key_to_title(role_key)
+            role_titles_to_encode.append(title)
+            role_names.append(role_baseline_name)  # 使用完整的baseline name作为key
+        
+        try:
+            # 批量编码所有role titles
+            title_embeddings = self.embedding_model.encode(role_titles_to_encode, convert_to_tensor=True)
+            
+            # 存储到缓存，key使用完整的baseline name
+            for role_name, title_embedding in zip(role_names, title_embeddings):
+                self.role_title_embeddings[role_name] = title_embedding
+                
+            logger.info(f"✅ 成功预计算 {len(self.role_title_embeddings)} 个role title embeddings")
+            logger.debug(f"缓存的role keys: {list(self.role_title_embeddings.keys())}")
+            
+        except Exception as e:
+            logger.error(f"预计算role title embeddings失败: {e}")
+            self.role_title_embeddings = {}
+    
+    def _role_key_to_title(self, role_key: str) -> str:
+        """智能转换role key到自然语言title"""
+        # 替换下划线为空格，首字母大写
+        title = role_key.replace('_', ' ').title()
+        
+        # 特殊处理一些缩写和术语
+        replacements = {
+            'Ui Ux': 'UI UX',
+            'Ai Ml': 'AI ML', 
+            'It': 'IT',
+            'Seo': 'SEO',
+            'Api': 'API',
+            'Devops': 'DevOps',
+            'Qa': 'QA'
+        }
+        
+        for old, new in replacements.items():
+            title = title.replace(old, new)
+            
+        return title
+
+    def _preprocess_job_title(self, job_title: str) -> str:
+        """简单清理job title，去掉噪音词汇"""
+        if not job_title or not job_title.strip():
+            return ""
+        
+        title = job_title.strip()
+        
+        # 去掉资历级别词汇
+        seniority_patterns = [
+            r'\b(senior|sr\.?|lead|principal|staff|chief|head of|director of)\b',
+            r'\b(junior|jr\.?|entry level|graduate|trainee|intern)\b', 
+            r'\b(mid|middle|intermediate|associate)\b'
+        ]
+        
+        for pattern in seniority_patterns:
+            title = re.sub(pattern, '', title, flags=re.IGNORECASE)
+        
+        # 去掉修饰词
+        modifier_patterns = [
+            r'\b(experienced|skilled|talented|expert|professional)\b',
+            r'\b(full time|part time|freelance|contract|remote)\b',
+            r'\b(m/f/d|w/m/d|\(m/f/d\)|\(w/m/d\))\b'  # 德语性别标识
+        ]
+        
+        for pattern in modifier_patterns:
+            title = re.sub(pattern, '', title, flags=re.IGNORECASE)
+        
+        # 标准化分隔符和缩写
+        title = re.sub(r'[-/&]', ' ', title)  # 统一分隔符
+        title = re.sub(r'\bdev\b', 'developer', title, flags=re.IGNORECASE)
+        title = re.sub(r'\beng\b', 'engineer', title, flags=re.IGNORECASE) 
+        title = re.sub(r'\bmgr\b', 'manager', title, flags=re.IGNORECASE)
+        
+        # 清理多余空格
+        title = re.sub(r'\s+', ' ', title).strip()
+        
+        logger.debug(f"Title preprocessing: '{job_title}' → '{title}'")
+        return title
+
+    def classify_job_role(self, job_title: str = "", job_description: str = "", 
+                          min_avg_similarity=0.35, title_weight=0.7) -> str:
+        """
+        使用title + description的加权融合进行角色分类
+        
+        Args:
+            job_title: 职位标题
+            job_description: 职位描述  
+            min_avg_similarity: 最小相似度阈值
+            title_weight: title的权重 (建议0.7)
+        
+        Returns:
+            角色分类字符串或"general"
+        """
+        return self.role_classifier.classify_job_role(job_title, job_description, min_avg_similarity, title_weight)
+
     def _load_baselines_from_db(self):
-        """
-        Loads active baselines and their pre-computed vectors from the database.
-        (FINAL FIX - Handles JSON string parsing)
-        """
         logger.info("Loading semantic baselines from database...")
         baselines = fetch_active_semantic_baselines(self.supabase_client)
         if not baselines:
-            logger.warning("No baselines loaded from DB. Semantic analysis will be disabled.")
+            logger.warning("No baselines loaded from DB.")
             return
 
         self.semantic_baselines = {"role": {}, "industry": {}, "global": {}}
-
         for baseline in baselines:
             baseline_id = baseline['id']
             name = baseline['name']
             baseline_type = baseline['baseline_type']
-            data = baseline.get('baseline_data', {})
-
-            # 1. 提取关键词
-            source_keywords = []
-            if isinstance(data, dict):
-                for key, value in data.items():
-                    if isinstance(value, list):
-                        source_keywords.extend(value)
             
+            # Simplified data extraction
+            source_keywords = [kw for key, value in baseline.get('baseline_data', {}).items() if isinstance(value, list) for kw in value]
             if not source_keywords:
-                logger.warning(f"[{name}] No source keywords found. Skipping.")
                 continue
 
-            # 2. 获取向量数据
             vectors_data = fetch_baseline_vectors(self.supabase_client, baseline_id, self.embedding_model_name)
             if not vectors_data:
-                logger.error(f"[{name}] CRITICAL: No vector data found in baseline_vectors table!")
-                continue
-
-            # 3. *** THE FINAL FIX IS HERE ***
-            # 检查返回的是否是字符串，如果是，则解析为字典
-            vectors_dict = {}
-            if isinstance(vectors_data, str):
-                try:
-                    vectors_dict = json.loads(vectors_data)
-                    logger.info(f"[{name}] Successfully parsed JSON string into a dictionary with {len(vectors_dict)} keys.")
-                except json.JSONDecodeError:
-                    logger.error(f"[{name}] FATAL: Failed to parse the received string as JSON. String starts with: {vectors_data[:100]}")
-                    continue
-            elif isinstance(vectors_data, dict):
-                vectors_dict = vectors_data # 如果已经是字典，直接使用
-            else:
-                logger.error(f"[{name}] FATAL: Received vector data is neither a string nor a dictionary. Type is {type(vectors_data)}. Skipping.")
                 continue
             
-            # 4. 匹配关键词和向量
-            vector_keys = set(vectors_dict.keys())
-            matched_keywords = [kw for kw in source_keywords if kw in vector_keys]
-
-            if not matched_keywords:
-                logger.error(f"[{name}] FATAL MISMATCH: 0 keywords matched! Keywords from semantic_baselines are MISSING in the vector dictionary.")
-                # 为了避免刷屏，只打印少量示例
-                logger.error(f"[{name}] Example keywords from semantic_baselines: {source_keywords[:5]}")
-                logger.error(f"[{name}] Example keys from vector dictionary: {list(vector_keys)[:5]}")
+            # Handle string-encoded JSON
+            vectors_dict = json.loads(vectors_data) if isinstance(vectors_data, str) else vectors_data
+            if not isinstance(vectors_dict, dict):
                 continue
-
-            # 5. 基于匹配到的关键词构建 Tensor
+            
+            matched_keywords = [kw for kw in source_keywords if kw in vectors_dict]
+            if not matched_keywords:
+                continue
+                
             try:
-                vectors_list = [vectors_dict[kw] for kw in matched_keywords]
-                # Move tensor to the same device as the embedding model to prevent device mismatch errors
-                vectors = torch.tensor(vectors_list, dtype=torch.float).to(self.device)
-
-                logger.info(f"[{name}] Successfully created a tensor of shape {vectors.shape} on device '{self.device}' using {len(matched_keywords)} matched keywords.")
-
+                vectors = torch.tensor([vectors_dict[kw] for kw in matched_keywords], dtype=torch.float).to(self.device)
                 if baseline_type in self.semantic_baselines:
-                    self.semantic_baselines[baseline_type][name] = {
-                        "keywords": matched_keywords,
-                        "vectors": vectors
-                    }
+                    self.semantic_baselines[baseline_type][name] = {"keywords": matched_keywords, "vectors": vectors}
             except Exception as e:
                 logger.error(f"[{name}] Error creating tensor: {e}", exc_info=True)
 
         logger.info("Finished loading baselines.")
-        for b_type, b_dict in self.semantic_baselines.items():
-            logger.info(f"Final loaded count for type '{b_type}': {len(b_dict)} baselines.")
-
-    def classify_job_role(self, job_description: str, min_avg_similarity=0.35) -> str:
-        """
-        Classifies the job role by finding which role baseline has the highest
-        average maximum similarity across all job description chunks.
-        """
-        if not self.embedding_model or not job_description:
-            return "general"
-
-        role_baselines = self.semantic_baselines.get("role", {})
-        if not role_baselines:
-            logger.warning("No role baselines loaded. Cannot classify role, defaulting to 'general'.")
-            return "general"
-
-        chunks = self.chunk_text(job_description)
-        if not chunks:
-            return "general"
-
-        chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
-
-        # 改为存储每个 role 的平均相似度分数
-        role_avg_scores = {role_name: 0.0 for role_name in role_baselines.keys()}
-
-        for role_name, baseline in role_baselines.items():
-            baseline_vectors = baseline.get('vectors')
-            if baseline_vectors is None or len(baseline_vectors) == 0:
-                continue
-
-            # 计算相似度矩阵 (这部分不变)
-            similarities = util.cos_sim(chunk_vectors, baseline_vectors)
-            # 找到每个 chunk 对这个 baseline 的最高相似度 (这部分不变)
-            max_sim_per_chunk = torch.max(similarities, dim=1).values
-            
-            # 核心改动：计算这些最高相似度的平均值，而不是计算 "hits"
-            average_score = torch.mean(max_sim_per_chunk).item()
-            role_avg_scores[role_name] = average_score
-
-        if not role_avg_scores:
-            return "general"
-
-        # 找到平均分最高的 role
-        best_role = max(role_avg_scores, key=role_avg_scores.get)
-        best_score = role_avg_scores[best_role]
-        
-        # 增加一个"安全阀"：如果最高的平均分也极低，说明完全不相关，还是返回 general
-        if best_score < min_avg_similarity:
-            logger.info(f"Best role '{best_role}' only scored {best_score:.3f} (below threshold {min_avg_similarity}). Classifying as 'general'. (Scores: { {k: round(v, 3) for k, v in role_avg_scores.items()} })")
-            return "general"
-
-        logger.info(f"Classified job role as '{best_role}' with score {best_score:.3f}. (All Scores: { {k: round(v, 3) for k, v in role_avg_scores.items()} })")
-        return best_role
-
-    def detect_semantic_anomalies(self, target_job: str, role_baseline_name: str, industry_baseline_name: str = None, similarity_threshold=0.5):
-        """
-        Detects semantic anomalies using vector similarity against pre-defined baselines.
-        """
-        # If the role is classified as general, we skip the analysis as there's no specific baseline for comparison.
-        if role_baseline_name == 'general':
-            logger.info("Job role classified as 'general', skipping semantic anomaly detection.")
-            return []
-
-        if not self.embedding_model:
-            logger.error("Embedding model is not available. Cannot perform semantic analysis.")
-            return []
-        
-        chunks = self.chunk_text(target_job)
-        if not chunks:
-            return []
-
-        chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
-        
-        # --- Baseline Vector Retrieval ---
-        role_baseline_vectors = self.semantic_baselines.get('role', {}).get(role_baseline_name, {}).get("vectors")
-        if role_baseline_vectors is None:
-            logger.warning(f"Role baseline '{role_baseline_name}' not found or has no vectors. Analysis cannot proceed.")
-            return []
-
-        industry_baseline_vectors = self.semantic_baselines.get("industry", {}).get(industry_baseline_name, {}).get("vectors")
-        
-        global_baselines = self.semantic_baselines.get('global', {})
-        global_baseline_vectors = None
-        if global_baselines:
-            global_baseline_name = next(iter(global_baselines))
-            global_baseline_vectors = global_baselines[global_baseline_name].get('vectors')
-
-        # --- Anomaly Detection Loop ---
-        anomalies = []
-        for i, chunk in enumerate(chunks):
-            chunk_vector = chunk_vectors[i].unsqueeze(0)
-            
-            sim_role = self._calculate_max_similarity(chunk_vector, role_baseline_vectors)
-            
-            if sim_role < similarity_threshold:
-                sim_industry = self._calculate_max_similarity(chunk_vector, industry_baseline_vectors)
-                sim_global = self._calculate_max_similarity(chunk_vector, global_baseline_vectors)
-                
-                anomaly_type = "Cross-Role"
-                if sim_global < 0.35:
-                    anomaly_type = "Emerging Tech"
-                elif industry_baseline_name and sim_industry > 0.65 and sim_role < 0.4:
-                    anomaly_type = "Industry-Specific"
-
-                skill_topic = "unknown"
-                if anomaly_type == "Industry-Specific" and industry_baseline_vectors is not None:
-                    skill_topic = self._find_best_match_keyword(chunk, chunk_vector, industry_baseline_vectors, self.semantic_baselines.get("industry", {}).get(industry_baseline_name, {}).get("keywords", []))
-                else:
-                    skill_topic = self._find_best_match_keyword(chunk, chunk_vector, role_baseline_vectors, self.semantic_baselines.get("role", {}).get(role_baseline_name, {}).get("keywords", []))
-
-                template = self.explanation_templates.get(anomaly_type, {})
-                explanation = template.get("explanation", "").format(skill=skill_topic, industry=industry_baseline_name, role=role_baseline_name)
-                business_impact = template.get("business_impact", "").format(skill=skill_topic, industry=industry_baseline_name, role=role_baseline_name)
-
-                anomalies.append({
-                    "chunk": chunk,
-                    "type": anomaly_type,
-                    "explanation": explanation,
-                    "business_impact": business_impact,
-                    "similarity_to_role": round(sim_role, 3),
-                    "similarity_to_industry": round(sim_industry, 3),
-                    "similarity_to_global": round(sim_global, 3),
-                })
-        
-        return anomalies
-
-    def _find_best_match_keyword(self, chunk_text, chunk_vector, baseline_vectors, baseline_keywords):
-        """Finds the most similar keyword from a baseline to a given chunk vector."""
-        if baseline_vectors is None or len(baseline_vectors) == 0 or not baseline_keywords:
-            # As a fallback, try to extract a noun phrase from the chunk
-            doc = self.nlp(chunk_text)
-            for np in doc.noun_chunks:
-                return np.text
-            return "this requirement"
-
-        similarities = util.cos_sim(chunk_vector, baseline_vectors)
-        best_match_index = torch.argmax(similarities).item()
-        return baseline_keywords[best_match_index]
-
-    def _calculate_max_similarity(self, chunk_vector, baseline_vectors):
-        """Helper to calculate max cosine similarity."""
-        if baseline_vectors is None or len(baseline_vectors) == 0:
-            return 0.0
-        similarities = util.cos_sim(chunk_vector, baseline_vectors)
-        return torch.max(similarities).item()
-
-    def calculate_global_idf(self, descriptions: list[str]) -> dict:
-        """
-        Calculates global IDF values from a list of job descriptions.
-        """
-        logger.info("Calculating global IDF from descriptions...")
-
-        # Filter out any empty documents
-        all_texts = [text for text in descriptions if text and len(text.strip()) > 10]
-
-        if len(all_texts) < 5:
-            logger.warning("Not enough documents with keywords to calculate IDF, skipping.")
-            return {}
-
-        vectorizer = TfidfVectorizer(
-            max_features=20000,
-            stop_words=list(self.stop_words),
-            ngram_range=(1, 2),
-            min_df=3,
-            token_pattern=r'(?u)\b[\w-]{2,}\b'  # Correct pattern for words with hyphens
-        )
-        try:
-            vectorizer.fit(all_texts)
-            feature_names = vectorizer.get_feature_names_out()
-            idf_values = vectorizer.idf_
-            idf_dict = dict(zip(feature_names, idf_values))
-            self.global_idf_cache = idf_dict  # Still cache in memory for the current run
-            
-            logger.info(f"IDF calculation complete. Found {len(idf_dict)} terms.")
-            sorted_idf = sorted(idf_dict.items(), key=lambda x: x[1])
-            logger.info(f"Most common terms (low IDF): {[word for word, idf in sorted_idf[:10]]}")
-            return idf_dict
-        except Exception as e:
-            logger.error(f"IDF calculation failed: {e}", exc_info=True)
-            return {}
 
     def classify_job_industry(self, company_name, job_title, description):
-        # ... existing code ...
         cache_key = f"{company_name}_{job_title}"
         if cache_key in self.industry_cache:
             return self.industry_cache[cache_key]
@@ -398,6 +283,43 @@ class EnhancedJobAnomalyDetector:
             classified_industry = 'general'
         self.industry_cache[cache_key] = classified_industry
         return classified_industry
+
+    def detect_semantic_anomalies(self, target_job: str, role_baseline_name: str, industry_baseline_name: str = None, similarity_threshold=0.5):
+        """
+        Detects semantic anomalies using vector similarity against pre-defined baselines.
+        """
+        return self.semantic_anomaly_detector.detect_semantic_anomalies(target_job, role_baseline_name, industry_baseline_name, similarity_threshold)
+
+    def detect_anomalies_dual_corpus(self, target_job, specialist_corpus, general_corpus, 
+                                    job_title="", company_name="", industry=""):
+        return self.legacy_anomaly_detector.detect_anomalies_dual_corpus(target_job, specialist_corpus, general_corpus, job_title, company_name, industry)
+
+    def calculate_global_idf(self, descriptions: list[str]) -> dict:
+        """
+        Calculates global IDF values from a list of job descriptions.
+        """
+        return self.legacy_anomaly_detector.calculate_global_idf(descriptions)
+
+    def _load_spacy_model(self):
+        try:
+            return spacy.load("de_core_news_sm")
+        except OSError:
+            logger.warning("German spaCy model not found, trying English model.")
+            try:
+                return spacy.load("en_core_web_sm")
+            except OSError:
+                logger.error("Please install a spaCy model: python -m spacy download de_core_news_sm")
+                raise
+
+    def _load_embedding_model(self):
+        try:
+            model_name = 'all-MiniLM-L6-v2'
+            model = SentenceTransformer(model_name)
+            logger.info(f"Loaded sentence-transformer model '{model_name}'.")
+            return model, model_name
+        except Exception as e:
+            logger.error(f"Failed to load sentence-transformer model: {e}", exc_info=True)
+            return None, None
 
     def is_generic_word(self, word, idf_threshold=2.5):
         if not self.global_idf_cache:
@@ -500,141 +422,4 @@ class EnhancedJobAnomalyDetector:
             if re.match(pattern, word, re.IGNORECASE):
                 return True
         return False
-
-    def detect_anomalies_dual_corpus(self, target_job, specialist_corpus, general_corpus, 
-                                    job_title="", company_name="", industry=""):
-        if not target_job:
-            return {"specialist_anomalies": [], "industry_markers": [], "metadata": {}}
-        company_terms = self.extract_company_terms(company_name)
-        target_unigrams, target_bigrams = self.advanced_text_preprocessing(
-            target_job, company_terms
-        )
-        specialist_unigrams = []
-        specialist_bigrams = []
-        for job in specialist_corpus:
-            if job and not pd.isna(job):
-                uni, bi = self.advanced_text_preprocessing(job)
-                specialist_unigrams.extend(uni)
-                specialist_bigrams.extend(bi)
-        general_unigrams = []
-        general_bigrams = []
-        for job in general_corpus:
-            if job and not pd.isna(job):
-                uni, bi = self.advanced_text_preprocessing(job)
-                general_unigrams.extend(uni)
-                general_bigrams.extend(bi)
-        specialist_anomalies = self.calculate_anomalies_enhanced(
-            target_unigrams, target_bigrams,
-            specialist_unigrams, specialist_bigrams,
-            job_title, company_name, comparison_type="specialist"
-        )
-        industry_markers = self.calculate_anomalies_enhanced(
-            target_unigrams, target_bigrams,
-            general_unigrams, general_bigrams,
-            job_title, company_name, comparison_type="industry"
-        )
-        return {
-            "specialist_anomalies": specialist_anomalies,
-            "industry_markers": industry_markers,
-            "metadata": {
-                "industry": industry,
-                "specialist_corpus_size": len(specialist_corpus),
-                "general_corpus_size": len(general_corpus),
-                "target_unigrams_count": len(target_unigrams),
-                "target_bigrams_count": len(target_bigrams),
-                "company_terms_filtered": len(company_terms)
-            }
-        }
-
-    def calculate_anomalies_enhanced(self, target_unigrams, target_bigrams, 
-                                    corpus_unigrams, corpus_bigrams,
-                                    job_title, company_name, comparison_type):
-        results = []
-        for word_type, target_words, corpus_words in [
-            ("unigrams", target_unigrams, corpus_unigrams),
-            ("bigrams", target_bigrams, corpus_bigrams)
-        ]:
-            target_freq = Counter(target_words)
-            corpus_freq = Counter(corpus_words)
-            target_total = len(target_words)
-            corpus_total = len(corpus_words)
-            if target_total == 0 or corpus_total == 0:
-                continue
-            for word, count in target_freq.items():
-                target_ratio = count / target_total
-                corpus_count = corpus_freq.get(word, 0)
-                min_corpus_freq = 1 if word_type == "bigrams" else 1
-                if corpus_count < min_corpus_freq:
-                    corpus_ratio = 0.0001
-                else:
-                    corpus_ratio = corpus_count / corpus_total
-                anomaly_ratio = target_ratio / corpus_ratio if corpus_ratio > 0 else 999
-                if comparison_type == "specialist":
-                    min_target_freq = 0.008 if word_type == "bigrams" else 0.004
-                    min_anomaly_ratio = 1.2 if word_type == "bigrams" else 1.5
-                else:
-                    min_target_freq = 0.01 if word_type == "bigrams" else 0.006
-                    min_anomaly_ratio = 2.0 if word_type == "bigrams" else 3.0
-                if (target_ratio >= min_target_freq and 
-                    anomaly_ratio >= min_anomaly_ratio and
-                    count >= 1):
-                    quality_score = self.calculate_quality_score_enhanced(
-                        word, job_title, word_type, comparison_type
-                    )
-                    if quality_score > 0:
-                        results.append({
-                            'word': str(word),
-                            'anomaly_ratio': float(round(anomaly_ratio, 2)),
-                            'target_frequency': float(round(target_ratio * 100, 3)),
-                            'corpus_frequency': float(round(corpus_ratio * 100, 4)),
-                            'target_count': int(count),
-                            'corpus_count': int(corpus_count),
-                            'quality_score': float(quality_score),
-                            'comparison_type': str(comparison_type),
-                            'word_type': str(word_type)
-                        })
-        results.sort(key=lambda x: (x['quality_score'], x['anomaly_ratio']), reverse=True)
-        return results[:8]
-
-    def calculate_quality_score_enhanced(self, word, job_title, word_type, comparison_type):
-        score = 1
-        if self.is_generic_word(word):
-            score -= 3
-            logger.debug(f"Penalizing generic word: {word} (low IDF)")
-        if job_title and word.lower() in job_title.lower():
-            score += 2
-        tech_indicators = [
-            'python', 'java', 'javascript', 'react', 'vue', 'angular', 'node',
-            'aws', 'azure', 'docker', 'kubernetes', 'git', 'sql', 'nosql',
-            'machine', 'learning', 'ai', 'data', 'analytics', 'science',
-            'devops', 'agile', 'scrum', 'api', 'rest', 'graphql',
-            'testing', 'automation', 'ci/cd', 'jenkins', 'terraform'
-        ]
-        if any(tech in word.lower() for tech in tech_indicators):
-            score += 2
-        industry_terms = [
-            'esg', 'sustainable', 'proptech', 'fintech', 'blockchain', 'cryptocurrency',
-            'healthcare', 'medical', 'pharmaceutical', 'biotech',
-            'automotive', 'manufacturing', 'logistics', 'supply',
-            'consulting', 'strategy', 'framework', 'case study',
-            'legal', 'compliance', 'regulatory', 'litigation',
-            'öffentlichkeitsarbeit', 'kommunikation', 'leadership communications',
-            'international', 'global', 'cross border'
-        ]
-        if any(term in word.lower() for term in industry_terms):
-            score += 2
-        if comparison_type == "industry":
-            score += 1
-        if word_type == "bigrams":
-            score += 1
-        if re.search(r'\d', word):
-            score += 0.5
-        explicit_generic = [
-            'digital', 'student', 'kreativ', 'innovative', 'modern',
-            'new', 'current', 'future', 'excellent', 'strong', 'good',
-            'various', 'different', 'multiple', 'general', 'basic'
-        ]
-        if any(generic in word.lower() for generic in explicit_generic):
-            score -= 2
-        return max(0, score)
 

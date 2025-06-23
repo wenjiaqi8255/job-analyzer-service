@@ -55,7 +55,7 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                 # We now use pre-computed baselines.
 
                 # Dynamically classify the role based on the job description.
-                role_baseline_for_job = detector.classify_job_role(description)
+                role_baseline_for_job = detector.classify_job_role(job_title=title, job_description=description)
                 
                 logger.info(f"Analyzing '{title}' with classified role='{role_baseline_for_job}' and industry='{industry}'")
 

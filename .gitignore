@@ -6,6 +6,7 @@ doc/
 .DS_Store
 
 sample_data/
+.specstory/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
