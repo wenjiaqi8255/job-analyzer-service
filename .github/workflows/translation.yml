@@ -39,7 +39,7 @@ jobs:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       run: |
-        python /translation/translation_service.py
+        python translation/translation_service.py
     
     - name: Report completion
       if: always()
