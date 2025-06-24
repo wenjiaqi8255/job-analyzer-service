@@ -42,21 +42,21 @@ class DatabaseManager:
 
         # 上传全局基线
         results['global'] = self._upload_baseline_pair(
-            'global', 'global_baseline', baselines['global']
+            'global', 'global', baselines['global']
         )
 
         # 上传角色基线
         results['roles'] = {}
         for role, baseline_data in baselines['roles'].items():
             results['roles'][role] = self._upload_baseline_pair(
-                'role', f'{role}_baseline', baseline_data
+                'role', role, baseline_data
             )
 
         # 上传行业基线
         results['industries'] = {}
         for industry, baseline_data in baselines['industries'].items():
             results['industries'][industry] = self._upload_baseline_pair(
-                'industry', f'{industry}_baseline', baseline_data
+                'industry', industry, baseline_data
             )
 
         logger.info("✅ 基线数据上传完成")

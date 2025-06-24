@@ -302,13 +302,15 @@ class SemanticClassifier:
         logger.info("🧠 开始分级智能技能分类...")
 
         # 初始化分类结构
+        all_role_keys = set(self.explicit_role_mappings.keys()) | set(self.role_semantic_descriptions.keys())
         role_classifications = {role: {
             'essential': [], 'common': [], 'collaboration': [], 'specializations': []
-        } for role in self.role_semantic_descriptions.keys()}
+        } for role in all_role_keys}
 
+        all_industry_keys = set(self.explicit_industry_mappings.keys()) | set(self.industry_semantic_descriptions.keys())
         industry_classifications = {industry: {
             'core_domain': [], 'regulatory': [], 'business_focus': [], 'unique_requirements': []
-        } for industry in self.industry_semantic_descriptions.keys()}
+        } for industry in all_industry_keys}
 
         # 预计算embeddings
         self._precompute_embeddings()
@@ -360,6 +362,9 @@ class SemanticClassifier:
             # 高置信度角色匹配
             best_role, role_similarity = self._calculate_best_role_match(skill_info)
             if best_role and role_similarity >= self.high_confidence_threshold:
+                if best_role not in role_classifications:
+                    logger.warning(f"Semantic match found for role '{best_role}' but it's not in the classification dictionary. Skipping.")
+                    continue
                 category = self._determine_role_category(skill_info, role_similarity)
                 role_classifications[best_role][category].append(skill)
                 assigned_skills.add(skill)
@@ -369,6 +374,9 @@ class SemanticClassifier:
             # 高置信度行业匹配
             best_industry, industry_similarity = self._calculate_best_industry_match(skill_info)
             if best_industry and industry_similarity >= self.high_confidence_threshold:
+                if best_industry not in industry_classifications:
+                    logger.warning(f"Semantic match found for industry '{best_industry}' but it's not in the classification dictionary. Skipping.")
+                    continue
                 category = self._determine_industry_category(skill_info, industry_similarity)
                 industry_classifications[best_industry][category].append(skill)
                 assigned_skills.add(skill)
@@ -388,6 +396,9 @@ class SemanticClassifier:
             # 中等置信度角色匹配
             best_role, role_similarity = self._calculate_best_role_match(skill_info)
             if best_role and role_similarity >= self.medium_confidence_threshold:
+                if best_role not in role_classifications:
+                    logger.warning(f"Semantic match found for role '{best_role}' but it's not in the classification dictionary. Skipping.")
+                    continue
                 category = self._determine_role_category(skill_info, role_similarity)
                 role_classifications[best_role][category].append(skill)
                 assigned_skills.add(skill)
@@ -397,6 +408,9 @@ class SemanticClassifier:
             # 中等置信度行业匹配
             best_industry, industry_similarity = self._calculate_best_industry_match(skill_info)
             if best_industry and industry_similarity >= self.medium_confidence_threshold:
+                if best_industry not in industry_classifications:
+                    logger.warning(f"Semantic match found for industry '{best_industry}' but it's not in the classification dictionary. Skipping.")
+                    continue
                 category = self._determine_industry_category(skill_info, industry_similarity)
                 industry_classifications[best_industry][category].append(skill)
                 assigned_skills.add(skill)
@@ -415,14 +429,20 @@ class SemanticClassifier:
             best_industry, industry_similarity = self._calculate_best_industry_match(skill_info)
 
             # 选择更好的匹配
-            if role_similarity >= self.low_confidence_threshold and role_similarity > industry_similarity:
-                category = self._determine_role_category(skill_info, role_similarity)
-                role_classifications[best_role][category].append(skill)
-                stats['semantic_role_assigned'] += 1
-            elif industry_similarity >= self.low_confidence_threshold:
-                category = self._determine_industry_category(skill_info, industry_similarity)
-                industry_classifications[best_industry][category].append(skill)
-                stats['semantic_industry_assigned'] += 1
+            if best_role and role_similarity >= self.low_confidence_threshold and role_similarity > industry_similarity:
+                if best_role not in role_classifications:
+                    logger.warning(f"Semantic match found for role '{best_role}' but it's not in the classification dictionary. Skipping.")
+                else:
+                    category = self._determine_role_category(skill_info, role_similarity)
+                    role_classifications[best_role][category].append(skill)
+                    stats['semantic_role_assigned'] += 1
+            elif best_industry and industry_similarity >= self.low_confidence_threshold:
+                if best_industry not in industry_classifications:
+                    logger.warning(f"Semantic match found for industry '{best_industry}' but it's not in the classification dictionary. Skipping.")
+                else:
+                    category = self._determine_industry_category(skill_info, industry_similarity)
+                    industry_classifications[best_industry][category].append(skill)
+                    stats['semantic_industry_assigned'] += 1
             else:
                 # 最终兜底到tech行业
                 industry_classifications['tech']['core_domain'].append(skill)
@@ -470,6 +490,9 @@ class SemanticClassifier:
 
         best_role, best_similarity = None, 0.0
 
+        if not self.role_embeddings:
+            return None, 0.0
+
         for role, role_embedding in self.role_embeddings.items():
             similarity = cosine_similarity([skill_embedding], [role_embedding])[0][0]
             bonus = self._calculate_role_type_bonus(skill_info, role)
@@ -491,6 +514,9 @@ class SemanticClassifier:
             return None, 0.0
 
         best_industry, best_similarity = None, 0.0
+
+        if not self.industry_embeddings:
+            return None, 0.0
 
         for industry, industry_embedding in self.industry_embeddings.items():
             similarity = cosine_similarity([skill_embedding], [industry_embedding])[0][0]
