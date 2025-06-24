@@ -1,16 +1,25 @@
 import logging
 import torch
 from sentence_transformers import util
+from .config import ModelThresholds, PipelineConfig, CacheConfig
+from .embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
 
 class SemanticAnomalyDetector:
-    def __init__(self, embedding_model, semantic_baselines, text_preprocessor, nlp_model):
+    def __init__(self, embedding_model, semantic_baselines, text_preprocessor, nlp_model, thresholds: ModelThresholds, pipeline_config: PipelineConfig, cache_config: CacheConfig):
         self.embedding_model = embedding_model
         self.semantic_baselines = semantic_baselines
         self.text_preprocessor = text_preprocessor
         self.nlp = nlp_model
+        self.thresholds = thresholds
+        
+        self.embedding_processor = BatchEmbeddingProcessor(
+            embedding_model=self.embedding_model,
+            batch_size=pipeline_config.batch_size,
+            cache_size=cache_config.cache_size
+        )
         # self.explanation_templates = {
         #     "Industry-Specific": {
         #         "explanation": "The requirement for '{skill}' is highly specific to the {industry} sector. While unusual for a typical {role} role, it signals a demand for deep industry knowledge.",
@@ -26,10 +35,9 @@ class SemanticAnomalyDetector:
         #     }
         # }
 
-    def detect_semantic_anomalies(self, target_job: str, role_baseline_name: str, 
-                                industry_baseline_name: str = None, similarity_threshold=0.5):
+    def detect_anomalies(self, target_job: str, role_baseline_name: str, industry_baseline_name: str = None):
         """
-        检测语义异常，现在会自动过滤无关内容
+        Detects semantic anomalies by comparing job description chunks against baselines.
         """
         if role_baseline_name == 'general':
             logger.info("Job role classified as 'general', skipping semantic anomaly detection.")
@@ -39,17 +47,21 @@ class SemanticAnomalyDetector:
             logger.error("Embedding model is not available. Cannot perform semantic analysis.")
             return []
         
-        # 使用新的过滤方法
-        chunks = self.text_preprocessor.chunk_and_filter_text(target_job)
+        # This part of the logic is mentioned as a performance bottleneck.
+        # It will be addressed in subsequent refactoring (caching, batching).
+        chunks = self.text_preprocessor.improved_chunking_for_anomaly_detection(target_job)
         
         if not chunks:
-            logger.warning("No relevant chunks after content filtering")
+            logger.warning("No relevant chunks to process.")
             return []
         
-        logger.info(f"Processing {len(chunks)} filtered chunks for anomaly detection")        
+        logger.info(f"Processing {len(chunks)} chunks for anomaly detection")
 
-        chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
-        
+        chunk_vectors = self.embedding_processor.encode_chunks(chunks)
+        if chunk_vectors.numel() == 0:
+            logger.warning("Chunk vectors are empty after encoding, cannot proceed.")
+            return []
+
         role_baseline_vectors = self.semantic_baselines.get('role', {}).get(role_baseline_name, {}).get("vectors")
         if role_baseline_vectors is None:
             logger.warning(f"Role baseline '{role_baseline_name}' has no vectors.")
@@ -62,7 +74,7 @@ class SemanticAnomalyDetector:
         for i, chunk in enumerate(chunks):
             sim_role = self._calculate_max_similarity(chunk_vectors[i].unsqueeze(0), role_baseline_vectors)
             
-            if sim_role < similarity_threshold:
+            if sim_role < self.thresholds.similarity_threshold:
                 anomaly = self._build_anomaly_record(
                     chunk, chunk_vectors[i], sim_role, role_baseline_name, industry_baseline_name, 
                     role_baseline_vectors, industry_baseline_vectors, global_baseline_vectors

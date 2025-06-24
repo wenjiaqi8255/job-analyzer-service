@@ -86,27 +86,22 @@ def fetch_active_semantic_baselines(supabase_client: Client):
 # 在 db_queries.py 中
 def fetch_baseline_vectors(supabase_client: Client, baseline_id: int, model_name: str):
     """
-    Fetches the pre-computed vectors for a specific baseline and embedding model.
-    Returns the skill_vectors dictionary directly.
+    Fetches the pre-computed vector record(s) for a specific baseline and embedding model.
     """
     try:
-        response = supabase_client.table('baseline_vectors').select('vectors_data').eq('baseline_id', baseline_id).eq('embedding_model', model_name).limit(1).execute()
+        response = supabase_client.table('baseline_vectors') \
+            .select('vectors_data') \
+            .eq('baseline_id', baseline_id) \
+            .eq('embedding_model', model_name) \
+            .limit(1) \
+            .execute()
         
         if response.data:
-            vectors_data = response.data[0].get('vectors_data', {})
-            
-            # 提取 skill_vectors 子字典
-            skill_vectors = vectors_data.get('skill_vectors', {})
-            
-            if not skill_vectors:
-                logger.warning(f"No skill_vectors found in vectors_data for baseline_id={baseline_id}")
-                logger.debug(f"Available keys in vectors_data: {list(vectors_data.keys())}")
-            
-            return skill_vectors  # 返回 {skill_name: vector} 字典
+            return response.data  # Return the full list of records, e.g., [{'vectors_data': {...}}]
         else:
             logger.warning(f"No vectors found for baseline_id={baseline_id} and model='{model_name}'")
-            return {}
+            return None
             
     except Exception as e:
         logger.error(f"Error fetching baseline vectors for baseline_id={baseline_id}: {e}", exc_info=True)
-        return {}
+        return None

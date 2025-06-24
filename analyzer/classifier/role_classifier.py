@@ -1,15 +1,17 @@
 import logging
 import torch
 from sentence_transformers import util
+from ..config import ModelThresholds
 
 logger = logging.getLogger(__name__)
 
 
 class RoleClassifier:
-    def __init__(self, embedding_model, semantic_baselines, text_preprocessor):
+    def __init__(self, embedding_model, semantic_baselines, text_preprocessor, thresholds: ModelThresholds):
         self.embedding_model = embedding_model
         self.semantic_baselines = semantic_baselines
         self.text_preprocessor = text_preprocessor
+        self.thresholds = thresholds
         self.role_title_embeddings = {}
         self._precompute_role_title_embeddings()
 
@@ -45,8 +47,7 @@ class RoleClassifier:
             title = title.replace(old, new)
         return title
 
-    def classify_job_role(self, job_title: str = "", job_description: str = "",
-                          min_avg_similarity=0.35, title_weight=0.7) -> str:
+    def classify_job_role(self, job_title: str = "", job_description: str = "") -> str:
         if not self.embedding_model or not self.semantic_baselines.get("role"):
             logger.warning("Cannot classify role due to missing embedding model or baselines.")
             return "general"
@@ -58,15 +59,15 @@ class RoleClassifier:
             logger.debug("No valid title or description scores computed.")
             return "general"
 
-        final_scores = self._weigh_and_combine_scores(title_scores, desc_scores, title_weight)
+        final_scores = self._weigh_and_combine_scores(title_scores, desc_scores, self.thresholds.role_title_weight)
         
         if not final_scores:
             return "general"
 
         best_role, best_score = max(final_scores.items(), key=lambda item: item[1])
 
-        if best_score < min_avg_similarity:
-            logger.info(f"Best role '{best_role}' scored {best_score:.3f} (below threshold {min_avg_similarity}). Classifying as 'general'.")
+        if best_score < self.thresholds.role_similarity_threshold:
+            logger.info(f"Best role '{best_role}' scored {best_score:.3f} (below threshold {self.thresholds.role_similarity_threshold}). Classifying as 'general'.")
             return "general"
         
         logger.info(f"Classified as '{best_role}' with final score {best_score:.3f}")

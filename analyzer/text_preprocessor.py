@@ -2,6 +2,7 @@ import re
 import pandas as pd
 from extractor.industry_keyword_library import INDUSTRY_KEYWORD_LIBRARY
 from .content_filter import ContentFilter
+from typing import List
 
 
 class TextPreprocessor:
@@ -188,59 +189,159 @@ class TextPreprocessor:
     
 
     
-    def advanced_text_preprocessing(self, text, company_terms_to_filter=None):
+    def process_text_for_embedding(self, text: str, chunk_size: int = 200, overlap: int = 50) -> List[List[str]]:
         """
-        高级文本预处理，包括词形还原、过滤停用词、噪音词等
-        company_terms_to_filter: 公司特定词汇
-        bigram_contains_company: 二元组是否包含公司特定词汇
-        unigrams: 一元组
-        bigrams: 二元组
-        valid_tokens: 有效token
-        lemma: 词形还原
+        Processes text into overlapping chunks of lemmas, suitable for embedding models.
+        This is designed to capture local context by creating sliding windows of tokens.
         """
         if not text or pd.isna(text):
-            return [], []
-        if company_terms_to_filter is None:
-            company_terms_to_filter = set()
-        text = str(text)
-        text = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
-        text = re.sub(r'([a-zA-Z])(\d)', r'\1 \2', text)
-        text = re.sub(r'(\d)([a-zA-Z])', r'\1 \2', text)
-        text = re.sub(r'[^\w\s\-/]', ' ', text)
-        text = re.sub(r'\s+', ' ', text)
-        text = text.strip().lower()
-        doc = self.nlp(text)
-        unigrams = []
-        bigrams = []
-        valid_tokens = []
-        for token in doc:
-            if (token.is_punct or token.is_space or
-                    token.text.lower() in self.stop_words or
-                    self.is_noise_pattern(token.text) or
-                    token.pos_ not in self.meaningful_pos):
-                continue
-            
-            if token.text.lower() in company_terms_to_filter:
-                continue
+            return []
 
-            lemma = token.lemma_.lower().strip()
-            
-            if len(lemma) < 3:
-                continue
-
-            valid_tokens.append(lemma)
-            unigrams.append(lemma)
-        for i in range(len(valid_tokens) - 1):
-            bigram = f"{valid_tokens[i]} {valid_tokens[i+1]}"
-            bigram_contains_company = any(
-                company_term in bigram for company_term in company_terms_to_filter
-            )
-            if not bigram_contains_company:
-                bigrams.append(bigram)
-        return unigrams, bigrams
+        # Clean and lemmatize
+        lemmas = [token.lemma_.lower() for token in self.nlp(text) if self._is_meaningful_token(token)]
+        
+        # Create overlapping chunks
+        chunks = []
+        for i in range(0, len(lemmas), chunk_size - overlap):
+            chunk = lemmas[i:i + chunk_size]
+            if chunk:
+                chunks.append(chunk)
+                
+        return chunks
 
     def is_noise_pattern(self, word):
         for pattern in self.noise_patterns:
             if re.match(pattern, word, re.IGNORECASE):
                 return True
-        return False 
+        return False
+
+    def improved_chunking_for_anomaly_detection(self, text: str) -> list[str]:
+        """
+        专为异常检测优化的chunking方法, 结合了多种策略.
+        """
+        # Step 1: 先对整个文本进行初步过滤，去除明显无关的部分
+        # Note: filter_job_requirement_chunks 期望一个chunks列表
+        # 我们将整个文本视为一个chunk进行过滤
+        filtered_text_list = self.content_filter.filter_job_requirement_chunks([text])
+        if not filtered_text_list:
+            return []
+        filtered_text = filtered_text_list[0]
+
+        # Step 2: 应用改进的chunking策略
+        # 基本的句子级别的chunk
+        primary_chunks = self._sentence_level_chunking(filtered_text)
+        
+        # 跨句子的chunk
+        cross_sentence_chunks = self._cross_sentence_chunking(filtered_text)
+
+        # Step 3: 合并并去重
+        all_chunks = primary_chunks + cross_sentence_chunks
+        unique_chunks = list(dict.fromkeys(all_chunks))  # 保留顺序的去重
+
+        # Step 4: 质量过滤
+        final_chunks = [chunk for chunk in unique_chunks if self._is_meaningful_chunk(chunk)]
+
+        return final_chunks
+
+    def _sentence_level_chunking(self, text: str) -> list[str]:
+        """
+        基于句子进行切分 (类似原有的 chunk_text)
+        """
+        if not text or pd.isna(text):
+            return []
+
+        text = re.sub(r'[ \t]+', ' ', text)
+        text = re.sub(r'\n+', '\n', text).strip()
+        
+        chunks = []
+        doc = self.nlp(text)
+        for sent in doc.sents:
+            sent_text = sent.text.strip()
+            # 使用更有意义的判断
+            if len(sent_text.split()) >= 3:
+                chunks.append(sent_text)
+        return chunks
+
+    def _cross_sentence_chunking(self, text: str) -> list[str]:
+        """
+        创建跨越相邻句子的chunk，以捕捉上下文关系.
+        """
+        doc = self.nlp(text)
+        sentences = [sent.text.strip() for sent in doc.sents if sent.text.strip()]
+        
+        chunks = []
+        for i in range(len(sentences) - 1):
+            sent1 = sentences[i]
+            sent2 = sentences[i+1]
+            
+            # 检查两个句子是否可能相关
+            if self._are_related_requirements(sent1, sent2):
+                combined = f"{sent1} {sent2}"
+                # 避免组合过长的chunk
+                if len(combined.split()) <= 25:
+                    chunks.append(combined)
+        return chunks
+
+    def _are_related_requirements(self, sent1: str, sent2: str) -> bool:
+        """
+        判断两个相邻的句子是否是相关的技能/要求描述.
+        """
+        # 关键词可以更丰富一些
+        tech_keywords = [
+            'experience', 'proficiency', 'knowledge', 'skills', 'required', 
+            'preferred', 'familiar', 'background', 'understanding', 'degree',
+            'bachelor', 'master', 'phd', 'qualification', 'bonus'
+        ]
+        
+        s1_lower = sent1.lower()
+        s2_lower = sent2.lower()
+
+        s1_has_tech = any(keyword in s1_lower for keyword in tech_keywords)
+        s2_has_tech = any(keyword in s2_lower for keyword in tech_keywords)
+        
+        # 规则1: 如果两个句子都包含技术/要求关键词，则可能相关
+        if s1_has_tech and s2_has_tech:
+            return True
+            
+        # 规则2: 如果第一句以冒号结尾，通常是列表的开始
+        if sent1.endswith(':'):
+            return True
+        
+        # 规则3: 如果两个句子都比较短，且缺乏动词，可能是技能列表的一部分
+        s1_words = len(sent1.split())
+        s2_words = len(sent2.split())
+        if s1_words < 10 and s2_words < 10:
+            # 这是一个简化的检查，可以做得更复杂
+            # 比如检查是否存在动词
+            doc1 = self.nlp(sent1)
+            doc2 = self.nlp(sent2)
+            s1_has_verb = any(token.pos_ == 'VERB' for token in doc1)
+            s2_has_verb = any(token.pos_ == 'VERB' for token in doc2)
+            if not s1_has_verb and not s2_has_verb:
+                return True
+
+        return False
+
+    def _is_meaningful_chunk(self, chunk: str) -> bool:
+        """
+        判断一个chunk是否有足够的分析价值.
+        """
+        words = chunk.split()
+        
+        # 长度过滤
+        if len(words) < 3 or len(words) > 30:
+            return False
+            
+        # 技术背景词检查
+        tech_context_words = [
+            'experience', 'skills', 'knowledge', 'proficiency', 'familiar', 'expert', 
+            'required', 'preferred', 'background', 'understanding', 'tools'
+        ]
+        has_tech_context = any(word in chunk.lower() for word in tech_context_words)
+        
+        # 实质性内容检查 (避免都是停用词或通用词)
+        # 使用正则表达式匹配包含字母的单词
+        meaningful_words = len(re.findall(r'\b[a-zA-Z]{3,}\b', chunk))
+
+        # 如果包含技术背景词，或者有足够多的实质性单词，则认为是有意义的
+        return has_tech_context or meaningful_words >= 3 
