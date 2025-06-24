@@ -12,6 +12,9 @@ class PipelineConfig:
     # 模型配置
     classification_model: str = 'MohammedDhiyaEddine/job-skill-sentence-transformer-tsdae'
     backup_model: str = 'all-MiniLM-L6-v2'
+
+    # 新增
+    semantic_config_dir: str = "skill_pipeline/pipeline/config"  # 配置文件目录
     
     # 分级阈值配置 - 更严格的阈值设置
     high_confidence_threshold: float = 0.75  # 高置信度阈值

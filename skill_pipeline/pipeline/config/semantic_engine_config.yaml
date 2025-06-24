@@ -1,0 +1,15 @@
+semantic_engine:
+  backup_model: sentence-transformers/paraphrase-MiniLM-L6-v2
+  bonus_weights:
+    explicit_keyword_match: 0.25
+    industry_role_alignment: 0.1
+    skill_type_match: 0.15
+  category_assignment_rules:
+    common_threshold: 0.75
+    essential_threshold: 0.85
+    specialization_threshold: 0.65
+  confidence_thresholds:
+    high: 0.75
+    low: 0.35
+    medium: 0.55
+  embedding_model: sentence-transformers/all-MiniLM-L6-v2

@@ -1,0 +1,746 @@
+roles:
+  auditor:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - excel
+      - audit_software
+      - sap
+      - quickbooks
+      - data_analytics_tools
+      essential:
+      - financial_auditing
+      - compliance_auditing
+      - risk_assessment
+      - internal_controls
+      - audit_procedures
+      - financial_analysis
+      - regulatory_compliance
+      - documentation
+      - analytical_thinking
+      - attention_to_detail
+      - professional_skepticism
+    related_industries: []
+    semantic_description: financial auditing compliance assessment risk evaluation
+      internal controls regulatory compliance analytical skills attention to detail
+      documentation professional skepticism financial analysis
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  backend_developer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - docker
+      - kubernetes
+      - redis
+      - elasticsearch
+      essential:
+      - python
+      - java
+      - nodejs
+      - c#
+      - php
+      - ruby
+      - go
+      - api_development
+      - rest_api
+      - graphql
+      - microservices
+      - database_design
+      - sql
+      - mongodb
+      - postgresql
+      - mysql
+    related_industries: []
+    semantic_description: "Backend software development focusing on server-side logic,\
+      \ APIs, \n            databases, and system architecture. Building scalable,\
+      \ secure, and performant backend systems \n            that power web and mobile\
+      \ applications."
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  business_consultant:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - powerpoint
+      - excel
+      - tableau
+      - salesforce
+      - microsoft_project
+      essential:
+      - business_analysis
+      - strategic_planning
+      - process_optimization
+      - stakeholder_management
+      - market_research
+      - financial_analysis
+      - change_management
+      - presentation_skills
+      - client_relationship_management
+      - problem_solving
+      - industry_expertise
+    related_industries: []
+    semantic_description: business analysis strategic planning process optimization
+      management consulting problem solving stakeholder engagement market research
+      financial analysis change management organizational improvement
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  cloud_engineer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - python
+      - bash
+      - networking
+      - monitoring
+      essential:
+      - aws
+      - azure
+      - google_cloud
+      - docker
+      - kubernetes
+      - terraform
+      - cloudformation
+      - serverless
+      - lambda
+      - cloud_architecture
+      - cloud_security
+      - cost_optimization
+    related_industries: []
+    semantic_description: cloud infrastructure platforms scalability distributed computing
+      serverless architecture container orchestration infrastructure as code cost
+      optimization multi-cloud strategy disaster recovery
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  content_creator:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - canva
+      - hootsuite
+      - buffer
+      - wordpress
+      - google_analytics
+      essential:
+      - adobe_creative_suite
+      - video_editing
+      - copywriting
+      - content_strategy
+      - social_media_management
+      - brand_awareness
+      - storytelling
+      - visual_design
+      - photography
+      - content_planning
+      - seo_content_writing
+      - multimedia_production
+    related_industries: []
+    semantic_description: content creation writing video production photography graphic
+      design storytelling brand voice social media content multimedia production creative
+      strategy audience engagement editorial planning
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  customer_support_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - zendesk
+      - freshdesk
+      - intercom
+      - salesforce_service_cloud
+      - livechat
+      essential:
+      - customer_service
+      - technical_support
+      - issue_resolution
+      - multilingual_communication
+      - empathy
+      - patience
+      - active_listening
+      - documentation
+      - escalation_management
+      - product_knowledge
+      - troubleshooting
+      - customer_retention
+    related_industries: []
+    semantic_description: customer service technical support issue resolution communication
+      skills empathy problem solving product knowledge escalation management customer
+      satisfaction retention helpdesk management
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  cybersecurity_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - kali_linux
+      - metasploit
+      - wireshark
+      - burp_suite
+      - nmap
+      essential:
+      - penetration_testing
+      - vulnerability_assessment
+      - incident_response
+      - security_auditing
+      - threat_modeling
+      - malware_analysis
+      - network_security
+      - web_application_security
+      - cryptography
+      - security_frameworks
+      - iso_27001
+      - nist_framework
+    related_industries: []
+    semantic_description: information security threat analysis vulnerability assessment
+      penetration testing incident response security frameworks compliance risk management
+      network security malware analysis
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  data_scientist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - tableau
+      - power_bi
+      - excel
+      - spark
+      - hadoop
+      essential:
+      - python
+      - r
+      - sql
+      - pandas
+      - numpy
+      - scikit_learn
+      - tensorflow
+      - pytorch
+      - jupyter
+      - matplotlib
+      - seaborn
+      - plotly
+      - machine_learning
+      - deep_learning
+      - statistical_analysis
+      - data_visualization
+      - data_mining
+      - predictive_modeling
+    related_industries: []
+    semantic_description: "Data analysis, statistical modeling, machine learning,\
+      \ and predictive analytics. \n            Extract insights from large datasets\
+      \ using programming, mathematics, and domain expertise. \n            Build\
+      \ predictive models, conduct A/B testing, and communicate findings to stakeholders."
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  devops_engineer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - linux
+      - bash
+      - python
+      - monitoring
+      - logging
+      essential:
+      - docker
+      - kubernetes
+      - jenkins
+      - gitlab_ci
+      - github_actions
+      - terraform
+      - ansible
+      - chef
+      - puppet
+      - aws
+      - azure
+      - gcp
+      - continuous_integration
+      - continuous_deployment
+      - infrastructure_as_code
+    related_industries: []
+    semantic_description: continuous integration deployment automation infrastructure
+      orchestration containerization monitoring configuration management release management
+      pipeline optimization scalability reliability
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  digital_marketing_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - adobe_creative_suite
+      - canva
+      - hootsuite
+      - buffer
+      essential:
+      - google_ads
+      - facebook_ads
+      - google_analytics
+      - social_media_marketing
+      - seo
+      - sem
+      - content_marketing
+      - email_marketing
+      - instagram_marketing
+      - linkedin_marketing
+      - twitter_marketing
+      - youtube_marketing
+      - google_tag_manager
+      - facebook_pixel
+      - mailchimp
+      - hubspot
+    related_industries: []
+    semantic_description: digital marketing campaigns social media advertising search
+      engine optimization content marketing email marketing conversion optimization
+      performance marketing brand management customer acquisition
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  education_trainer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - moodle
+      - blackboard
+      - zoom
+      - microsoft_teams
+      - articulate_storyline
+      essential:
+      - curriculum_development
+      - instructional_design
+      - adult_learning_principles
+      - assessment_evaluation
+      - e_learning_development
+      - training_delivery
+      - educational_technology
+      - learning_management_systems
+      - pedagogy
+      - facilitation
+    related_industries: []
+    semantic_description: education training curriculum development instructional
+      design learning assessment adult education professional development knowledge
+      transfer skills development training delivery program evaluation
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  embedded_systems_developer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - arduino
+      - raspberry_pi
+      - keil
+      - iar_embedded_workbench
+      - oscilloscope
+      essential:
+      - c_programming
+      - cpp_programming
+      - microcontroller_programming
+      - real_time_systems
+      - embedded_c
+      - hardware_integration
+      - firmware_development
+      - debugging
+      - protocol_implementation
+      - low_level_programming
+      - system_architecture
+    related_industries: []
+    semantic_description: embedded software development microcontroller programming
+      real-time systems hardware integration firmware development low-level programming
+      system optimization debugging protocol implementation
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  frontend_web_developer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - figma
+      - sketch
+      - git
+      - vscode
+      essential:
+      - html
+      - css
+      - javascript
+      - react
+      - angular
+      - vue
+      - typescript
+      - sass
+      - less
+      - webpack
+      - npm
+      - yarn
+      - responsive_design
+      - cross_browser_compatibility
+    related_industries: []
+    semantic_description: "Frontend web development focusing on user interface implementation,\
+      \ \n            responsive design, and interactive user experiences. JavaScript\
+      \ frameworks, HTML/CSS, \n            and modern web technologies for building\
+      \ engaging web applications."
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  hr_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - personio
+      - workday
+      - bamboohr
+      - linkedin_recruiter
+      - xing
+      - successfactors
+      essential:
+      - recruitment
+      - interviewing
+      - talent_acquisition
+      - employee_relations
+      - performance_management
+      - payroll_management
+      - compliance
+      - onboarding
+      - training_development
+      - hr_analytics
+      - labor_law
+      - compensation_benefits
+    related_industries: []
+    semantic_description: human resources recruitment talent acquisition employee
+      relations performance management training development compensation benefits
+      compliance organizational development succession planning
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  office_administrator:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - microsoft_office
+      - google_workspace
+      - calendar_management
+      - quickbooks
+      essential:
+      - administrative_support
+      - data_entry
+      - filing_systems
+      - appointment_scheduling
+      - correspondence
+      - record_keeping
+      - office_management
+      - vendor_coordination
+      - expense_tracking
+      - meeting_coordination
+      - document_preparation
+    related_industries: []
+    semantic_description: administrative support office management data entry scheduling
+      coordination documentation record keeping vendor management meeting coordination
+      executive assistance workflow optimization
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  operations_manager:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - erp_systems
+      - sap
+      - oracle
+      - microsoft_project
+      - lean_six_sigma
+      essential:
+      - operations_management
+      - process_improvement
+      - supply_chain_management
+      - budget_management
+      - team_leadership
+      - performance_monitoring
+      - logistics_coordination
+      - inventory_management
+      - vendor_management
+      - cost_optimization
+    related_industries: []
+    semantic_description: operations management process improvement supply chain coordination
+      team leadership performance monitoring quality control resource optimization
+      logistics management vendor relations cost control
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  physiotherapist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - emr_systems
+      - scheduling_software
+      - billing_software
+      - medical_devices
+      essential:
+      - physical_therapy
+      - rehabilitation_techniques
+      - anatomy_knowledge
+      - patient_assessment
+      - treatment_planning
+      - manual_therapy
+      - exercise_prescription
+      - patient_education
+      - medical_documentation
+      - healthcare_compliance
+      - therapeutic_modalities
+    related_industries: []
+    semantic_description: physical therapy rehabilitation patient assessment treatment
+      planning manual therapy exercise prescription injury prevention pain management
+      mobility improvement therapeutic techniques patient education
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  project_manager:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - microsoft_project
+      - asana
+      - trello
+      - monday_com
+      - slack
+      essential:
+      - agile
+      - scrum
+      - project_management
+      - jira
+      - confluence
+      - kanban
+      - waterfall
+      - risk_management
+      - stakeholder_management
+      - budget_management
+      - timeline_management
+      - resource_planning
+    related_industries: []
+    semantic_description: project coordination planning scheduling resource management
+      stakeholder communication risk assessment team leadership agile methodology
+      delivery management budget control
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  quality_assurance_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - jira
+      - test_rail
+      - quality_center
+      - minitab
+      - six_sigma
+      essential:
+      - quality_control
+      - testing_methodologies
+      - iso_standards
+      - process_improvement
+      - root_cause_analysis
+      - documentation
+      - audit_procedures
+      - risk_assessment
+      - compliance_management
+      - statistical_analysis
+      - continuous_improvement
+    related_industries: []
+    semantic_description: software testing quality control test automation manual
+      testing performance testing security testing user acceptance testing defect
+      management test planning quality metrics process improvement
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  social_media_manager:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - hootsuite
+      - buffer
+      - sprout_social
+      - canva
+      - later
+      - socialbakers
+      essential:
+      - social_media_strategy
+      - content_creation
+      - community_management
+      - social_media_analytics
+      - influencer_marketing
+      - paid_social_advertising
+      - brand_management
+      - customer_engagement
+      - crisis_management
+      - trend_analysis
+    related_industries: []
+    semantic_description: social media strategy community management content planning
+      audience engagement influencer marketing social analytics campaign management
+      brand awareness crisis communication trend analysis
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  social_worker:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - case_management_software
+      - microsoft_office
+      - database_management
+      essential:
+      - case_management
+      - counseling
+      - social_services
+      - crisis_intervention
+      - advocacy
+      - community_outreach
+      - resource_coordination
+      - documentation
+      - assessment_skills
+      - ethical_practice
+      - cultural_competency
+      - family_support
+    related_industries: []
+    semantic_description: social services case management counseling advocacy community
+      outreach crisis intervention family support resource coordination mental health
+      assessment cultural competency ethical practice
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  ui_ux_designer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      exclude_categories:
+      - programming_language
+      - database
+      exclude_skills:
+      - python
+      - java
+      - sql
+      - backend_development
+    explicit_skills:
+      common:
+      - adobe_creative_suite
+      - canva
+      - miro
+      - figjam
+      essential:
+      - figma
+      - sketch
+      - adobe_xd
+      - adobe_photoshop
+      - adobe_illustrator
+      - invision
+      - principle
+      - framer
+      - zeplin
+      - marvel
+      - user_interface_design
+      - user_experience_design
+      - ui_design
+      - ux_design
+      - wireframing
+      - prototyping
+      - user_research
+      - usability_testing
+      - interaction_design
+      - visual_design
+      - design_systems
+    related_industries: []
+    semantic_description: "User interface and user experience design focusing on visual\
+      \ design, \n            interaction design, usability testing, wireframing,\
+      \ prototyping, design systems, \n            and user research. Creative problem-solving\
+      \ for digital products and user-centered design methodologies."
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7

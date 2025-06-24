@@ -1,0 +1,908 @@
+industries:
+  administrative_support:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - administrative
+      - support_services
+      - office_management
+      - executive_assistant
+      - virtual_assistant
+      - data_entry
+      - customer_service
+      - call_center
+      - help_desk
+      - technical_support
+      - documentation
+      - filing
+      - scheduling
+    related_roles: []
+    semantic_description: administrative support office management clerical services
+      data entry scheduling coordination customer service executive assistance
+  advertising_marketing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - advertising
+      - marketing
+      - digital_marketing
+      - performance_marketing
+      - brand_management
+      - campaign_management
+      - creative_services
+      - media_planning
+      - programmatic_advertising
+      - ad_tech
+      - mar_tech
+      - seo
+      - sem
+      - social_media_marketing
+      - content_marketing
+      - influencer_marketing
+      - affiliate_marketing
+      - email_marketing
+      - marketing_automation
+      - lead_generation
+      - conversion_optimization
+    related_roles: []
+    semantic_description: advertising marketing digital campaigns brand management
+      creative services media planning performance marketing customer acquisition
+  automotive:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - automotive
+      - car
+      - vehicle
+      - bmw
+      - mercedes
+      - porsche
+      - audi
+      - volkswagen
+      - mobility
+      - transport
+      - automotive_engineering
+      - vehicle_dynamics
+      - powertrain
+      - electric_vehicle
+      - ev
+      - autonomous_driving
+      - adas
+      - connected_car
+      - car_sharing
+      - ride_sharing
+      - micromobility
+      - battery_technology
+      - charging_infrastructure
+      - automotive_software
+      - cariad
+      - volkswagen_digital
+      - embedded_automotive
+      - autosar
+      - can_bus
+      - lin_bus
+      - automotive_ethernet
+      - functional_safety
+      - cybersecurity_automotive
+      - over_the_air_updates
+      - vehicle_to_everything
+      - v2x
+      - lidar
+      - radar
+      - computer_vision_automotive
+      regulatory:
+      - can_bus
+      - autosar
+      - iso_26262
+      - automotive_safety
+      - euro_ncap
+    related_roles: []
+    semantic_description: automotive manufacturing vehicle development transportation
+      mobility electric vehicles autonomous driving powertrain engineering automotive
+      software connected vehicles supply chain
+  biotechnology:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - biotech
+      - biotechnology_research
+      - life_sciences
+      - genetics
+      - molecular_biology
+      - cell_biology
+      - biochemistry
+      - bioinformatics
+      - drug_discovery
+      - clinical_trials
+      - pharmaceutical_research
+      - medical_devices
+      - genomics
+      - proteomics
+      - crispr
+      - gene_therapy
+      - immunotherapy
+      - personalized_medicine
+      - precision_medicine
+      regulatory:
+      - fda
+      - ema
+      - gcp
+      - gmp
+      - ich_guidelines
+      - regulatory_affairs
+      - clinical_data_management
+      - pharmacovigilance
+      - medical_writing
+    related_roles: []
+    semantic_description: biotechnology life sciences genetics molecular biology drug
+      discovery clinical research bioinformatics medical research pharmaceutical development
+  consulting:
+    domain_keywords: []
+    explicit_skills:
+      business_focus:
+      - pwc
+      - deloitte
+      - ey
+      - kpmg
+      - accenture
+      - capgemini
+      core_domain:
+      - consulting
+      - mckinsey
+      - bcg
+      - bain
+      - strategy
+      - consultant
+      - beratung
+      - strategieberatung
+      - unternehmensberatung
+      - strategy_consulting
+      - management_consulting
+      - digital_transformation
+      - business_process_optimization
+      - change_management
+      - organizational_design
+      - market_research
+      - competitive_analysis
+      - case_study
+      - framework
+      - project_management
+      - stakeholder_management
+      - process_reengineering
+      - lean_consulting
+      - agile_transformation
+      - design_thinking
+      - innovation_management
+    related_roles: []
+    semantic_description: "Strategic business consulting, management consulting, digital\
+      \ transformation, \n            and organizational change. Problem-solving for\
+      \ complex business challenges, \n            process optimization, and strategic\
+      \ planning across various industries."
+  defense_aerospace:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - defense
+      - aerospace
+      - space_manufacturing
+      - military_technology
+      - avionics
+      - radar_systems
+      - satellite_technology
+      - missile_systems
+      - cybersecurity_defense
+      - intelligence
+      - surveillance
+      - reconnaissance
+      - embedded_software
+      - real_time_systems
+      - safety_critical_systems
+      - flight_control
+      - navigation_systems
+      - communication_systems
+      regulatory:
+      - itar
+      - ear
+      - security_clearance
+      - nato_standards
+      - mil_std
+      - do_178c
+      - do_254
+      - iso_26262
+    related_roles: []
+    semantic_description: defense aerospace military technology aviation systems satellite
+      technology security clearance government contracts space exploration
+  edge_computing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - edge_computing
+      - fog_computing
+      - distributed_computing
+      - real_time_processing
+      - low_latency
+      - edge_ai
+      - edge_ml
+      - iot_gateway
+      - edge_devices
+      - embedded_systems
+      - network_optimization
+      - content_delivery_network
+      - cdn
+    related_roles: []
+    semantic_description: edge computing distributed systems real-time processing
+      IoT connectivity low latency data processing network optimization
+  energy:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - energy
+      - renewable
+      - solar
+      - wind
+      - oil
+      - gas
+      - utilities
+      - power
+      - nuclear
+      - sustainability
+      - renewable_energy
+      - solar_energy
+      - wind_energy
+      - energy_storage
+      - smart_grid
+      - power_systems
+      - electrical_engineering
+      - energy_management
+    related_roles: []
+    semantic_description: energy renewable energy oil gas utilities power generation
+      sustainability clean technology energy storage smart grid nuclear energy environmental
+      solutions
+  extended_reality:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - augmented_reality
+      - ar
+      - virtual_reality
+      - vr
+      - mixed_reality
+      - mr
+      - extended_reality
+      - xr
+      - computer_graphics
+      - 3d_modeling
+      - game_engines
+      - spatial_computing
+      - hand_tracking
+      - eye_tracking
+      - haptic_feedback
+      - immersive_experiences
+      - metaverse
+    related_roles: []
+    semantic_description: extended reality virtual reality augmented reality mixed
+      reality immersive technology spatial computing metaverse
+  facilities_management:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - facilities_management
+      - building_management
+      - maintenance
+      - hvac
+      - security_systems
+      - cleaning_services
+      - landscaping
+      - property_maintenance
+      - space_planning
+      - workplace_services
+      - energy_management
+      - sustainability_management
+      - vendor_management
+    related_roles: []
+    semantic_description: facilities management building operations maintenance property
+      services workplace solutions energy management space planning
+  finance:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - bank
+      - financial
+      - investment
+      - finance
+      - asset
+      - trading
+      - fund
+      - capital
+      - fintech
+      - banking
+      - wealth
+      - portfolio
+      - credit
+      - investment_banking
+      - asset_management
+      - portfolio_management
+      - risk_management
+      - derivatives
+      - equity
+      - bonds
+      - fixed_income
+      - forex
+      - commodities
+      - quantitative_analysis
+      - financial_modeling
+      - valuation
+      - due_diligence
+      - corporate_finance
+      - private_banking
+      - wealth_management
+      - algorithmic_trading
+      - high_frequency_trading
+      - structured_products
+      - capital_markets
+      regulatory:
+      - basel
+      - mifid
+      - solvency
+      - ifrs
+      - gaap
+      - var
+      - stress_testing
+      - credit_risk
+      - market_risk
+      - operational_risk
+      - compliance
+      - audit
+      - kyc
+      - aml
+      - fatca
+      - crs
+      - prudential_regulation
+      - liquidity_risk
+      unique_requirements:
+      - esg
+      - sustainable
+      - risk
+      - green_finance
+      - impact_investing
+    related_roles: []
+    semantic_description: "Financial services including banking, investment management,\
+      \ trading, \n            fintech, and wealth management. Risk assessment, financial\
+      \ analysis, \n            regulatory compliance, and financial technology innovation."
+  healthcare:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - health
+      - medical
+      - pharmaceutical
+      - biotech
+      - clinical
+      - patient
+      - hospital
+      - healthcare
+      - medicine
+      - clinical_research
+      - medical_devices
+      - biotechnology
+      - clinical_trials
+      - drug_discovery
+      - medical_writing
+      - bioinformatics
+      - genomics
+      - proteomics
+      - digital_health
+      - telemedicine
+      - health_tech
+      - medtech
+      - nursing
+      - physiotherapy
+      - occupational_therapy
+      - radiology
+      - pathology
+      - cardiology
+      - oncology
+      - neurology
+      - psychiatry
+      - emergency_medicine
+      - surgery
+      - anesthesiology
+      - pediatrics
+      - geriatrics
+      - public_health
+      - epidemiology
+      - health_economics
+      regulatory:
+      - healthcare_compliance
+      - hipaa
+      - fda_regulations
+      - fda
+      - ema
+      - gcp
+      - gmp
+      - regulatory_affairs
+      - pharmacovigilance
+      - medical_imaging
+      - mdcg
+      - mdr
+      - ivdr
+    related_roles: []
+    semantic_description: healthcare medical services clinical research pharmaceutical
+      biotechnology medical devices patient care digital health telemedicine health
+      technology regulatory compliance
+  individual_family_services:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - social_work
+      - family_services
+      - counseling
+      - therapy
+      - mental_health
+      - addiction_treatment
+      - child_welfare
+      - elderly_care
+      - disability_services
+      - community_outreach
+      - case_management
+      - crisis_intervention
+      - support_groups
+    related_roles: []
+    semantic_description: social services family support counseling mental health
+      community outreach welfare services case management crisis intervention
+  internet_publishing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - digital_publishing
+      - content_management
+      - web_publishing
+      - online_media
+      - digital_content
+      - cms
+      - wordpress
+      - drupal
+      - seo_content
+      - editorial
+      - copywriting
+      - content_strategy
+      - social_media_content
+      - video_content
+      - podcast_production
+    related_roles: []
+    semantic_description: digital publishing online content web publishing content
+      management SEO digital media editorial services online marketing
+  law:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - law
+      - legal
+      - attorney
+      - lawyer
+      - litigation
+      - compliance
+      - regulatory
+      - recht
+      - rechtsanwalt
+      - kanzlei
+      - jurist
+      - contract_law
+      - corporate_law
+      - intellectual_property
+      - ip
+      - patent
+      - trademark
+      - copyright
+      - due_diligence
+      - merger
+      - acquisition
+      - m&a
+      - antitrust
+      - competition_law
+      - employment_law
+      - labor_law
+      regulatory:
+      - gdpr
+      - data_protection
+      - privacy
+    related_roles: []
+    semantic_description: legal services litigation corporate law intellectual property
+      compliance regulatory affairs contract law employment law mergers acquisitions
+      dispute resolution legal research
+  manufacturing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - manufacturing
+      - production
+      - industrial
+      - factory
+      - assembly
+      - quality
+      - lean
+      - operations
+      - industry_4.0
+      - smart_manufacturing
+      - iot
+      - industrial_iot
+      - iiot
+      - automation
+      - robotics
+      - cobots
+      - digital_twin
+      - predictive_maintenance
+      - supply_chain
+      - lean_manufacturing
+      - six_sigma
+      - kaizen
+      - erp
+      - mes
+      - scada
+      - plc
+      - hmi
+      - opc_ua
+      - additive_manufacturing
+      - 3d_printing
+      - cnc_machining
+      - welding
+      - injection_molding
+      - extrusion
+      - stamping
+      - forging
+      - casting
+      - quality_control
+      - statistical_process_control
+      - iso_9001
+      - continuous_improvement
+      - tpm
+      - overall_equipment_effectiveness
+    related_roles: []
+    semantic_description: manufacturing production industrial operations quality control
+      supply chain lean manufacturing automation robotics process optimization inventory
+      management
+  market_research:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - market_research
+      - consumer_insights
+      - data_analytics
+      - survey_research
+      - focus_groups
+      - statistical_analysis
+      - business_intelligence
+      - competitive_intelligence
+      - trend_analysis
+      - customer_research
+      - product_research
+      - brand_research
+      - user_experience_research
+      - ethnographic_research
+    related_roles: []
+    semantic_description: market research consumer insights data analysis competitive
+      intelligence trend analysis survey research business intelligence
+  media:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - media
+      - publishing
+      - journalism
+      - content
+      - editorial
+      - marketing
+      - communication
+      - pr
+      - öffentlichkeitsarbeit
+      - digital_marketing
+      - performance_marketing
+      - programmatic_advertising
+      - ad_tech
+      - mar_tech
+      - seo
+      - sem
+      - social_media_marketing
+      - content_marketing
+      - influencer_marketing
+      - affiliate_marketing
+      - email_marketing
+      - crm
+      - customer_segmentation
+      - attribution_modeling
+      - marketing_automation
+    related_roles: []
+    semantic_description: media entertainment publishing journalism content creation
+      broadcasting digital media advertising marketing communications creative services
+      audience engagement
+  personal_care_manufacturing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - cosmetics
+      - skincare
+      - haircare
+      - fragrance
+      - beauty_products
+      - personal_hygiene
+      - wellness_products
+      - luxury_goods
+      - product_formulation
+      - regulatory_cosmetics
+      - packaging_design
+      - brand_management
+      - retail_beauty
+      - e_commerce_beauty
+    related_roles: []
+    semantic_description: personal care cosmetics beauty products consumer goods product
+      formulation manufacturing retail distribution
+  primary_secondary_education:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - teaching
+      - education
+      - curriculum_development
+      - pedagogy
+      - classroom_management
+      - educational_technology
+      - e_learning
+      - student_assessment
+      - special_education
+      - language_teaching
+      - stem_education
+      - arts_education
+      - physical_education
+      - educational_administration
+      - school_counseling
+    related_roles: []
+    semantic_description: K-12 education primary school secondary school teaching
+      curriculum student development educational administration
+  quantum_computing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - quantum_computing
+      - quantum_algorithms
+      - quantum_mechanics
+      - quantum_information
+      - quantum_cryptography
+      - quantum_sensors
+      - quantum_simulation
+      - quantum_machine_learning
+      - qiskit
+      - cirq
+      - quantum_annealing
+      - quantum_error_correction
+      - quantum_supremacy
+      - quantum_advantage
+      - nisq
+    related_roles: []
+    semantic_description: quantum computing quantum physics information technology
+      advanced computing quantum algorithms scientific research
+  real_estate:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - real_estate
+      - property
+      - immobilien
+      - proptech
+      - construction
+      - building
+      - development
+      - housing
+      - property_management
+      - facility_management
+      - smart_building
+      - building_automation
+      - energy_management
+      - rental_platform
+      - property_valuation
+      - mortgage_tech
+      - construction_tech
+    related_roles: []
+    semantic_description: real estate property development construction building management
+      facility management proptech smart buildings energy efficiency urban planning
+      architectural design
+  retail:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - retail
+      - ecommerce
+      - sales
+      - customer
+      - store
+      - merchandise
+      - shopping
+      - consumer
+      - e-commerce
+      - online_marketplace
+      - dropshipping
+      - omnichannel
+      - customer_experience
+      - personalization
+      - recommendation_engine
+      - inventory_management
+      - warehouse_management
+      - logistics
+      - fulfillment
+      - payment_gateway
+      - checkout_optimization
+      - conversion_rate_optimization
+    related_roles: []
+    semantic_description: retail sales customer service merchandising inventory management
+      e-commerce omnichannel shopping experience brand management customer engagement
+      supply chain
+  space_technology:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - space_technology
+      - satellite_systems
+      - space_exploration
+      - rocket_technology
+      - orbital_mechanics
+      - space_communications
+      - earth_observation
+      - gps
+      - gnss
+      - constellation_management
+      - space_debris
+      - asteroid_mining
+      - mars_exploration
+      - iss
+      - cubesat
+      - smallsat
+      - launch_systems
+    related_roles: []
+    semantic_description: space technology aerospace satellite systems space exploration
+      orbital mechanics spacecraft design space commerce
+  sporting_goods:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - sports_equipment
+      - athletic_wear
+      - outdoor_gear
+      - fitness_equipment
+      - sports_technology
+      - performance_analytics
+      - sports_marketing
+      - athlete_endorsements
+      - product_design
+      - materials_engineering
+      - sports_science
+      - biomechanics
+    related_roles: []
+    semantic_description: sporting goods athletic equipment fitness products sports
+      retail performance technology sports marketing active lifestyle
+  sustainability_cleantech:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - sustainability
+      - cleantech
+      - renewable_energy
+      - solar_energy
+      - wind_energy
+      - energy_storage
+      - smart_grid
+      - carbon_capture
+      - circular_economy
+      - waste_management
+      - recycling
+      - upcycling
+      - green_building
+      - sustainable_materials
+      - life_cycle_assessment
+      - carbon_footprint
+      - esg_reporting
+      - sustainability_consulting
+      - environmental_impact
+      - climate_change
+      - net_zero
+      - carbon_neutral
+      regulatory:
+      - eu_taxonomy
+      - sfdr
+      - tcfd
+      - ghg_protocol
+      - science_based_targets
+      - iso_14001
+      - leed
+      - breeam
+      - energy_star
+    related_roles: []
+    semantic_description: sustainability clean technology environmental solutions
+      renewable energy green innovation carbon reduction
+  tech:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - software
+      - technology
+      - tech
+      - ai
+      - machine_learning
+      - data_science
+      - developer
+      - engineering
+      - cloud
+      - devops
+      - digital
+      - innovation
+      - platform
+      - algorithm
+      - python
+      - java
+      - javascript
+      - typescript
+      - react
+      - angular
+      - vue
+      - sql
+      - mongodb
+      - postgresql
+      - docker
+      - kubernetes
+      - aws
+      - azure
+      - gcp
+      - tensorflow
+      - pytorch
+      - pandas
+      - numpy
+      - git
+      - scrum
+      - agile
+      - microservices
+      - api_development
+      - full_stack
+      - frontend
+      - backend
+      - mobile_development
+      - ios
+      - android
+      - kotlin
+      - swift
+      - flutter
+      - cybersecurity
+      - blockchain
+      - quantum_computing
+      - edge_computing
+      - iot
+      - ar
+      - vr
+      - mixed_reality
+      - computer_vision
+      - nlp
+      - robotics
+    related_roles: []
+    semantic_description: "Technology sector focusing on software development, digital\
+      \ innovation, \n            artificial intelligence, cloud computing, and technology\
+      \ solutions. \n            Programming, system architecture, and cutting-edge\
+      \ technological advancement."
+  venture_capital:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - venture_capital
+      - private_equity
+      - startup_funding
+      - investment_analysis
+      - deal_sourcing
+      - due_diligence
+      - portfolio_management
+      - exit_strategies
+      - startup_ecosystem
+      - growth_capital
+      - angel_investing
+      - corporate_venture
+      - fintech_investing
+      - deeptech_investing
+      - impact_investing
+    related_roles: []
+    semantic_description: venture capital private equity startup funding investment
+      analysis deal sourcing portfolio management entrepreneurship

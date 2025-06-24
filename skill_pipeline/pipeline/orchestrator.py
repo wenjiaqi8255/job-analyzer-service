@@ -19,9 +19,10 @@ class PipelineOrchestrator:
     def __init__(self, config: PipelineConfig):
         self.config = config
         self.processor = SkillProcessor()
-        self.classifier = SemanticClassifier(config)
+        config_dir = config.semantic_config_dir  # 新增配置目录路径
+        self.classifier = SemanticClassifier(config_dir)
         # 修改初始化基线生成器的调用
-        self.baseline_generator = BaselineGenerator(config, self.classifier.model)
+        self.baseline_generator = BaselineGenerator(config, self.classifier.semantic_engine.model)
         self.database_manager = DatabaseManager(config)
 
         # 创建输出目录
