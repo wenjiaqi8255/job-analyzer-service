@@ -2,6 +2,7 @@ import logging
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from ..embedding_processor import BatchEmbeddingProcessor
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -9,66 +10,51 @@ class IndustryClassifier:
     """
     Classifies job industries based on semantic similarity to predefined baselines.
     """
-    def __init__(self, embedding_model, baselines, preprocessor, threshold=0.5):
+    def __init__(self, embedding_processor: BatchEmbeddingProcessor, baselines, preprocessor, threshold=0.5):
         """
         Initializes the IndustryClassifier.
 
         Args:
-            embedding_model: The model to use for generating embeddings.
+            embedding_processor: An instance of BatchEmbeddingProcessor.
             baselines (dict): A dictionary where keys are industry names and values are dictionaries
                               of baseline texts.
             preprocessor: An instance of TextPreprocessor.
             threshold (float): The similarity threshold for a successful classification.
         """
-        self.embedding_model = embedding_model
+        self.embedding_processor = embedding_processor
         self.preprocessor = preprocessor
         self.threshold = threshold
-        self.embedding_processor = BatchEmbeddingProcessor(embedding_model)
-        self.baseline_embeddings = self._compute_baseline_embeddings(baselines)
+        self.baseline_embeddings = self._load_precomputed_vectors(baselines)
 
-    def _compute_baseline_embeddings(self, baselines):
+    def _load_precomputed_vectors(self, baselines):
         """
-        Computes and caches embeddings for the baseline industries.
-
-        Args:
-            baselines (dict): The baseline industry data.
-
-        Returns:
-            dict: A dictionary mapping industry names to their computed embeddings.
+        Loads pre-computed vectors from the baselines.
+        Averages the vectors for each baseline to create a single representative vector.
         """
         baseline_embeddings = {}
         if not baselines:
             logger.warning("No industry baselines provided to IndustryClassifier.")
             return baseline_embeddings
-            
-        logger.info(f"Computing baseline embeddings for {len(baselines)} industries.")
+
+        logger.info(f"Loading pre-computed vectors for {len(baselines)} industries.")
         for industry_name, baseline_content in baselines.items():
             if not isinstance(baseline_content, dict):
                 logger.warning(f"Skipping baseline for industry '{industry_name}' due to unexpected format: {type(baseline_content)}")
                 continue
 
-            texts_to_embed = baseline_content.get('texts', [])
-            if not texts_to_embed and isinstance(baseline_content, dict):
-                 texts_to_embed = [text for key, text in baseline_content.items() if isinstance(text, str)]
-
-            if not texts_to_embed:
-                logger.warning(f"No text found to create embedding for industry baseline '{industry_name}'.")
-                continue
-            
-            combined_text = " ".join(self.preprocessor.preprocess_texts(texts_to_embed))
-            
-            if not combined_text.strip():
-                logger.warning(f"No content to embed for industry '{industry_name}' after preprocessing.")
+            vectors = baseline_content.get('vectors')
+            if vectors is None or len(vectors) == 0:
+                logger.warning(f"No vectors found for industry baseline '{industry_name}'.")
                 continue
 
             try:
-                embedding = self.embedding_processor.get_embedding(combined_text, 'industry_baseline')
-                if embedding is not None:
-                    baseline_embeddings[industry_name] = np.array(embedding).reshape(1, -1)
+                # Create a single representative vector by averaging all skill vectors
+                avg_vector = np.mean(np.array(vectors.cpu()), axis=0)
+                baseline_embeddings[industry_name] = avg_vector.reshape(1, -1)
             except Exception as e:
-                logger.error(f"Failed to compute embedding for industry baseline '{industry_name}': {e}", exc_info=True)
-                
-        logger.info(f"Successfully computed embeddings for {len(baseline_embeddings)} industry baselines.")
+                logger.error(f"Failed to process vectors for industry '{industry_name}': {e}", exc_info=True)
+        
+        logger.info(f"Successfully loaded and processed embeddings for {len(baseline_embeddings)} industry baselines.")
         return baseline_embeddings
 
     def classify(self, job_industry, company_name, job_description):
@@ -98,18 +84,20 @@ class IndustryClassifier:
             job_embedding = self.embedding_processor.get_embedding(preprocessed_text, 'job_industry_classification')
             if job_embedding is None:
                 return "Unknown"
-            job_embedding = np.array(job_embedding).reshape(1, -1)
+            # job_embedding is a tensor, needs to be reshaped for cosine_similarity
+            job_embedding_np = job_embedding.cpu().numpy().reshape(1, -1)
 
             max_similarity = -1
             best_match_industry = "Unknown"
 
             for industry_name, baseline_embedding in self.baseline_embeddings.items():
-                similarity = cosine_similarity(job_embedding, baseline_embedding)[0][0]
+                similarity = cosine_similarity(job_embedding_np, baseline_embedding)[0][0]
+                logger.info(f"  - Similarity with '{industry_name}': {similarity:.4f}")
                 if similarity > max_similarity:
                     max_similarity = similarity
                     best_match_industry = industry_name
             
-            logger.debug(f"Industry classification for '{job_industry}': Best match is '{best_match_industry}' with similarity {max_similarity:.4f}")
+            logger.info(f"Industry classification for '{job_industry}': Best match is '{best_match_industry}' with similarity {max_similarity:.4f}")
 
             if max_similarity >= self.threshold:
                 return best_match_industry

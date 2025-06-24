@@ -2,6 +2,7 @@ import logging
 from .role_classifier import RoleClassifier
 from .industry_classifier import IndustryClassifier
 from ..config import AppConfig
+from ..embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -12,15 +13,17 @@ class ClassificationPipeline:
         self.text_preprocessor = text_preprocessor
         self.config = config
         
+        embedding_processor = BatchEmbeddingProcessor(embedding_model)
+        
         self.role_classifier = RoleClassifier(
-            embedding_model=self.embedding_model,
+            embedding_processor=embedding_processor,
             semantic_baselines=self.semantic_baselines,
             text_preprocessor=self.text_preprocessor,
             thresholds=self.config.model_thresholds
         )
         
         self.industry_classifier = IndustryClassifier(
-            embedding_model=self.embedding_model,
+            embedding_processor=embedding_processor,
             baselines=self.semantic_baselines.get('industry', {}),
             preprocessor=self.text_preprocessor,
             threshold=self.config.model_thresholds.industry_similarity_threshold

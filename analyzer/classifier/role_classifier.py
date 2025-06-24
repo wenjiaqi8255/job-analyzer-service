@@ -2,13 +2,14 @@ import logging
 import torch
 from sentence_transformers import util
 from ..config import ModelThresholds
+from ..embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
 
 class RoleClassifier:
-    def __init__(self, embedding_model, semantic_baselines, text_preprocessor, thresholds: ModelThresholds):
-        self.embedding_model = embedding_model
+    def __init__(self, embedding_processor: BatchEmbeddingProcessor, semantic_baselines, text_preprocessor, thresholds: ModelThresholds):
+        self.embedding_processor = embedding_processor
         self.semantic_baselines = semantic_baselines
         self.text_preprocessor = text_preprocessor
         self.thresholds = thresholds
@@ -17,10 +18,6 @@ class RoleClassifier:
 
     def _precompute_role_title_embeddings(self):
         """Pre-computes and caches embeddings for all standard role titles."""
-        if not self.embedding_model:
-            logger.warning("Embedding model not available, skipping title embeddings precomputation.")
-            return
-
         logger.info("Pre-computing role title embeddings...")
         role_baselines = self.semantic_baselines.get("role", {})
         if not role_baselines:
@@ -31,7 +28,7 @@ class RoleClassifier:
         role_names = list(role_baselines.keys())
 
         try:
-            title_embeddings = self.embedding_model.encode(role_titles_to_encode, convert_to_tensor=True)
+            title_embeddings = self.embedding_processor.get_embeddings(role_titles_to_encode, 'role_title_precomputation')
             self.role_title_embeddings = dict(zip(role_names, title_embeddings))
             logger.info(f"✅ Successfully pre-computed {len(self.role_title_embeddings)} role title embeddings.")
             logger.debug(f"Cached role keys: {list(self.role_title_embeddings.keys())}")
@@ -48,8 +45,8 @@ class RoleClassifier:
         return title
 
     def classify_job_role(self, job_title: str = "", job_description: str = "") -> str:
-        if not self.embedding_model or not self.semantic_baselines.get("role"):
-            logger.warning("Cannot classify role due to missing embedding model or baselines.")
+        if not self.semantic_baselines.get("role"):
+            logger.warning("Cannot classify role due to missing baselines.")
             return "general"
 
         title_scores = self._calculate_title_similarity(job_title)
@@ -83,7 +80,9 @@ class RoleClassifier:
             return {}
             
         try:
-            input_embedding = self.embedding_model.encode([cleaned_title], convert_to_tensor=True)[0]
+            input_embedding = self.embedding_processor.get_embedding(cleaned_title, 'job_title_classification')
+            if input_embedding is None:
+                return {}
             scores = {}
             for name, cached_embedding in self.role_title_embeddings.items():
                 similarity = util.cos_sim(input_embedding.unsqueeze(0), cached_embedding.unsqueeze(0)).item()
@@ -103,7 +102,7 @@ class RoleClassifier:
             return {}
 
         try:
-            chunk_vectors = self.embedding_model.encode(chunks, convert_to_tensor=True)
+            chunk_vectors = self.embedding_processor.encode_chunks(chunks)
             scores = {}
             role_baselines = self.semantic_baselines.get("role", {})
             for name, baseline in role_baselines.items():

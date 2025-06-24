@@ -102,6 +102,19 @@ class TextPreprocessor:
 
         return title
 
+    def preprocess_text(self, text: str) -> str:
+        """
+        A general-purpose text preprocessing function.
+        Lemmatizes, removes stopwords and noise, and returns a clean string.
+        """
+        if not text or pd.isna(text):
+            return ""
+
+        doc = self.nlp(text)
+        lemmas = [token.lemma_.lower() for token in doc if self._is_meaningful_token(token)]
+        
+        return " ".join(lemmas)
+
     def classify_job_industry(self, company_name, job_title, description):
         # ... existing code ...
         cache_key = f"{company_name}_{job_title}"
@@ -345,3 +358,14 @@ class TextPreprocessor:
 
         # 如果包含技术背景词，或者有足够多的实质性单词，则认为是有意义的
         return has_tech_context or meaningful_words >= 3 
+
+    def _is_meaningful_token(self, token):
+        """Checks if a token is worth keeping for analysis."""
+        if (token.is_stop or
+                token.is_punct or
+                token.is_space or
+                token.lemma_.lower() in self.stop_words or
+                self.is_noise_pattern(token.lemma_.lower()) or
+                token.pos_ not in self.meaningful_pos):
+            return False
+        return True 

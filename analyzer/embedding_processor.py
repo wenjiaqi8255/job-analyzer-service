@@ -18,6 +18,42 @@ class BatchEmbeddingProcessor:
         self.batch_size = batch_size
         self.cache = LRUCache(maxsize=cache_size)
 
+    def get_embedding(self, text: str, source: str = 'default') -> torch.Tensor:
+        """
+        Generates an embedding for a single string.
+        """
+        if not text:
+            return None
+        try:
+            # The model expects a list, so we wrap the text in a list
+            embedding = self.embedding_model.encode(
+                [text],
+                convert_to_tensor=True,
+                show_progress_bar=False
+            )
+            return embedding[0]  # Return the single tensor from the output list
+        except Exception as e:
+            logger.error(f"Failed to get embedding for text from '{source}': {e}", exc_info=True)
+            return None
+
+    def get_embeddings(self, texts: List[str], source: str = 'default') -> torch.Tensor:
+        """
+        Generates embeddings for a list of strings.
+        """
+        if not texts:
+            return torch.empty(0)
+        try:
+            embeddings = self.embedding_model.encode(
+                texts,
+                batch_size=self.batch_size,
+                convert_to_tensor=True,
+                show_progress_bar=False
+            )
+            return embeddings
+        except Exception as e:
+            logger.error(f"Failed to get embeddings for texts from '{source}': {e}", exc_info=True)
+            return torch.empty(0)
+
     def encode_chunks(self, chunks: List[str]) -> torch.Tensor:
         """
         Encodes a list of text chunks, using a cache to retrieve existing embeddings
