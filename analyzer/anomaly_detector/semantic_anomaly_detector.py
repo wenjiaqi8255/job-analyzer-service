@@ -1,8 +1,8 @@
 import logging
 import torch
 from sentence_transformers import util
-from .config import ModelThresholds, PipelineConfig, CacheConfig
-from .embedding_processor import BatchEmbeddingProcessor
+from ..config import ModelThresholds, PipelineConfig, CacheConfig
+from ..utils.embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -74,13 +74,21 @@ class SemanticAnomalyDetector:
         for i, chunk in enumerate(chunks):
             sim_role = self._calculate_max_similarity(chunk_vectors[i].unsqueeze(0), role_baseline_vectors)
             
+            # logger.info(f"Chunk: '{chunk}', Similarity to Role '{role_baseline_name}': {sim_role:.4f}")
+
             if sim_role < self.thresholds.similarity_threshold:
+                # logger.info(f"Chunk is anomalous. Building record...")
                 anomaly = self._build_anomaly_record(
-                    chunk, chunk_vectors[i], sim_role, role_baseline_name, industry_baseline_name, 
+                    chunk, chunk_vectors[i].unsqueeze(0), sim_role, role_baseline_name, industry_baseline_name, 
                     role_baseline_vectors, industry_baseline_vectors, global_baseline_vectors
                 )
                 anomalies.append(anomaly)
         
+        if not anomalies:
+            logger.info("No semantic anomalies detected.")
+        else:
+            logger.info(f"Detected {len(anomalies)} semantic anomalies.")
+
         return anomalies
 
     def _get_global_baseline_vectors(self):
@@ -94,11 +102,15 @@ class SemanticAnomalyDetector:
         sim_industry = self._calculate_max_similarity(chunk_vector, industry_vectors)
         sim_global = self._calculate_max_similarity(chunk_vector, global_vectors)
         
+        # logger.info(f"Anomaly details: sim_industry={sim_industry:.4f}, sim_global={sim_global:.4f}")
+
         anomaly_type = "Cross-Role"
         if sim_global < 0.35:
             anomaly_type = "Emerging Tech"
         elif industry_name and sim_industry > 0.65 and sim_role < 0.4:
             anomaly_type = "Industry-Specific"
+
+        # logger.info(f"Determined anomaly type: {anomaly_type}")
 
         skill_topic = "unknown"
         if anomaly_type == "Industry-Specific" and industry_vectors is not None:
@@ -108,16 +120,20 @@ class SemanticAnomalyDetector:
             keywords = self.semantic_baselines.get("role", {}).get(role_name, {}).get("keywords", [])
             skill_topic = self._find_best_match_keyword(chunk, chunk_vector, role_vectors, keywords)
 
+        # logger.info(f"Extracted skill topic: '{skill_topic}'")
+
         # template = self.explanation_templates.get(anomaly_type, {})
         # explanation = template.get("explanation", "").format(skill=skill_topic, industry=industry_name, role=role_name)
         # business_impact = template.get("business_impact", "").format(skill=skill_topic, industry=industry_name, role=role_name)
 
-        return {
+        record = {
             "chunk": chunk, "type": anomaly_type, 
             # "explanation": explanation, 
             # "business_impact": business_impact,
             "similarity_to_role": round(sim_role, 3), "similarity_to_industry": round(sim_industry, 3), "similarity_to_global": round(sim_global, 3),
         }
+        # logger.debug(f"Constructed anomaly record: {record}")
+        return record
 
     def _find_best_match_keyword(self, chunk_text, chunk_vector, baseline_vectors, baseline_keywords):
         if baseline_vectors is None or len(baseline_vectors) == 0 or not baseline_keywords:

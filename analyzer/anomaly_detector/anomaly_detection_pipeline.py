@@ -1,6 +1,6 @@
 import logging
 from .semantic_anomaly_detector import SemanticAnomalyDetector
-from .config import ModelThresholds, PipelineConfig, CacheConfig
+from ..config import ModelThresholds, PipelineConfig, CacheConfig
 
 logger = logging.getLogger(__name__)
 

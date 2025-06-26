@@ -9,8 +9,8 @@ import pandas as pd
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
 from supabase import create_client, Client
-from analyzer.db_queries import fetch_all_job_listings, fetch_job_by_id
-from analyzer.pipeline import run_pipeline
+from analyzer.utils.db_queries import fetch_all_job_listings, fetch_job_by_id
+from analyzer.run_pipeline import run_pipeline
 from playground.local_data_util import load_and_process_jobs
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')

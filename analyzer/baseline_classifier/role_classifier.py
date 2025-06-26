@@ -2,7 +2,7 @@ import logging
 import torch
 from sentence_transformers import util
 from ..config import ModelThresholds
-from ..embedding_processor import BatchEmbeddingProcessor
+from ..utils.embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,8 @@ class RoleClassifier:
         if not self.semantic_baselines.get("role"):
             logger.warning("Cannot classify role due to missing baselines.")
             return "general"
+        
+        logger.debug(f"Classifying role for title='{job_title}' and description='{job_description[:50]}...'")
 
         title_scores = self._calculate_title_similarity(job_title)
         desc_scores = self._calculate_description_similarity(job_description)
@@ -62,6 +64,7 @@ class RoleClassifier:
             return "general"
 
         best_role, best_score = max(final_scores.items(), key=lambda item: item[1])
+        logger.debug(f"Best role before threshold: {best_role} with score {best_score:.4f}")
 
         if best_score < self.thresholds.role_similarity_threshold:
             logger.info(f"Best role '{best_role}' scored {best_score:.3f} (below threshold {self.thresholds.role_similarity_threshold}). Classifying as 'general'.")
@@ -76,6 +79,7 @@ class RoleClassifier:
             return {}
         
         cleaned_title = self.text_preprocessor.preprocess_job_title(job_title)
+        logger.debug(f"Cleaned title for similarity calculation: '{cleaned_title}'")
         if not cleaned_title:
             return {}
             
@@ -87,6 +91,7 @@ class RoleClassifier:
             for name, cached_embedding in self.role_title_embeddings.items():
                 similarity = util.cos_sim(input_embedding.unsqueeze(0), cached_embedding.unsqueeze(0)).item()
                 scores[name] = similarity
+            logger.debug(f"Title similarity scores: {scores}")
             return scores
         except Exception as e:
             logger.error(f"Title embedding failed: {e}")
@@ -98,6 +103,7 @@ class RoleClassifier:
             return {}
 
         chunks = self.text_preprocessor.chunk_text(job_description)
+        logger.debug(f"Processing {len(chunks)} description chunks for similarity.")
         if not chunks:
             return {}
 
@@ -113,6 +119,7 @@ class RoleClassifier:
 
                 chunk_max_sims = [torch.max(util.cos_sim(chunk_vec.unsqueeze(0), baseline_vectors)).item() for chunk_vec in chunk_vectors]
                 scores[name] = sum(chunk_max_sims) / len(chunk_max_sims)
+            logger.debug(f"Description similarity scores: {scores}")
             return scores
         except Exception as e:
             logger.error(f"Description embedding failed: {e}")
@@ -124,15 +131,20 @@ class RoleClassifier:
         final_scores = {}
         desc_weight = 1.0 - title_weight
 
+        logger.debug(f"Combining scores with title_weight={title_weight:.2f}")
         for role in all_roles:
             title_score = title_scores.get(role, 0.0)
             desc_score = desc_scores.get(role, 0.0)
-
+            
+            weighted_score = 0.0
             if title_score > 0 and desc_score == 0:
-                final_scores[role] = title_score * 0.8  # Penalize if only title is available
+                weighted_score = title_score * 0.8  # Penalize if only title is available
             elif title_score == 0 and desc_score > 0:
-                final_scores[role] = desc_score * 0.6  # Penalize more if only description is available
+                weighted_score = desc_score * 0.6  # Penalize more if only description is available
             else:
-                final_scores[role] = (title_weight * title_score) + (desc_weight * desc_score)
+                weighted_score = (title_weight * title_score) + (desc_weight * desc_score)
+            
+            final_scores[role] = weighted_score
+            logger.debug(f"Role '{role}': title_score={title_score:.4f}, desc_score={desc_score:.4f} -> final_score={weighted_score:.4f}")
                 
         return final_scores 

@@ -105,3 +105,4 @@ def fetch_baseline_vectors(supabase_client: Client, baseline_id: int, model_name
     except Exception as e:
         logger.error(f"Error fetching baseline vectors for baseline_id={baseline_id}: {e}", exc_info=True)
         return None
+    

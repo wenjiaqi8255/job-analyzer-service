@@ -1,7 +1,7 @@
 import unittest
 import spacy
-from analyzer.content_filter import ContentFilter
-from analyzer.text_preprocessor import TextPreprocessor
+from analyzer.content_separator.content_filter import ContentFilter
+from analyzer.utils.text_preprocessor import TextPreprocessor
 
 class TestContentFilterWithRelaxedRules(unittest.TestCase):
 

@@ -2,7 +2,7 @@ import logging
 from .role_classifier import RoleClassifier
 from .industry_classifier import IndustryClassifier
 from ..config import AppConfig
-from ..embedding_processor import BatchEmbeddingProcessor
+from ..utils.embedding_processor import BatchEmbeddingProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,6 @@ class ClassificationPipeline:
             preprocessor=self.text_preprocessor,
             threshold=self.config.model_thresholds.industry_similarity_threshold
         )
-        # In the future, an industry classifier could be initialized here as well.
         
     def run(self, job_data: dict) -> dict:
         """

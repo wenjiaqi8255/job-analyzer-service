@@ -1,14 +1,15 @@
 import logging
 import pandas as pd
 import json
-from .exceptions import JobProcessingError, PipelineError
-from .data_validator import validate_job_data, ValidationError
+from .utils.exceptions import JobProcessingError, PipelineError
+from .utils.data_validator import validate_job_data, ValidationError
 from .config import get_config
-from .resource_manager import ResourceManager
-from .text_preprocessor import TextPreprocessor
-from .classifier.classification_pipeline import ClassificationPipeline
-from .anomaly_detection_pipeline import AnomalyDetectionPipeline
-from .inference import write_analysis_result
+from .utils.resource_manager import ResourceManager
+from .utils.text_preprocessor import TextPreprocessor
+from .baseline_classifier.classification_pipeline import ClassificationPipeline
+from .anomaly_detector.anomaly_detection_pipeline import AnomalyDetectionPipeline
+from .utils.etl import write_analysis_result
+from .content_separator.job_content_separator import JobContentSeparator
 from extractor.job_data_accessor import JobDataAccessor
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                 return []
 
             text_preprocessor = TextPreprocessor(nlp_model)
+            job_content_separator = JobContentSeparator(nlp_model)
             
             classification_pipeline = ClassificationPipeline(
                 embedding_model=embedding_model,
@@ -65,6 +67,10 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                     try:
                         job_data = row.to_dict()
                         validate_job_data(job_data)
+                        original_description = job_data.get('description', '')
+                        if original_description:
+                            separated_result = job_content_separator.extract_pure_job_requirements(original_description)
+                            job_data['effective_description'] = separated_result['job_content_filtered']
 
                         classification_result = classification_pipeline.run(job_data)
                         

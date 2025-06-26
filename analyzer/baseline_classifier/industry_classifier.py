@@ -1,7 +1,7 @@
 import logging
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from ..embedding_processor import BatchEmbeddingProcessor
+from ..utils.embedding_processor import BatchEmbeddingProcessor
 import torch
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,7 @@ class IndustryClassifier:
             return "Unknown"
 
         job_text = f"{job_industry} {company_name} {job_description}"
+        logger.debug(f"Classifying industry based on text: '{job_text[:100]}...'")
         preprocessed_text = self.preprocessor.preprocess_text(job_text)
         
         if not preprocessed_text.strip():
@@ -92,16 +93,18 @@ class IndustryClassifier:
 
             for industry_name, baseline_embedding in self.baseline_embeddings.items():
                 similarity = cosine_similarity(job_embedding_np, baseline_embedding)[0][0]
-                logger.info(f"  - Similarity with '{industry_name}': {similarity:.4f}")
+                logger.debug(f"  - Similarity with '{industry_name}': {similarity:.4f}")
                 if similarity > max_similarity:
                     max_similarity = similarity
                     best_match_industry = industry_name
             
-            logger.info(f"Industry classification for '{job_industry}': Best match is '{best_match_industry}' with similarity {max_similarity:.4f}")
+            logger.debug(f"Industry classification best match: '{best_match_industry}' with similarity {max_similarity:.4f} (Threshold: {self.threshold})")
 
             if max_similarity >= self.threshold:
+                logger.info(f"Final industry classification: '{best_match_industry}'")
                 return best_match_industry
             else:
+                logger.info(f"Industry similarity below threshold. Classified as 'Unknown'.")
                 return "Unknown"
         except Exception as e:
             logger.error(f"Error during industry classification for job industry '{job_industry}': {e}", exc_info=True)

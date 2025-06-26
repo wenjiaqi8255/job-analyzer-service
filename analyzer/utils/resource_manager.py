@@ -2,7 +2,7 @@ import logging
 import torch
 import spacy
 from sentence_transformers import SentenceTransformer
-from .config import AppConfig
+from ..config import AppConfig
 from .exceptions import ModelLoadingError
 from .db_queries import fetch_active_semantic_baselines, fetch_baseline_vectors
 from supabase import Client

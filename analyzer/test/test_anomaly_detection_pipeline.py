@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock, patch
-from analyzer.anomaly_detection_pipeline import AnomalyDetectionPipeline
+from analyzer.anomaly_detector.anomaly_detection_pipeline import AnomalyDetectionPipeline
 from analyzer.config import ModelThresholds, PipelineConfig, CacheConfig
 
 class TestAnomalyDetectionPipeline(unittest.TestCase):
