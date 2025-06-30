@@ -2,6 +2,7 @@ import logging
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from ..utils.embedding_processor import BatchEmbeddingProcessor
+from ..config import ModelThresholds
 import torch
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ class IndustryClassifier:
     """
     Classifies job industries based on semantic similarity to predefined baselines.
     """
-    def __init__(self, embedding_processor: BatchEmbeddingProcessor, baselines, preprocessor, threshold=0.5):
+    def __init__(self, embedding_processor: BatchEmbeddingProcessor, baselines, preprocessor, threshold:ModelThresholds):
         """
         Initializes the IndustryClassifier.
 
@@ -23,7 +24,7 @@ class IndustryClassifier:
         """
         self.embedding_processor = embedding_processor
         self.preprocessor = preprocessor
-        self.threshold = threshold
+        self.threshold = threshold.industry_similarity_threshold
         self.baseline_embeddings = self._load_precomputed_vectors(baselines)
 
     def _load_precomputed_vectors(self, baselines):
@@ -59,7 +60,7 @@ class IndustryClassifier:
 
     def classify(self, job_industry, company_name, job_description):
         """
-        Classifies the industry of a job.
+        Classifies the industry of a job using a weighted scoring model.
 
         Args:
             job_industry (str): The industry of the job.
@@ -73,39 +74,106 @@ class IndustryClassifier:
             logger.warning("Cannot classify industry: no baseline embeddings available.")
             return "Unknown"
 
-        job_text = f"{job_industry} {company_name} {job_description}"
-        logger.debug(f"Classifying industry based on text: '{job_text[:100]}...'")
-        preprocessed_text = self.preprocessor.preprocess_text(job_text)
+        # Calculate scores from different parts of the job data
+        industry_scores = self._calculate_industry_name_similarity(job_industry)
+        desc_scores = self._calculate_description_similarity(f"{company_name} {job_description}")
+
+        if not industry_scores and not desc_scores:
+            logger.warning("No valid scores could be computed from industry or description.")
+            return "Unknown"
         
-        if not preprocessed_text.strip():
-            logger.warning("Cannot classify industry: no content after preprocessing.")
+        # Combine scores with a heavier weight on the industry name
+        final_scores = self._weigh_and_combine_scores(industry_scores, desc_scores, industry_weight=0.7)
+
+        if not final_scores:
+            logger.info("No final scores after weighting. Classified as 'Unknown'.")
             return "Unknown"
 
-        try:
-            job_embedding = self.embedding_processor.get_embedding(preprocessed_text, 'job_industry_classification')
-            if job_embedding is None:
-                return "Unknown"
-            # job_embedding is a tensor, needs to be reshaped for cosine_similarity
-            job_embedding_np = job_embedding.cpu().numpy().reshape(1, -1)
+        best_match_industry, max_similarity = max(final_scores.items(), key=lambda item: item[1])
+        
+        logger.debug(f"Industry classification best match: '{best_match_industry}' with score {max_similarity:.4f} (Threshold: {self.threshold})")
 
-            max_similarity = -1
-            best_match_industry = "Unknown"
+        if max_similarity >= self.threshold:
+            logger.info(f"Final industry classification: '{best_match_industry}' with score {max_similarity:.4f}")
+            return best_match_industry
+        else:
+            logger.info(f"Best match '{best_match_industry}' score {max_similarity:.4f} is below threshold {self.threshold}. Classified as 'Unknown'.")
+            return "Unknown"
 
-            for industry_name, baseline_embedding in self.baseline_embeddings.items():
-                similarity = cosine_similarity(job_embedding_np, baseline_embedding)[0][0]
-                logger.debug(f"  - Similarity with '{industry_name}': {similarity:.4f}")
-                if similarity > max_similarity:
-                    max_similarity = similarity
-                    best_match_industry = industry_name
+    def _weigh_and_combine_scores(self, industry_scores: dict, desc_scores: dict, industry_weight: float) -> dict:
+        """Combines industry and description scores using a weighted average."""
+        all_industries = set(industry_scores.keys()) | set(desc_scores.keys())
+        final_scores = {}
+        desc_weight = 1.0 - industry_weight
+
+        logger.debug(f"Combining scores with industry_weight={industry_weight:.2f}")
+        for industry in all_industries:
+            industry_score = industry_scores.get(industry, 0.0)
+            desc_score = desc_scores.get(industry, 0.0)
             
-            logger.debug(f"Industry classification best match: '{best_match_industry}' with similarity {max_similarity:.4f} (Threshold: {self.threshold})")
-
-            if max_similarity >= self.threshold:
-                logger.info(f"Final industry classification: '{best_match_industry}'")
-                return best_match_industry
+            # Apply penalties similar to RoleClassifier for robustness
+            if industry_score > 0 and desc_score == 0:
+                weighted_score = industry_score * 0.8  # Penalize if only industry name is available
+            elif industry_score == 0 and desc_score > 0:
+                weighted_score = desc_score * 0.6  # Penalize more if only description is available
             else:
-                logger.info(f"Industry similarity below threshold. Classified as 'Unknown'.")
-                return "Unknown"
+                weighted_score = (industry_weight * industry_score) + (desc_weight * desc_score)
+            
+            final_scores[industry] = weighted_score
+            logger.debug(f"Industry '{industry}': industry_score={industry_score:.4f}, desc_score={desc_score:.4f} -> final_score={weighted_score:.4f}")
+                
+        return final_scores
+
+    def _calculate_industry_name_similarity(self, job_industry: str) -> dict:
+        """Calculates similarity scores based on the job industry name."""
+        if not job_industry or not job_industry.strip() or not self.baseline_embeddings:
+            return {}
+
+        # The industry name itself is compared against the pre-computed average vectors.
+        # This is a bit different from RoleClassifier's title comparison but fits the current structure.
+        cleaned_industry = self.preprocessor.preprocess_text(job_industry)
+        if not cleaned_industry:
+            return {}
+            
+        try:
+            input_embedding = self.embedding_processor.get_embedding(cleaned_industry, 'job_industry_name_classification')
+            if input_embedding is None:
+                return {}
+
+            scores = {}
+            input_embedding_np = input_embedding.cpu().numpy().reshape(1, -1)
+            for name, baseline_embedding in self.baseline_embeddings.items():
+                similarity = cosine_similarity(input_embedding_np, baseline_embedding)[0][0]
+                scores[name] = similarity
+            logger.debug(f"Industry name similarity scores: {scores}")
+            return scores
         except Exception as e:
-            logger.error(f"Error during industry classification for job industry '{job_industry}': {e}", exc_info=True)
-            return "Unknown" 
+            logger.error(f"Industry name embedding/similarity failed: {e}", exc_info=True)
+            return {}
+
+    def _calculate_description_similarity(self, text: str) -> dict:
+        """Calculates similarity scores based on the job description and company name."""
+        if not text or not text.strip():
+            return {}
+
+        preprocessed_text = self.preprocessor.preprocess_text(text)
+        if not preprocessed_text.strip():
+            return {}
+
+        try:
+            # Reusing the logic from the original classify method for description part
+            job_embedding = self.embedding_processor.get_embedding(preprocessed_text, 'job_description_classification')
+            if job_embedding is None:
+                return {}
+            
+            job_embedding_np = job_embedding.cpu().numpy().reshape(1, -1)
+            scores = {}
+            for name, baseline_embedding in self.baseline_embeddings.items():
+                similarity = cosine_similarity(job_embedding_np, baseline_embedding)[0][0]
+                scores[name] = similarity
+            
+            logger.debug(f"Description similarity scores: {scores}")
+            return scores
+        except Exception as e:
+            logger.error(f"Description embedding/similarity failed: {e}", exc_info=True)
+            return {} 

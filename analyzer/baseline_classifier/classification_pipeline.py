@@ -26,7 +26,7 @@ class ClassificationPipeline:
             embedding_processor=embedding_processor,
             baselines=self.semantic_baselines.get('industry', {}),
             preprocessor=self.text_preprocessor,
-            threshold=self.config.model_thresholds.industry_similarity_threshold
+            threshold=self.config.model_thresholds
         )
         
     def run(self, job_data: dict) -> dict:
@@ -35,18 +35,21 @@ class ClassificationPipeline:
         
         Args:
             job_data (dict): A dictionary containing job details like 'job_title', 
-                             'effective_description', and 'industry'.
+                             'effective_description' (for role classification),
+                             'company_description' (for industry classification),
+                             'industry', and 'company_name'.
                              
         Returns:
             dict: A dictionary with classification results, e.g., {'role': 'Software Engineer', 'industry': 'Technology'}.
         """
         job_title = job_data.get('job_title', '')
-        job_description = job_data.get('effective_description', '')
+        job_description = job_data.get('effective_description', '')  # For role classification
+        company_description = job_data.get('company_description', '')  # For industry classification
         job_industry = job_data.get('industry', '')
         company_name = job_data.get('company_name', '')
         
         classified_role = self.role_classifier.classify_job_role(job_title, job_description)
-        classified_industry = self.industry_classifier.classify(job_industry, company_name, job_description)
+        classified_industry = self.industry_classifier.classify(job_industry, company_name, company_description)
         
         logger.info(f"Classification complete. Role='{classified_role}', Industry='{classified_industry}'")
         

@@ -4,11 +4,10 @@ from typing import Dict, Any
 @dataclass
 class ModelThresholds:
     min_avg_similarity: float = 0.35
-    title_weight: float = 0.9
-    similarity_threshold: float = 0.5
+    similarity_threshold: float = 0.1
     idf_threshold: float = 2.5
     role_similarity_threshold: float = 0.3
-    role_title_weight: float = 0.7
+    role_title_weight: float = 0.9
     industry_similarity_threshold: float = 0.3
 
 @dataclass

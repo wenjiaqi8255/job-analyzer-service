@@ -229,9 +229,12 @@ industries:
       - network_optimization
       - content_delivery_network
       - cdn
+      - sdn
+      - software_defined_networking
+      - edge_offloading
     related_roles: []
     semantic_description: edge computing distributed systems real-time processing
-      IoT connectivity low latency data processing network optimization
+      IoT connectivity low latency data processing network optimization SDN edge offloading
   energy:
     domain_keywords: []
     explicit_skills:
@@ -258,6 +261,30 @@ industries:
     semantic_description: energy renewable energy oil gas utilities power generation
       sustainability clean technology energy storage smart grid nuclear energy environmental
       solutions
+  events_services:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - event_planning
+      - event_management
+      - conference_organization
+      - trade_shows
+      - corporate_events
+      - wedding_planning
+      - party_planning
+      - venue_management
+      - catering_coordination
+      - audio_visual_services
+      - logistics_coordination
+      - vendor_management
+      - budget_management
+      - timeline_coordination
+      - guest_management
+      - marketing_events
+      - sponsorship_management
+    related_roles: []
+    semantic_description: event planning management conference organization trade shows
+      corporate events venue coordination catering logistics guest management
   extended_reality:
     domain_keywords: []
     explicit_skills:
@@ -369,6 +396,64 @@ industries:
     semantic_description: "Financial services including banking, investment management,\
       \ trading, \n            fintech, and wealth management. Risk assessment, financial\
       \ analysis, \n            regulatory compliance, and financial technology innovation."
+  food_beverage_manufacturing:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - food_processing
+      - beverage_production
+      - food_safety
+      - haccp
+      - food_technology
+      - nutrition_science
+      - quality_control_food
+      - packaging_technology
+      - supply_chain_food
+      - regulatory_compliance_food
+      - product_development_food
+      - fermentation
+      - preservation_techniques
+      - sensory_analysis
+      - food_chemistry
+      - food_microbiology
+      regulatory:
+      - fda_food
+      - eu_food_regulations
+      - brc_standards
+      - ifs_food
+      - organic_certification
+    related_roles: []
+    semantic_description: food beverage manufacturing processing production quality
+      control safety regulations nutrition technology packaging supply chain
+  freight_transportation:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - logistics
+      - freight_forwarding
+      - cargo_management
+      - supply_chain_logistics
+      - warehouse_operations
+      - transportation_planning
+      - customs_clearance
+      - international_shipping
+      - last_mile_delivery
+      - fleet_management
+      - route_optimization
+      - inventory_management
+      - cold_chain_logistics
+      - dangerous_goods_handling
+      - packaging_logistics
+      - distribution_networks
+      regulatory:
+      - customs_regulations
+      - iata_regulations
+      - dot_regulations
+      - adr_regulations
+      - dangerous_goods_certification
+    related_roles: []
+    semantic_description: freight transportation logistics supply chain cargo management
+      customs international shipping fleet management distribution warehouse operations
   healthcare:
     domain_keywords: []
     explicit_skills:
@@ -430,6 +515,52 @@ industries:
     semantic_description: healthcare medical services clinical research pharmaceutical
       biotechnology medical devices patient care digital health telemedicine health
       technology regulatory compliance
+  hospitality:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - hotel_management
+      - restaurant_operations
+      - guest_services
+      - housekeeping
+      - front_desk_operations
+      - food_beverage_service
+      - event_planning_hospitality
+      - revenue_management
+      - hospitality_technology
+      - customer_experience
+      - concierge_services
+      - maintenance_hospitality
+      - staff_management
+      - quality_assurance_hospitality
+      - booking_systems
+      - property_management_systems
+      - point_of_sale_systems
+    related_roles: []
+    semantic_description: hospitality hotel management guest services restaurant operations
+      housekeeping revenue management customer experience booking systems
+  hotels_motels:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - hotel_operations
+      - room_management
+      - guest_relations
+      - front_office_operations
+      - housekeeping_management
+      - reservation_systems
+      - property_management_software
+      - revenue_optimization
+      - guest_experience
+      - hotel_maintenance
+      - staff_scheduling
+      - inventory_management_hotel
+      - quality_standards
+      - hospitality_marketing
+      - customer_service_hotel
+    related_roles: []
+    semantic_description: hotel motel operations room management guest services reservations
+      housekeeping property management hospitality customer service
   individual_family_services:
     domain_keywords: []
     explicit_skills:
@@ -502,6 +633,10 @@ industries:
       - competition_law
       - employment_law
       - labor_law
+      - rechtsanwaltsfachangestellte
+      - anwaltssoftware
+      - mahnverfahren
+      - elektronische_aktenführung
       regulatory:
       - gdpr
       - data_protection
@@ -509,7 +644,7 @@ industries:
     related_roles: []
     semantic_description: legal services litigation corporate law intellectual property
       compliance regulatory affairs contract law employment law mergers acquisitions
-      dispute resolution legal research
+      dispute resolution legal research legal assistance
   manufacturing:
     domain_keywords: []
     explicit_skills:
@@ -611,10 +746,16 @@ industries:
       - customer_segmentation
       - attribution_modeling
       - marketing_automation
+      - video_production
+      - content_creation
+      - multimedia_production
+      - video_editing
+      - color_grading
+      - sound_design
     related_roles: []
     semantic_description: media entertainment publishing journalism content creation
       broadcasting digital media advertising marketing communications creative services
-      audience engagement
+      audience engagement video production multimedia
   personal_care_manufacturing:
     domain_keywords: []
     explicit_skills:
@@ -778,6 +919,30 @@ industries:
     related_roles: []
     semantic_description: sporting goods athletic equipment fitness products sports
       retail performance technology sports marketing active lifestyle
+  staffing_recruiting:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - recruitment
+      - talent_acquisition
+      - headhunting
+      - executive_search
+      - staffing_solutions
+      - temporary_staffing
+      - permanent_placement
+      - candidate_screening
+      - interviewing
+      - talent_pipeline
+      - recruitment_marketing
+      - employer_branding
+      - applicant_tracking_systems
+      - hr_consulting
+      - workforce_planning
+      - onboarding_services
+      - background_checks
+    related_roles: []
+    semantic_description: staffing recruiting talent acquisition headhunting executive
+      search temporary staffing permanent placement candidate screening workforce planning
   sustainability_cleantech:
     domain_keywords: []
     explicit_skills:
@@ -817,73 +982,437 @@ industries:
     related_roles: []
     semantic_description: sustainability clean technology environmental solutions
       renewable energy green innovation carbon reduction
+  # 网络安全（从tech中分离出来）
+  cybersecurity:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - cybersecurity
+        - information_security
+        - network_security
+        - incident_response
+        - threat_analysis
+        - vulnerability_assessment
+        - penetration_testing
+        - security_operations
+        - malware_analysis
+        - forensics
+        - siem
+        - soc
+        - blue_team
+        - red_team
+        - security_architecture
+        - compliance_security
+        - risk_assessment
+        - encryption
+        - identity_management
+        - access_control
+        - security_analyst
+        - security_specialist
+        - security_engineer
+        - cybersecurity_analyst
+        - infosec
+        - endpoint_security
+        - cloud_security
+        - application_security
+        - security_audit
+        - threat_hunting
+        - cyber_threat_intelligence
+        - security_incident_management
+      regulatory:
+        - iso_27001
+        - nist_framework
+        - gdpr_security
+        - pci_dss
+        - sox_compliance
+    related_roles: []
+    semantic_description: cybersecurity information security network protection threat detection incident response vulnerability management security operations penetration testing digital forensics compliance
+
+  # 人工智能与机器学习
+  artificial_intelligence:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - ai
+        - machine_learning
+        - deep_learning
+        - neural_networks
+        - natural_language_processing
+        - nlp
+        - computer_vision
+        - data_science
+        - tensorflow
+        - pytorch
+        - scikit_learn
+        - pandas
+        - numpy
+        - jupyter
+        - python_ml
+        - r_statistics
+        - statistics
+        - predictive_modeling
+        - classification
+        - regression
+        - clustering
+        - recommendation_systems
+        - reinforcement_learning
+        - generative_ai
+        - llm
+        - transformers
+        - bert
+        - gpt
+        - hugging_face
+        - mlops
+        - model_deployment
+        - feature_engineering
+        - data_preprocessing
+      regulatory:
+        - ai_ethics
+        - ai_governance
+        - model_interpretability
+        - bias_detection
+    related_roles: []
+    semantic_description: artificial intelligence machine learning data science neural networks deep learning natural language processing computer vision predictive analytics model development
+
+  # 区块链与加密货币
+  blockchain_crypto:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - blockchain
+        - cryptocurrency
+        - bitcoin
+        - ethereum
+        - smart_contracts
+        - solidity
+        - web3
+        - defi
+        - nft
+        - consensus_algorithms
+        - distributed_ledger
+        - cryptography
+        - hash_functions
+        - digital_signatures
+        - wallet_development
+        - dapp_development
+        - tokenomics
+        - dao
+        - lightning_network
+        - layer2_solutions
+        - proof_of_stake
+        - proof_of_work
+        - metamask
+        - truffle
+        - hardhat
+      regulatory:
+        - crypto_compliance
+        - aml_crypto
+        - kyc_crypto
+    related_roles: []
+    semantic_description: blockchain cryptocurrency smart contracts decentralized applications web3 digital assets distributed systems cryptography fintech innovation
+
+  # 云计算与DevOps
+  cloud_devops:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - cloud_computing
+        - devops
+        - aws
+        - azure
+        - gcp
+        - docker
+        - kubernetes
+        - terraform
+        - ansible
+        - jenkins
+        - ci_cd
+        - infrastructure_as_code
+        - containerization
+        - orchestration
+        - microservices
+        - serverless
+        - lambda
+        - cloud_architecture
+        - cloud_migration
+        - cloud_security
+        - monitoring
+        - logging
+        - prometheus
+        - grafana
+        - elk_stack
+        - gitops
+        - helm
+        - istio
+        - service_mesh
+      regulatory:
+        - cloud_compliance
+        - data_residency
+        - cloud_governance
+    related_roles: []
+    semantic_description: cloud computing devops infrastructure automation containerization orchestration continuous integration deployment scalable systems platform engineering
+
+  # 移动应用开发
+  mobile_development:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - mobile_development
+        - ios_development
+        - android_development
+        - swift
+        - kotlin
+        - objective_c
+        - java_android
+        - flutter
+        - dart
+        - react_native
+        - xamarin
+        - ionic
+        - cordova
+        - mobile_ui_ux
+        - app_store_optimization
+        - mobile_testing
+        - mobile_security
+        - push_notifications
+        - mobile_analytics
+        - in_app_purchases
+        - mobile_performance
+        - responsive_design
+        - cross_platform
+        - hybrid_apps
+        - native_development
+        - mobile_architecture
+      regulatory:
+        - app_store_guidelines
+        - mobile_privacy
+        - gdpr_mobile
+    related_roles: []
+    semantic_description: mobile application development iOS Android cross-platform native apps user experience mobile architecture app deployment
+
+  # 游戏开发
+  game_development:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - game_development
+        - unity
+        - unreal_engine
+        - c_sharp_unity
+        - c_plus_plus_games
+        - game_design
+        - 3d_modeling
+        - animation
+        - game_physics
+        - rendering
+        - shader_programming
+        - game_ai
+        - multiplayer_networking
+        - game_optimization
+        - level_design
+        - character_design
+        - game_audio
+        - game_testing
+        - game_analytics
+        - monetization
+        - mobile_games
+        - console_games
+        - pc_games
+        - vr_games
+        - ar_games
+        - indie_game_development
+      regulatory:
+        - game_rating_systems
+        - platform_certification
+    related_roles: []
+    semantic_description: game development interactive entertainment 3D graphics game engines unity unreal multiplayer gaming user experience
+
+  # 物联网
+  iot_embedded:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - iot
+        - internet_of_things
+        - embedded_systems
+        - arduino
+        - raspberry_pi
+        - c_embedded
+        - c_plus_plus_embedded
+        - microcontrollers
+        - sensors
+        - actuators
+        - wireless_communication
+        - bluetooth
+        - wifi
+        - zigbee
+        - lora
+        - mqtt
+        - coap
+        - edge_computing
+        - real_time_systems
+        - firmware_development
+        - hardware_programming
+        - pcb_design
+        - circuit_design
+        - power_management
+        - industrial_iot
+        - smart_home
+        - wearable_devices
+      regulatory:
+        - iot_security_standards
+        - device_certification
+        - electromagnetic_compatibility
+    related_roles: []
+    semantic_description: internet of things embedded systems hardware programming sensors connectivity wireless communication edge computing industrial automation
+
+  # 金融科技（从finance中分离但保留在tech类别）
+  fintech:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+        - fintech
+        - digital_banking
+        - payment_systems
+        - cryptocurrency_tech
+        - robo_advisors
+        - algorithmic_trading
+        - risk_tech
+        - regtech
+        - insurtech
+        - wealthtech
+        - lending_tech
+        - crowdfunding_platforms
+        - peer_to_peer_payments
+        - mobile_banking
+        - open_banking
+        - api_banking
+        - neobanks
+        - challenger_banks
+        - digital_wallets
+        - contactless_payments
+        - fraud_detection
+        - credit_scoring
+        - financial_data_analytics
+        - trade_finance_tech
+        - investment_platforms
+      regulatory:
+        - psd2
+        - open_banking_regulations
+        - financial_data_protection
+        - anti_money_laundering_tech
+        - kyc_automation
+    related_roles: []
+    semantic_description: financial technology digital banking payment innovation cryptocurrency trading platforms risk management regulatory technology financial data
+
+  wellness_fitness:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - fitness_training
+      - wellness_coaching
+      - nutrition_counseling
+      - personal_training
+      - group_fitness
+      - yoga_instruction
+      - pilates
+      - strength_training
+      - cardio_training
+      - rehabilitation_fitness
+      - sports_nutrition
+      - wellness_program_design
+      - fitness_assessment
+      - exercise_physiology
+      - health_promotion
+      - lifestyle_coaching
+      - mindfulness_training
+      - stress_management
+      - fitness_technology
+      - wearable_devices
+    related_roles: []
+    semantic_description: wellness fitness personal training nutrition coaching health
+      promotion exercise physiology lifestyle coaching fitness technology
+
+  # 通用技术（缩小后的tech，作为兜底）
   tech:
     domain_keywords: []
     explicit_skills:
       core_domain:
-      - software
-      - technology
-      - tech
-      - ai
-      - machine_learning
-      - data_science
-      - developer
-      - engineering
-      - cloud
-      - devops
-      - digital
-      - innovation
-      - platform
-      - algorithm
-      - python
-      - java
-      - javascript
-      - typescript
-      - react
-      - angular
-      - vue
-      - sql
-      - mongodb
-      - postgresql
-      - docker
-      - kubernetes
-      - aws
-      - azure
-      - gcp
-      - tensorflow
-      - pytorch
-      - pandas
-      - numpy
-      - git
-      - scrum
-      - agile
-      - microservices
-      - api_development
-      - full_stack
-      - frontend
-      - backend
-      - mobile_development
-      - ios
-      - android
-      - kotlin
-      - swift
-      - flutter
-      - cybersecurity
-      - blockchain
-      - quantum_computing
-      - edge_computing
-      - iot
-      - ar
-      - vr
-      - mixed_reality
-      - computer_vision
-      - nlp
-      - robotics
+        - software_development
+        - programming
+        - web_development
+        - software_engineering
+        - system_architecture
+        - database_management
+        - api_development
+        - software_testing
+        - version_control
+        - git
+        - agile
+        - scrum
+        - project_management_tech
+        - technical_documentation
+        - code_review
+        - debugging
+        - performance_optimization
+        - scalability
+        - reliability
+        - maintainability
+        - software_design_patterns
+        - object_oriented_programming
+        - functional_programming
+        - technical_leadership
+        - mentoring_technical
+        - innovation
+        - digital_transformation
+        - automation_tools
+        - process_digitalization
+        # 添加编程语言和框架
+        - python
+        - java
+        - javascript
+        - typescript
+        - react
+        - angular
+        - vue
+        - node_js
+        - spring
+        - django
+        - flask
+        - express
+        - sql
+        - mongodb
+        - postgresql
+        - mysql
+        - redis
+        - elasticsearch
     related_roles: []
-    semantic_description: "Technology sector focusing on software development, digital\
-      \ innovation, \n            artificial intelligence, cloud computing, and technology\
-      \ solutions. \n            Programming, system architecture, and cutting-edge\
-      \ technological advancement."
+    semantic_description: software development programming web development system architecture database management technical innovation digital solutions technology leadership
+  travel_arrangements:
+    domain_keywords: []
+    explicit_skills:
+      core_domain:
+      - travel_planning
+      - booking_systems
+      - tour_operations
+      - travel_agency_services
+      - itinerary_planning
+      - destination_management
+      - travel_technology
+      - global_distribution_systems
+      - amadeus
+      - sabre
+      - galileo
+      - customer_service_travel
+      - travel_insurance
+      - visa_services
+      - group_travel
+      - business_travel
+      - leisure_travel
+      - travel_consulting
+    related_roles: []
+    semantic_description: travel arrangements booking services tour operations destination
+      management travel technology customer service travel planning consultation
   venture_capital:
     domain_keywords: []
     explicit_skills:

@@ -158,10 +158,18 @@ roles:
       - content_planning
       - seo_content_writing
       - multimedia_production
+      - video_production
+      - post_production
+      - color_grading
+      - sound_design
+      - content_creation
+      - tiktok_content
+      - instagram_reels
+      - youtube_content
     related_industries: []
     semantic_description: content creation writing video production photography graphic
       design storytelling brand voice social media content multimedia production creative
-      strategy audience engagement editorial planning
+      strategy audience engagement editorial planning video editing post-production
     skill_type_preferences:
       methodology: 0.6
       tool: 0.7
@@ -263,6 +271,9 @@ roles:
       - data_visualization
       - data_mining
       - predictive_modeling
+      - edge_computing
+      - sdn_knowledge
+      - quantum_computing_awareness
     related_industries: []
     semantic_description: "Data analysis, statistical modeling, machine learning,\
       \ and predictive analytics. \n            Extract insights from large datasets\
@@ -441,6 +452,37 @@ roles:
     skill_type_preferences:
       methodology: 0.6
       tool: 0.7
+  housekeeping_staff:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - cleaning_equipment
+      - inventory_management_cleaning
+      - scheduling_software
+      essential:
+      - housekeeping_procedures
+      - cleaning_techniques
+      - hygiene_standards
+      - room_maintenance
+      - guest_service
+      - attention_to_detail
+      - time_management
+      - quality_control_cleaning
+      - safety_procedures
+      - inventory_tracking
+      - equipment_maintenance
+      - customer_service_hospitality
+    related_industries: []
+    semantic_description: housekeeping cleaning services room maintenance hygiene
+      standards guest service quality control hospitality cleaning procedures safety
+      protocols inventory management
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
   hr_specialist:
     alternative_names: []
     domain_keywords: []
@@ -472,6 +514,105 @@ roles:
     semantic_description: human resources recruitment talent acquisition employee
       relations performance management training development compensation benefits
       compliance organizational development succession planning
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  legal_assistant:
+    alternative_names: ["rechtsanwaltsfachangestellte"]
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - microsoft_office
+      - case_management_software
+      - billing_software
+      - document_management_systems
+      essential:
+      - legal_documentation
+      - anwaltssoftware
+      - mahnverfahren
+      - elektronische_aktenführung
+      - legal_research
+      - client_communication
+      - court_procedures
+      - legal_terminology
+      - case_preparation
+      - compliance_legal
+      - administrative_support_legal
+      - german_legal_system
+      - legal_correspondence
+    related_industries: []
+    semantic_description: legal assistant paralegal legal documentation court procedures
+      case management legal research administrative support German legal system compliance
+      client communication legal terminology
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  logistics_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - sap_logistics
+      - wms_systems
+      - transportation_management_systems
+      - excel_advanced
+      essential:
+      - supply_chain_management
+      - warehouse_operations
+      - inventory_management
+      - logistics_planning
+      - transportation_coordination
+      - customs_procedures
+      - international_shipping
+      - cost_optimization_logistics
+      - vendor_management_logistics
+      - route_planning
+      - freight_management
+      - logistics_analytics
+    related_industries: []
+    semantic_description: logistics supply chain warehouse operations inventory management
+      transportation coordination international shipping customs procedures cost optimization
+      freight management route planning
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
+  media_designer:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - canva
+      - figma
+      - sketch
+      essential:
+      - adobe_creative_suite
+      - adobe_photoshop
+      - adobe_illustrator
+      - adobe_indesign
+      - graphic_design
+      - layout_design
+      - typography
+      - digital_design
+      - print_design
+      - brand_design
+      - visual_identity
+      - creative_direction
+      - design_thinking
+      - color_theory
+      - composition
+    related_industries: []
+    semantic_description: media design graphic design digital design print design
+      visual identity brand design creative direction typography layout design visual
+      communication creative services
     skill_type_preferences:
       methodology: 0.6
       tool: 0.7
@@ -537,6 +678,37 @@ roles:
     skill_type_preferences:
       methodology: 0.6
       tool: 0.7
+  operations_specialist:
+    alternative_names: []
+    domain_keywords: []
+    exclusion_rules:
+      categories: []
+      skills: []
+    explicit_skills:
+      common:
+      - excel_advanced
+      - project_management_tools
+      - data_analysis_tools
+      essential:
+      - process_optimization
+      - operational_efficiency
+      - workflow_management
+      - performance_metrics
+      - data_analysis_operations
+      - quality_assurance_ops
+      - vendor_coordination
+      - resource_planning
+      - process_documentation
+      - continuous_improvement
+      - operational_reporting
+      - problem_solving_ops
+    related_industries: []
+    semantic_description: operations process optimization workflow management operational
+      efficiency performance metrics quality assurance resource planning continuous
+      improvement problem solving operational reporting
+    skill_type_preferences:
+      methodology: 0.6
+      tool: 0.7
   physiotherapist:
     alternative_names: []
     domain_keywords: []
@@ -568,7 +740,7 @@ roles:
     skill_type_preferences:
       methodology: 0.6
       tool: 0.7
-  project_manager:
+  pre_sales_consultant:
     alternative_names: []
     domain_keywords: []
     exclusion_rules:
@@ -576,171 +748,22 @@ roles:
       skills: []
     explicit_skills:
       common:
-      - microsoft_project
-      - asana
-      - trello
-      - monday_com
-      - slack
+      - crm_systems
+      - presentation_software
+      - demo_tools
       essential:
-      - agile
-      - scrum
-      - project_management
-      - jira
-      - confluence
-      - kanban
-      - waterfall
-      - risk_management
-      - stakeholder_management
-      - budget_management
-      - timeline_management
-      - resource_planning
-    related_industries: []
-    semantic_description: project coordination planning scheduling resource management
-      stakeholder communication risk assessment team leadership agile methodology
-      delivery management budget control
-    skill_type_preferences:
-      methodology: 0.6
-      tool: 0.7
-  quality_assurance_specialist:
-    alternative_names: []
-    domain_keywords: []
-    exclusion_rules:
-      categories: []
-      skills: []
-    explicit_skills:
-      common:
-      - jira
-      - test_rail
-      - quality_center
-      - minitab
-      - six_sigma
-      essential:
-      - quality_control
-      - testing_methodologies
-      - iso_standards
-      - process_improvement
-      - root_cause_analysis
-      - documentation
-      - audit_procedures
-      - risk_assessment
-      - compliance_management
-      - statistical_analysis
-      - continuous_improvement
-    related_industries: []
-    semantic_description: software testing quality control test automation manual
-      testing performance testing security testing user acceptance testing defect
-      management test planning quality metrics process improvement
-    skill_type_preferences:
-      methodology: 0.6
-      tool: 0.7
-  social_media_manager:
-    alternative_names: []
-    domain_keywords: []
-    exclusion_rules:
-      categories: []
-      skills: []
-    explicit_skills:
-      common:
-      - hootsuite
-      - buffer
-      - sprout_social
-      - canva
-      - later
-      - socialbakers
-      essential:
-      - social_media_strategy
-      - content_creation
-      - community_management
-      - social_media_analytics
-      - influencer_marketing
-      - paid_social_advertising
-      - brand_management
+      - technical_consulting
+      - solution_design
+      - client_needs_analysis
+      - product_demonstration
+      - proposal_writing
+      - technical_presentation
       - customer_engagement
-      - crisis_management
-      - trend_analysis
+      - solution_architecture
+      - competitive_analysis
+      - stakeholder_management
+      - business_development
+      - technical_sales
     related_industries: []
-    semantic_description: social media strategy community management content planning
-      audience engagement influencer marketing social analytics campaign management
-      brand awareness crisis communication trend analysis
-    skill_type_preferences:
-      methodology: 0.6
-      tool: 0.7
-  social_worker:
-    alternative_names: []
-    domain_keywords: []
-    exclusion_rules:
-      categories: []
-      skills: []
-    explicit_skills:
-      common:
-      - case_management_software
-      - microsoft_office
-      - database_management
-      essential:
-      - case_management
-      - counseling
-      - social_services
-      - crisis_intervention
-      - advocacy
-      - community_outreach
-      - resource_coordination
-      - documentation
-      - assessment_skills
-      - ethical_practice
-      - cultural_competency
-      - family_support
-    related_industries: []
-    semantic_description: social services case management counseling advocacy community
-      outreach crisis intervention family support resource coordination mental health
-      assessment cultural competency ethical practice
-    skill_type_preferences:
-      methodology: 0.6
-      tool: 0.7
-  ui_ux_designer:
-    alternative_names: []
-    domain_keywords: []
-    exclusion_rules:
-      exclude_categories:
-      - programming_language
-      - database
-      exclude_skills:
-      - python
-      - java
-      - sql
-      - backend_development
-    explicit_skills:
-      common:
-      - adobe_creative_suite
-      - canva
-      - miro
-      - figjam
-      essential:
-      - figma
-      - sketch
-      - adobe_xd
-      - adobe_photoshop
-      - adobe_illustrator
-      - invision
-      - principle
-      - framer
-      - zeplin
-      - marvel
-      - user_interface_design
-      - user_experience_design
-      - ui_design
-      - ux_design
-      - wireframing
-      - prototyping
-      - user_research
-      - usability_testing
-      - interaction_design
-      - visual_design
-      - design_systems
-    related_industries: []
-    semantic_description: "User interface and user experience design focusing on visual\
-      \ design, \n            interaction design, usability testing, wireframing,\
-      \ prototyping, design systems, \n            and user research. Creative problem-solving\
-      \ for digital products and user-centered design methodologies."
-    skill_type_preferences:
-      methodology: 0.6
-      tool: 0.7
+    semantic_description: pre-sales consulting technical sales solution design client
+      needs analysis product demonstration proposal writing customer engagement solution

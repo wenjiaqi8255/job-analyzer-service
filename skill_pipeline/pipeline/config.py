@@ -26,7 +26,7 @@ class PipelineConfig:
     industry_threshold: float = 0.45  # 提高默认行业阈值
     
     # 基线生成配置
-    min_skills_for_baseline: int = 5
+    min_skills_for_baseline: int = 2
     embedding_dimension: int = 768
     
     # 数据库配置

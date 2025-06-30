@@ -30,7 +30,7 @@ class SemanticClassifier:
         } for role in self.semantic_engine.role_profiles.keys()}
         
         industry_classifications = {industry: {
-            'core_domain': [], 'regulatory': [], 'business_focus': [], 'unique_requirements': []
+            'core_domain': [], 'regulatory': [], 'business_focus': [], 'unique_requirements': [], 'common': []
         } for industry in self.semantic_engine.industry_profiles.keys()}
         
         # 统计变量

@@ -70,7 +70,8 @@ def run_pipeline(mode, jobs_to_analyze_df, idf_corpus_df, supabase=None, output_
                         original_description = job_data.get('description', '')
                         if original_description:
                             separated_result = job_content_separator.extract_pure_job_requirements(original_description)
-                            job_data['effective_description'] = separated_result['job_content_filtered']
+                            job_data['effective_description'] = separated_result['job_content_filtered']  # For role classification and anomaly detection
+                            job_data['company_description'] = separated_result['removed_company_info']    # For industry classification
 
                         classification_result = classification_pipeline.run(job_data)
                         
