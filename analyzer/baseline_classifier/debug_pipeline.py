@@ -198,26 +198,38 @@ def test_actual_job_classification(pipeline):
     print(f"行业: {test_job_data['industry']}")
     print("-" * 60)
     
-    # 运行分类
+    # 运行分析
     try:
-        result = pipeline.run(test_job_data)
-        print(f"分类结果:")
-        print(f"  角色: {result.get('role', 'Unknown')}")
-        print(f"  行业: {result.get('industry', 'Unknown')}")
+        result = pipeline.analyze(test_job_data)
+        print(f"分析结果:")
+        print(f"  Primary Role: {result.get('role', 'Unknown')}")
+        print(f"  Primary Industry: {result.get('industry', 'Unknown')}")
         
+        print("\nRole Similarities (Top 5):")
+        role_sims = result.get('role_similarity_analysis', {})
+        for i, (role, score) in enumerate(role_sims.items()):
+            if i >= 5: break
+            print(f"  - {role}: {score:.4f}")
+            
+        print("\nIndustry Similarities (Top 5):")
+        industry_sims = result.get('industry_similarity_analysis', {})
+        for i, (industry, score) in enumerate(industry_sims.items()):
+            if i >= 5: break
+            print(f"  - {industry}: {score:.4f}")
+
         # 如果行业不是tech，则失败
         if result.get('industry') != 'tech':
-            print(f"❌ 分类错误! 期望: tech, 实际: {result.get('industry')}")
+            print(f"\n❌ 分类错误! 期望: tech, 实际: {result.get('industry')}")
         else:
-            print(f"✅ 分类正确!")
+            print(f"\n✅ 分类正确!")
             
     except Exception as e:
-        print(f"❌ 分类过程出错: {str(e)}")
-        logger.error(f"Classification error: {e}", exc_info=True)
+        print(f"❌ 分析过程出错: {str(e)}")
+        logger.error(f"Analysis error: {e}", exc_info=True)
 
 
 def main():
-    from .classification_pipeline import ClassificationPipeline
+    from .analysis_pipeline import AnalysisPipeline
     from ..config import AppConfig
     from ..utils.resource_manager import ResourceManager
     from ..utils.text_preprocessor import TextPreprocessor
@@ -258,7 +270,7 @@ def main():
         text_preprocessor = TextPreprocessor(nlp_model)
         
         # 初始化pipeline
-        pipeline = ClassificationPipeline(
+        pipeline = AnalysisPipeline(
             embedding_model=embedding_model,
             semantic_baselines=semantic_baselines,
             text_preprocessor=text_preprocessor,
@@ -267,8 +279,8 @@ def main():
         
         # 运行测试
         debug_baseline_similarity(
-            pipeline.industry_classifier,
-            pipeline.industry_classifier.embedding_processor,
+            pipeline.industry_analyzer,
+            pipeline.industry_analyzer.embedding_processor,
             pipeline.text_preprocessor
         )
         

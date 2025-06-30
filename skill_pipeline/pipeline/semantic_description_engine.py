@@ -5,6 +5,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from sentence_transformers import SentenceTransformer
 from functools import lru_cache
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,17 @@ class ConfigurableSemanticEngine:
         
         # 核心优化：预计算所有profile embeddings
         self._precompute_profile_embeddings()
+
+        # 新增：将预计算的嵌入向量整理成张量以供外部使用
+        device = self.model.device
+        self.role_embeddings = torch.tensor([
+            self._profile_embeddings_cache[f"role_{name}"] 
+            for name in self.role_profiles.keys()
+        ], device=device)
+        self.industry_embeddings = torch.tensor([
+            self._profile_embeddings_cache[f"industry_{name}"] 
+            for name in self.industry_profiles.keys()
+        ], device=device)
     
     def _precompute_profile_embeddings(self):
         """预计算所有profile的embeddings - 核心性能优化"""

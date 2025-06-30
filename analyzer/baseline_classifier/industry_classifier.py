@@ -7,13 +7,13 @@ import torch
 
 logger = logging.getLogger(__name__)
 
-class IndustryClassifier:
+class IndustrySimilarityAnalyzer:
     """
-    Classifies job industries based on semantic similarity to predefined baselines.
+    Calculates job industry similarities based on semantic similarity to predefined baselines.
     """
     def __init__(self, embedding_processor: BatchEmbeddingProcessor, baselines, preprocessor, threshold:ModelThresholds):
         """
-        Initializes the IndustryClassifier.
+        Initializes the IndustrySimilarityAnalyzer.
 
         Args:
             embedding_processor: An instance of BatchEmbeddingProcessor.
@@ -34,7 +34,7 @@ class IndustryClassifier:
         """
         baseline_embeddings = {}
         if not baselines:
-            logger.warning("No industry baselines provided to IndustryClassifier.")
+            logger.warning("No industry baselines provided to IndustrySimilarityAnalyzer.")
             return baseline_embeddings
 
         logger.info(f"Loading pre-computed vectors for {len(baselines)} industries.")
@@ -49,18 +49,25 @@ class IndustryClassifier:
                 continue
 
             try:
-                # Create a single representative vector by averaging all skill vectors
-                avg_vector = np.mean(np.array(vectors.cpu()), axis=0)
-                baseline_embeddings[industry_name] = avg_vector.reshape(1, -1)
+                # In the new architecture, 'vectors' is already the pre-computed weighted average vector (a 1D tensor)
+                # We just need to ensure it's in the correct numpy 2D-array format for scikit-learn
+                if isinstance(vectors, torch.Tensor):
+                    # Detach from gpu, convert to numpy, and reshape to (1, D)
+                    baseline_embeddings[industry_name] = vectors.cpu().numpy().reshape(1, -1)
+                else:
+                    # Fallback for unexpected formats
+                    logger.warning(f"Vectors for '{industry_name}' is not a tensor, attempting to convert.")
+                    baseline_embeddings[industry_name] = np.array(vectors).reshape(1, -1)
+
             except Exception as e:
                 logger.error(f"Failed to process vectors for industry '{industry_name}': {e}", exc_info=True)
         
         logger.info(f"Successfully loaded and processed embeddings for {len(baseline_embeddings)} industry baselines.")
         return baseline_embeddings
 
-    def classify(self, job_industry, company_name, job_description):
+    def calculate_similarities(self, job_industry, company_name, job_description):
         """
-        Classifies the industry of a job using a weighted scoring model.
+        Calculates the similarity of a job to various industries.
 
         Args:
             job_industry (str): The industry of the job.
@@ -68,11 +75,11 @@ class IndustryClassifier:
             job_description (str): The description of the job.
 
         Returns:
-            str: The name of the classified industry, or "Unknown" if no suitable industry is found.
+            dict: A dictionary with industry names as keys and similarity scores as values.
         """
         if not self.baseline_embeddings:
-            logger.warning("Cannot classify industry: no baseline embeddings available.")
-            return "Unknown"
+            logger.warning("Cannot calculate industry similarity: no baseline embeddings available.")
+            return {}
 
         # Calculate scores from different parts of the job data
         industry_scores = self._calculate_industry_name_similarity(job_industry)
@@ -80,25 +87,17 @@ class IndustryClassifier:
 
         if not industry_scores and not desc_scores:
             logger.warning("No valid scores could be computed from industry or description.")
-            return "Unknown"
+            return {}
         
         # Combine scores with a heavier weight on the industry name
         final_scores = self._weigh_and_combine_scores(industry_scores, desc_scores, industry_weight=0.7)
 
         if not final_scores:
-            logger.info("No final scores after weighting. Classified as 'Unknown'.")
-            return "Unknown"
+            logger.info("No final scores after weighting. Returning empty dict.")
+            return {}
 
-        best_match_industry, max_similarity = max(final_scores.items(), key=lambda item: item[1])
-        
-        logger.debug(f"Industry classification best match: '{best_match_industry}' with score {max_similarity:.4f} (Threshold: {self.threshold})")
-
-        if max_similarity >= self.threshold:
-            logger.info(f"Final industry classification: '{best_match_industry}' with score {max_similarity:.4f}")
-            return best_match_industry
-        else:
-            logger.info(f"Best match '{best_match_industry}' score {max_similarity:.4f} is below threshold {self.threshold}. Classified as 'Unknown'.")
-            return "Unknown"
+        logger.info(f"Calculated {len(final_scores)} industry similarity scores.")
+        return final_scores
 
     def _weigh_and_combine_scores(self, industry_scores: dict, desc_scores: dict, industry_weight: float) -> dict:
         """Combines industry and description scores using a weighted average."""
@@ -144,7 +143,7 @@ class IndustryClassifier:
             input_embedding_np = input_embedding.cpu().numpy().reshape(1, -1)
             for name, baseline_embedding in self.baseline_embeddings.items():
                 similarity = cosine_similarity(input_embedding_np, baseline_embedding)[0][0]
-                scores[name] = similarity
+                scores[name] = float(similarity)
             logger.debug(f"Industry name similarity scores: {scores}")
             return scores
         except Exception as e:
@@ -170,7 +169,7 @@ class IndustryClassifier:
             scores = {}
             for name, baseline_embedding in self.baseline_embeddings.items():
                 similarity = cosine_similarity(job_embedding_np, baseline_embedding)[0][0]
-                scores[name] = similarity
+                scores[name] = float(similarity)
             
             logger.debug(f"Description similarity scores: {scores}")
             return scores

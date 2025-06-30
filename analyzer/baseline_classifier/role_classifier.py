@@ -7,7 +7,7 @@ from ..utils.embedding_processor import BatchEmbeddingProcessor
 logger = logging.getLogger(__name__)
 
 
-class RoleClassifier:
+class RoleSimilarityAnalyzer:
     def __init__(self, embedding_processor: BatchEmbeddingProcessor, semantic_baselines, text_preprocessor, thresholds: ModelThresholds):
         self.embedding_processor = embedding_processor
         self.semantic_baselines = semantic_baselines
@@ -44,34 +44,27 @@ class RoleClassifier:
             title = title.replace(old, new)
         return title
 
-    def classify_job_role(self, job_title: str = "", job_description: str = "") -> str:
+    def calculate_similarities(self, job_title: str = "", job_description: str = "") -> dict:
         if not self.semantic_baselines.get("role"):
-            logger.warning("Cannot classify role due to missing baselines.")
-            return "general"
+            logger.warning("Cannot calculate role similarities due to missing baselines.")
+            return {}
         
-        logger.debug(f"Classifying role for title='{job_title}' and description='{job_description[:50]}...'")
+        logger.debug(f"Calculating role similarities for title='{job_title}' and description='{job_description[:50]}...'")
 
         title_scores = self._calculate_title_similarity(job_title)
         desc_scores = self._calculate_description_similarity(job_description)
 
         if not title_scores and not desc_scores:
             logger.debug("No valid title or description scores computed.")
-            return "general"
+            return {}
 
         final_scores = self._weigh_and_combine_scores(title_scores, desc_scores, self.thresholds.role_title_weight)
         
         if not final_scores:
-            return "general"
+            return {}
 
-        best_role, best_score = max(final_scores.items(), key=lambda item: item[1])
-        logger.debug(f"Best role before threshold: {best_role} with score {best_score:.4f}")
-
-        if best_score < self.thresholds.role_similarity_threshold:
-            logger.info(f"Best role '{best_role}' scored {best_score:.3f} (below threshold {self.thresholds.role_similarity_threshold}). Classifying as 'general'.")
-            return "general"
-        
-        logger.info(f"Classified as '{best_role}' with final score {best_score:.3f}")
-        return best_role
+        logger.info(f"Calculated {len(final_scores)} role similarity scores.")
+        return final_scores
 
     def _calculate_title_similarity(self, job_title: str) -> dict:
         """Calculates similarity scores based on the job title."""

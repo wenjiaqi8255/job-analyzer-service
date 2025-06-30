@@ -6,9 +6,14 @@ class ModelThresholds:
     min_avg_similarity: float = 0.35
     similarity_threshold: float = 0.1
     idf_threshold: float = 2.5
-    role_similarity_threshold: float = 0.3
+    role_similarity_threshold: float = 0.35
     role_title_weight: float = 0.9
-    industry_similarity_threshold: float = 0.3
+    industry_similarity_threshold: float = 0.4
+    
+    # New thresholds for the refined anomaly detection logic
+    core_skill_threshold: float = 0.4  # Similarity to be considered a core skill (and not an anomaly)
+    boilerplate_threshold: float = 0.7 # Similarity to be considered standard boilerplate (and not an anomaly)
+    cross_role_threshold: float = 0.4 # Similarity to another role to be flagged as a cross-role anomaly
 
 @dataclass
 class CacheConfig:

@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, List, Tuple, Optional
 from .semantic_description_engine import ConfigurableSemanticEngine
+from sentence_transformers import util
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,11 @@ class SemanticClassifier:
     def __init__(self, config_dir: str):
         self.semantic_engine = ConfigurableSemanticEngine(config_dir)
         self.confidence_thresholds = self._load_confidence_thresholds()
+        # 定义显式分配的权重
+        self.explicit_weights = {
+            'role': {'essential': 1.0, 'common': 0.85, 'specializations': 0.75, 'collaboration': 0.6},
+            'industry': {'core_domain': 1.0, 'regulatory': 0.9, 'business_focus': 0.8, 'unique_requirements': 0.75, 'common': 0.6}
+        }
         
     def _load_confidence_thresholds(self) -> Dict[str, float]:
         """加载置信度阈值"""
@@ -21,181 +27,115 @@ class SemanticClassifier:
         }
     
     def classify_skills(self, all_skills: List[Dict]) -> Tuple[Dict, Dict]:
-        """分级分类所有技能"""
-        logger.info("🧠 开始配置驱动的技能分类...")
-        
+        """
+        执行加权多重分配技能分类。
+        - 移除排他性：一个技能可以被分配给多个角色/行业。
+        - 引入权重：每个分配都有一个权重，来源于显式定义或语义相似度。
+        """
+        logger.info("🧠 开始执行加权多重分配技能分类...")
+
         # 初始化分类结构
-        role_classifications = {role: {
-            'essential': [], 'common': [], 'collaboration': [], 'specializations': []
-        } for role in self.semantic_engine.role_profiles.keys()}
+        role_classifications = {role: {cat: [] for cat in self.explicit_weights['role']} 
+                              for role in self.semantic_engine.role_profiles.keys()}
+        industry_classifications = {industry: {cat: [] for cat in self.explicit_weights['industry']}
+                                  for industry in self.semantic_engine.industry_profiles.keys()}
+
+        # 预先编码所有技能以提高效率
+        skill_texts = [s['skill'] for s in all_skills]
+        logger.info(f"正在分析 {len(skill_texts)} 个技能...")
+        skill_embeddings = self.semantic_engine.model.encode(skill_texts, convert_to_tensor=True)
         
-        industry_classifications = {industry: {
-            'core_domain': [], 'regulatory': [], 'business_focus': [], 'unique_requirements': [], 'common': []
-        } for industry in self.semantic_engine.industry_profiles.keys()}
+        # 计算所有技能与所有角色的相似度矩阵
+        role_sim_matrix = util.pytorch_cos_sim(skill_embeddings, self.semantic_engine.role_embeddings)
+        # 计算所有技能与所有行业的相似度矩阵
+        industry_sim_matrix = util.pytorch_cos_sim(skill_embeddings, self.semantic_engine.industry_embeddings)
         
-        # 统计变量
-        stats = {
-            'explicit_role_assigned': 0,
-            'explicit_industry_assigned': 0,
-            'semantic_role_assigned': 0,
-            'semantic_industry_assigned': 0,
-            'unassigned': 0,
-            'skipped_by_exclusion': 0
-        }
-        
-        assigned_skills = set()
-        
-        # === 第一轮：显式规则分配 ===
-        logger.info("📋 第一轮：显式规则分配...")
-        for skill_info in all_skills:
+        role_names = list(self.semantic_engine.role_profiles.keys())
+        industry_names = list(self.semantic_engine.industry_profiles.keys())
+
+        for i, skill_info in enumerate(all_skills):
             skill = skill_info['skill']
-            
-            # 角色显式分配
-            role_assigned = self._assign_explicit_role(skill, role_classifications)
-            if role_assigned:
-                assigned_skills.add(skill)
-                stats['explicit_role_assigned'] += 1
-                continue
-            
-            # 行业显式分配
-            industry_assigned = self._assign_explicit_industry(skill, industry_classifications)
-            if industry_assigned:
-                assigned_skills.add(skill)
-                stats['explicit_industry_assigned'] += 1
-        
-        # === 第二轮：高置信度语义匹配 ===
-        logger.info("🎯 第二轮：高置信度语义匹配...")
-        self._semantic_assignment_round(all_skills, assigned_skills, role_classifications, 
-                                      industry_classifications, stats, 'high')
-        
-        # === 第三轮：中等置信度语义匹配 ===
-        logger.info("🔍 第三轮：中等置信度语义匹配...")
-        self._semantic_assignment_round(all_skills, assigned_skills, role_classifications, 
-                                      industry_classifications, stats, 'medium')
-        
-        # === 第四轮：兜底处理 ===
-        logger.info("🥅 第四轮：兜底处理...")
-        self._fallback_assignment(all_skills, assigned_skills, role_classifications, 
-                                industry_classifications, stats)
-        
-        # 清理空分类
+            skill_lower = skill.lower()
+
+            # --- 角色分配 ---
+            for j, role_name in enumerate(role_names):
+                profile = self.semantic_engine.role_profiles[role_name]
+                
+                # 1. 显式分配
+                is_explicitly_assigned = False
+                for category, explicit_skills in profile.explicit_skills.items():
+                    if category in role_classifications[role_name] and (skill in explicit_skills or skill_lower in [s.lower() for s in explicit_skills]):
+                        weight = self.explicit_weights['role'].get(category, 0.7)
+                        role_classifications[role_name][category].append(
+                            {'skill': skill, 'weight': weight, 'source': 'explicit'}
+                        )
+                        is_explicitly_assigned = True
+                        break
+                
+                if is_explicitly_assigned:
+                    continue
+
+                # 2. 语义分配
+                similarity = role_sim_matrix[i, j].item()
+                if similarity >= self.confidence_thresholds['low']:
+                    category = self.semantic_engine.determine_category(skill_info, similarity, 'role')
+                    if category in role_classifications[role_name]:
+                        role_classifications[role_name][category].append(
+                            {'skill': skill, 'weight': round(similarity, 3), 'source': 'semantic'}
+                        )
+
+            # --- 行业分配 ---
+            for k, industry_name in enumerate(industry_names):
+                profile = self.semantic_engine.industry_profiles[industry_name]
+
+                # 1. 显式分配
+                is_explicitly_assigned = False
+                for category, explicit_skills in profile.explicit_skills.items():
+                    if category in industry_classifications[industry_name] and (skill in explicit_skills or skill_lower in [s.lower() for s in explicit_skills]):
+                        weight = self.explicit_weights['industry'].get(category, 0.7)
+                        industry_classifications[industry_name][category].append(
+                            {'skill': skill, 'weight': weight, 'source': 'explicit'}
+                        )
+                        is_explicitly_assigned = True
+                        break
+                
+                if is_explicitly_assigned:
+                    continue
+                    
+                # 2. 语义分配
+                similarity = industry_sim_matrix[i, k].item()
+                if similarity >= self.confidence_thresholds['low']:
+                    category = self.semantic_engine.determine_category(skill_info, similarity, 'industry')
+                    if category in industry_classifications[industry_name]:
+                        industry_classifications[industry_name][category].append(
+                            {'skill': skill, 'weight': round(similarity, 3), 'source': 'semantic'}
+                        )
+
+        # 清理并返回结果
         role_classifications = self._clean_classifications(role_classifications)
         industry_classifications = self._clean_classifications(industry_classifications)
         
-        # 输出统计信息
-        self._log_classification_stats(stats, len(all_skills))
-        
+        logger.info("✅ 加权多重分配分类完成.")
         return role_classifications, industry_classifications
-    
-    def _assign_explicit_role(self, skill: str, role_classifications: Dict) -> bool:
-        """显式角色分配 - 基于配置文件"""
-        skill_lower = skill.lower()
-        
-        for role_name, profile in self.semantic_engine.role_profiles.items():
-            for category, skills in profile.explicit_skills.items():
-                if skill in skills or skill_lower in [s.lower() for s in skills]:
-                    role_classifications[role_name][category].append(skill)
-                    logger.debug(f"  📋 显式分配: {skill} → {role_name}.{category}")
-                    return True
-        return False
-    
-    def _assign_explicit_industry(self, skill: str, industry_classifications: Dict) -> bool:
-        """显式行业分配 - 基于配置文件"""
-        skill_lower = skill.lower()
-        
-        for industry_name, profile in self.semantic_engine.industry_profiles.items():
-            for category, skills in profile.explicit_skills.items():
-                if skill in skills or skill_lower in [s.lower() for s in skills]:
-                    industry_classifications[industry_name][category].append(skill)
-                    logger.debug(f"  🏢 显式分配: {skill} → {industry_name}.{category}")
-                    return True
-        return False
-    
-    def _semantic_assignment_round(self, all_skills: List[Dict], assigned_skills: set,
-                                 role_classifications: Dict, industry_classifications: Dict,
-                                 stats: Dict, confidence_level: str):
-        """执行一轮语义分配"""
-        threshold = self.confidence_thresholds[confidence_level]
-        
-        for skill_info in all_skills:
-            skill = skill_info['skill']
-            
-            if skill in assigned_skills:
-                continue
-            
-            # 获取最佳角色匹配
-            best_role, role_similarity, role_profile = self.semantic_engine.get_best_role_match(skill_info)
-            
-            if best_role and role_similarity >= threshold:
-                category = self.semantic_engine.determine_category(skill_info, role_similarity, 'role')
-                role_classifications[best_role][category].append(skill)
-                assigned_skills.add(skill)
-                stats['semantic_role_assigned'] += 1
-                logger.debug(f"  🎯 语义角色分配: {skill} → {best_role}.{category} (相似度: {role_similarity:.3f})")
-                continue
-            
-            # 获取最佳行业匹配
-            best_industry, industry_similarity, industry_profile = self.semantic_engine.get_best_industry_match(skill_info)
-            
-            if best_industry and industry_similarity >= threshold:
-                category = self.semantic_engine.determine_category(skill_info, industry_similarity, 'industry')
-                industry_classifications[best_industry][category].append(skill)
-                assigned_skills.add(skill)
-                stats['semantic_industry_assigned'] += 1
-                logger.debug(f"  🏭 语义行业分配: {skill} → {best_industry}.{category} (相似度: {industry_similarity:.3f})")
-    
-    def _fallback_assignment(self, all_skills: List[Dict], assigned_skills: set,
-                           role_classifications: Dict, industry_classifications: Dict,
-                           stats: Dict):
-        """兜底分配处理"""
-        for skill_info in all_skills:
-            skill = skill_info['skill']
-            
-            if skill in assigned_skills:
-                continue
-            
-            # 尝试低置信度匹配
-            best_role, role_similarity, _ = self.semantic_engine.get_best_role_match(skill_info)
-            best_industry, industry_similarity, _ = self.semantic_engine.get_best_industry_match(skill_info)
-            
-            low_threshold = self.confidence_thresholds['low']
-            
-            # 选择更好的匹配
-            if (best_role and role_similarity >= low_threshold and 
-                role_similarity > industry_similarity):
-                category = self.semantic_engine.determine_category(skill_info, role_similarity, 'role')
-                role_classifications[best_role][category].append(skill)
-                stats['semantic_role_assigned'] += 1
-            elif best_industry and industry_similarity >= low_threshold:
-                category = self.semantic_engine.determine_category(skill_info, industry_similarity, 'industry')
-                industry_classifications[best_industry][category].append(skill)
-                stats['semantic_industry_assigned'] += 1
-            else:
-                # 最终兜底到tech行业
-                if 'tech' in industry_classifications:
-                    industry_classifications['tech']['core_domain'].append(skill)
-                stats['unassigned'] += 1
-    
+
     def _clean_classifications(self, classifications: Dict) -> Dict:
-        """清理分类结果"""
+        """清理分类结果，移除空列表并按技能名去重"""
         cleaned = {}
         for key, categories in classifications.items():
             cleaned_categories = {}
             for category_name, skills in categories.items():
                 if isinstance(skills, list) and skills:
-                    unique_skills = sorted(list(set(skills)))
-                    cleaned_categories[category_name] = unique_skills
+                    # 按技能名称去重，保留权重最高的一个
+                    skill_map = {}
+                    for s in skills:
+                        if s['skill'] not in skill_map or s['weight'] > skill_map[s['skill']]['weight']:
+                            skill_map[s['skill']] = s
+                    
+                    unique_skills = list(skill_map.values())
+                    # 按权重降序排序
+                    cleaned_categories[category_name] = sorted(unique_skills, key=lambda x: x['weight'], reverse=True)
+
             if cleaned_categories:
                 cleaned[key] = cleaned_categories
         return cleaned
-    
-    def _log_classification_stats(self, stats: Dict, total_skills: int):
-        """记录分类统计信息"""
-        logger.info(f"📊 分类完成:")
-        logger.info(f"  📋 显式角色分配: {stats['explicit_role_assigned']}")
-        logger.info(f"  🏢 显式行业分配: {stats['explicit_industry_assigned']}")
-        logger.info(f"  🎯 语义角色分配: {stats['semantic_role_assigned']}")
-        logger.info(f"  🏭 语义行业分配: {stats['semantic_industry_assigned']}")
-        logger.info(f"  🥅 兜底分配: {stats['unassigned']}")
-        logger.info(f"  📈 总处理: {total_skills} 个技能")
     

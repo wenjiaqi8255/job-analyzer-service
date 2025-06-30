@@ -7,7 +7,8 @@ the schema for complex data stored in the database, ensuring that producers and
 consumers of this data have a single source of truth.
 
 The most important schema is `BaselineVectorSet`, which defines the structure of
-the JSON data stored in the `vectors_data` column of the `baseline_vectors` table.
+the JSON data stored in the database, ensuring that producers and
+consumers of this data have a single source of truth.
 """
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -39,17 +40,35 @@ class GlobalVectorData(BaseModel):
     vector_metadata: VectorMetadata
     vectors: List[List[float]] = Field(description="A consolidated list of all skill vectors for a baseline")
 
-class BaselineVectorSet(BaseModel):
-    """
-    This model represents the structure of the `vectors_data` column 
-    in the `baseline_vectors` table.
+class JobContent(BaseModel):
+    """职位内容的结构"""
+    raw_text: str
+    cleaned_text: str
+    language: str
 
-    This is the definitive schema for the JSON object stored in the database.
-    Any process that reads from or writes to this column should adhere to this
-    structure. The `ResourceManager` in the `analyzer` service, for example,
-    parses this structure to load baseline vectors for anomaly detection.
-    """
-    vectors: List[List[float]] = Field(description="Consolidated list of vectors for analysis")
-    skill_map: Dict[str, int] = Field(description="Mapping from skill string to its index in the vectors list")
-    model: str
-    dimension: int 
+class BaselineVectorSet(BaseModel):
+    """基线向量集，用于存储在数据库的JSON字段中"""
+    vectors: List[List[float]]  # 向量列表, 现在可能只包含一个加权平均向量
+    skill_map: Dict[str, int]   # 技能到其在原始（未加权）向量列表中索引的映射
+    model: str                  # 使用的模型名称
+    dimension: int              # 向量维度
+    weights: Optional[Dict[str, float]] = None # 新增：存储每个技能的权重
+
+class SkillAnalysisResult(BaseModel):
+    """技能分析结果"""
+    skill: str
+    is_baseline: bool
+    is_required: Optional[bool] = None
+    similarity_score: Optional[float] = None
+    is_synonym: bool = False
+    is_common_skill: Optional[bool] = None
+
+class AnomalyDetectionResult(BaseModel):
+    """异常检测结果"""
+    job_id: str
+    anomaly_score: float
+    missing_skills: List[SkillAnalysisResult]
+    unexpected_skills: List[SkillAnalysisResult]
+    required_skills_in_job: List[SkillAnalysisResult]
+    baseline_role: Optional[str] = None
+    baseline_industry: Optional[str] = None 

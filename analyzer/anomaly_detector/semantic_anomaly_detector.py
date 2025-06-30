@@ -8,9 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 class SemanticAnomalyDetector:
-    def __init__(self, embedding_model, semantic_baselines, text_preprocessor, nlp_model, thresholds: ModelThresholds, pipeline_config: PipelineConfig, cache_config: CacheConfig):
+    def __init__(self, embedding_model, semantic_baselines, boilerplate_baseline, text_preprocessor, nlp_model, thresholds: ModelThresholds, pipeline_config: PipelineConfig, cache_config: CacheConfig):
         self.embedding_model = embedding_model
         self.semantic_baselines = semantic_baselines
+        self.boilerplate_baseline = boilerplate_baseline
         self.text_preprocessor = text_preprocessor
         self.nlp = nlp_model
         self.thresholds = thresholds
@@ -35,61 +36,119 @@ class SemanticAnomalyDetector:
         #     }
         # }
 
-    def detect_anomalies(self, target_job: str, role_baseline_name: str, industry_baseline_name: str = None):
-        """
-        Detects semantic anomalies by comparing job description chunks against baselines.
-        """
-        if role_baseline_name == 'general':
-            logger.info("Job role classified as 'general', skipping semantic anomaly detection.")
-            return []
+    def _create_hybrid_baseline(self, role_similarities: dict, top_k: int = 3):
+        """Creates a weighted hybrid baseline from the top-k most similar roles."""
+        if not role_similarities:
+            return None, {}
 
-        if not self.embedding_model:
-            logger.error("Embedding model is not available. Cannot perform semantic analysis.")
-            return []
+        # Sort roles by similarity score and take the top-k
+        sorted_roles = sorted(role_similarities.items(), key=lambda item: item[1], reverse=True)[:top_k]
         
-        # This part of the logic is mentioned as a performance bottleneck.
-        # It will be addressed in subsequent refactoring (caching, batching).
+        # Filter out roles with scores below a minimum threshold to avoid noise
+        top_roles = {role: score for role, score in sorted_roles if score > self.thresholds.role_similarity_threshold}
+        
+        if not top_roles:
+            return None, {}
+
+        # Normalize the scores to use as weights
+        total_score = sum(top_roles.values())
+        weights = {role: score / total_score for role, score in top_roles.items()}
+
+        # Combine the baseline vectors using the calculated weights
+        combined_vectors = []
+        for role, weight in weights.items():
+            role_baseline = self.semantic_baselines.get('role', {}).get(role, {})
+            vectors = role_baseline.get('vectors')
+            if vectors is not None and vectors.numel() > 0:
+                # In the new architecture, vectors is a 1D tensor. We collect them for stacking.
+                combined_vectors.append(vectors)
+
+        if not combined_vectors:
+            return None, {}
+        
+        # Stack the vectors to create a (k, D) tensor, where k is the number of top roles.
+        hybrid_baseline = torch.stack(combined_vectors, dim=0)
+        
+        logger.info(f"Created hybrid baseline from roles: {list(weights.keys())} with weights {list(weights.values())}")
+        
+        return hybrid_baseline, weights
+
+    def detect_anomalies(self, target_job: str, analysis_result: dict):
+        """
+        Detects semantic anomalies using a more robust, context-aware approach.
+        1. Filters out chunks that are core to the primary role.
+        2. Identifies "cross-role" skills by checking against other role baselines.
+        3. Filters out common boilerplate text using a negative baseline.
+        """
+        role_similarities = analysis_result.get('role_similarity_analysis', {})
+        primary_role = analysis_result.get('role', 'general')
+
+        if primary_role == 'general' or not role_similarities:
+            logger.info("Primary role is 'general' or no similarities found, skipping semantic anomaly detection.")
+            return {"semantic_anomalies": [], "baseline_composition": {}}
+
+        # Create a hybrid baseline from the top roles for the primary role context
+        primary_role_baseline, baseline_composition = self._create_hybrid_baseline(role_similarities)
+        
+        if primary_role_baseline is None or primary_role_baseline.numel() == 0:
+            logger.warning(f"Could not create a valid primary role baseline. Cannot perform anomaly detection.")
+            return {"semantic_anomalies": [], "baseline_composition": {}}
+
+        # Prepare other role baselines for cross-checking
+        other_role_baselines = {
+            name: baseline['vectors']
+            for name, baseline in self.semantic_baselines.get('role', {}).items()
+            if name != primary_role and baseline.get('vectors') is not None
+        }
+
+        # --- Start of the new detection logic ---
         chunks = self.text_preprocessor.improved_chunking_for_anomaly_detection(target_job)
-        
         if not chunks:
-            logger.warning("No relevant chunks to process.")
-            return []
-        
-        logger.info(f"Processing {len(chunks)} chunks for anomaly detection")
+            return {"semantic_anomalies": [], "baseline_composition": {}}
 
         chunk_vectors = self.embedding_processor.encode_chunks(chunks)
         if chunk_vectors.numel() == 0:
-            logger.warning("Chunk vectors are empty after encoding, cannot proceed.")
-            return []
-
-        role_baseline_vectors = self.semantic_baselines.get('role', {}).get(role_baseline_name, {}).get("vectors")
-        if role_baseline_vectors is None:
-            logger.warning(f"Role baseline '{role_baseline_name}' has no vectors.")
-            return []
-
-        industry_baseline_vectors = self.semantic_baselines.get("industry", {}).get(industry_baseline_name, {}).get("vectors")
-        global_baseline_vectors = self._get_global_baseline_vectors()
+            return {"semantic_anomalies": [], "baseline_composition": {}}
 
         anomalies = []
         for i, chunk in enumerate(chunks):
-            sim_role = self._calculate_max_similarity(chunk_vectors[i].unsqueeze(0), role_baseline_vectors)
+            chunk_vector = chunk_vectors[i].unsqueeze(0)
+
+            # Step 1: Filter out core responsibilities and boilerplate
+            sim_to_primary = self._calculate_max_similarity(chunk_vector, primary_role_baseline)
+            sim_to_boilerplate = self._calculate_max_similarity(chunk_vector, self.boilerplate_baseline)
+
+            if sim_to_primary > self.thresholds.core_skill_threshold:
+                continue # It's a core skill, not an anomaly.
+
+            if sim_to_boilerplate > self.thresholds.boilerplate_threshold:
+                continue # It's standard boilerplate, not an anomaly.
+
+            # Step 2: Identify "cross-role" anomalies
+            cross_role_matches = []
+            for role_name, other_baseline in other_role_baselines.items():
+                sim_to_other = self._calculate_max_similarity(chunk_vector, other_baseline)
+                if sim_to_other > self.thresholds.cross_role_threshold:
+                    cross_role_matches.append({"role": role_name, "similarity": sim_to_other})
             
-            # logger.info(f"Chunk: '{chunk}', Similarity to Role '{role_baseline_name}': {sim_role:.4f}")
+            # If the chunk is highly similar to another role, it's a valuable cross-role anomaly
+            if cross_role_matches:
+                # Find the best match among the cross-roles
+                best_cross_match = max(cross_role_matches, key=lambda x: x['similarity'])
+                anomalies.append({
+                    "chunk": chunk,
+                    "type": "Cross-Role",
+                    "similarity_to_primary_role": round(sim_to_primary, 3),
+                    "related_to_role": best_cross_match['role'],
+                    "related_role_similarity": round(best_cross_match['similarity'], 3)
+                })
 
-            if sim_role < self.thresholds.similarity_threshold:
-                # logger.info(f"Chunk is anomalous. Building record...")
-                anomaly = self._build_anomaly_record(
-                    chunk, chunk_vectors[i].unsqueeze(0), sim_role, role_baseline_name, industry_baseline_name, 
-                    role_baseline_vectors, industry_baseline_vectors, global_baseline_vectors
-                )
-                anomalies.append(anomaly)
-        
         if not anomalies:
-            logger.info("No semantic anomalies detected.")
+            logger.info("No semantic anomalies detected after contextual filtering.")
         else:
-            logger.info(f"Detected {len(anomalies)} semantic anomalies.")
+            logger.info(f"Detected {len(anomalies)} high-confidence semantic anomalies.")
 
-        return anomalies
+        return {"semantic_anomalies": anomalies, "baseline_composition": baseline_composition}
 
     def _get_global_baseline_vectors(self):
         global_baselines = self.semantic_baselines.get('global', {})
@@ -98,55 +157,10 @@ class SemanticAnomalyDetector:
             return global_baselines[global_baseline_name].get('vectors')
         return None
 
-    def _build_anomaly_record(self, chunk, chunk_vector, sim_role, role_name, industry_name, role_vectors, industry_vectors, global_vectors):
-        sim_industry = self._calculate_max_similarity(chunk_vector, industry_vectors)
-        sim_global = self._calculate_max_similarity(chunk_vector, global_vectors)
-        
-        # logger.info(f"Anomaly details: sim_industry={sim_industry:.4f}, sim_global={sim_global:.4f}")
-
-        anomaly_type = "Cross-Role"
-        if sim_global < 0.35:
-            anomaly_type = "Emerging Tech"
-        elif industry_name and sim_industry > 0.65 and sim_role < 0.4:
-            anomaly_type = "Industry-Specific"
-
-        # logger.info(f"Determined anomaly type: {anomaly_type}")
-
-        skill_topic = "unknown"
-        if anomaly_type == "Industry-Specific" and industry_vectors is not None:
-            keywords = self.semantic_baselines.get("industry", {}).get(industry_name, {}).get("keywords", [])
-            skill_topic = self._find_best_match_keyword(chunk, chunk_vector, industry_vectors, keywords)
-        else:
-            keywords = self.semantic_baselines.get("role", {}).get(role_name, {}).get("keywords", [])
-            skill_topic = self._find_best_match_keyword(chunk, chunk_vector, role_vectors, keywords)
-
-        # logger.info(f"Extracted skill topic: '{skill_topic}'")
-
-        # template = self.explanation_templates.get(anomaly_type, {})
-        # explanation = template.get("explanation", "").format(skill=skill_topic, industry=industry_name, role=role_name)
-        # business_impact = template.get("business_impact", "").format(skill=skill_topic, industry=industry_name, role=role_name)
-
-        record = {
-            "chunk": chunk, "type": anomaly_type, 
-            # "explanation": explanation, 
-            # "business_impact": business_impact,
-            "similarity_to_role": round(sim_role, 3), "similarity_to_industry": round(sim_industry, 3), "similarity_to_global": round(sim_global, 3),
-        }
-        # logger.debug(f"Constructed anomaly record: {record}")
-        return record
-
-    def _find_best_match_keyword(self, chunk_text, chunk_vector, baseline_vectors, baseline_keywords):
-        if baseline_vectors is None or len(baseline_vectors) == 0 or not baseline_keywords:
-            doc = self.nlp(chunk_text)
-            for np in doc.noun_chunks:
-                return np.text
-            return "this requirement"
-
-        similarities = util.cos_sim(chunk_vector, baseline_vectors)
-        best_match_index = torch.argmax(similarities).item()
-        return baseline_keywords[best_match_index]
-
     def _calculate_max_similarity(self, chunk_vector, baseline_vectors):
-        if baseline_vectors is None or len(baseline_vectors) == 0:
+        if baseline_vectors is None or baseline_vectors.numel() == 0:
             return 0.0
+        # Ensure baseline_vectors is 2D
+        if baseline_vectors.dim() == 1:
+            baseline_vectors = baseline_vectors.unsqueeze(0)
         return torch.max(util.cos_sim(chunk_vector, baseline_vectors)).item() 

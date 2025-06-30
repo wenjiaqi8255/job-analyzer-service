@@ -19,6 +19,7 @@ class ResourceManager:
         self.embedding_model = None
         self.nlp_model = None
         self.semantic_baselines = {"role": {}, "industry": {}, "global": {}}
+        self.boilerplate_baseline = None  # For identifying standard legal/HR text
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         if torch.backends.mps.is_available():
             self.device = 'mps'
@@ -31,11 +32,13 @@ class ResourceManager:
         self._load_embedding_model()
         self._load_spacy_model()
         self._load_baselines_from_db()
+        self._create_boilerplate_baseline() # Create the negative baseline
         
         return {
             "embedding_model": self.embedding_model,
             "nlp_model": self.nlp_model,
-            "semantic_baselines": self.semantic_baselines
+            "semantic_baselines": self.semantic_baselines,
+            "boilerplate_baseline": self.boilerplate_baseline
         }
 
     def _load_embedding_model(self):
@@ -89,29 +92,41 @@ class ResourceManager:
             vectors = None
             if vector_data and 'vectors_data' in vector_data[0]:
                 vectors_payload = vector_data[0]['vectors_data']
-                vectors_list = []
-
-                # The actual vector data is nested inside the JSON payload
+                
+                # 新架构下，'vectors' 字段是一个只包含单个加权平均向量的列表
                 if isinstance(vectors_payload, dict) and 'vectors' in vectors_payload:
                     vectors_list = vectors_payload.get('vectors')
-                elif isinstance(vectors_payload, list): # Keep backward compatibility
-                    vectors_list = vectors_payload
-
-                if vectors_list:
-                    try:
-                        vectors = torch.tensor(vectors_list, device=self.device)
-                        logger.debug(f"Successfully created tensor for '{name}' with shape {vectors.shape}")
-                    except Exception as e:
-                        logger.error(f"Could not convert vectors to tensor for '{name}': {e}", exc_info=True)
+                    
+                    # 验证我们是否得到了预期的结构：一个包含单个向量的列表
+                    if isinstance(vectors_list, list) and len(vectors_list) == 1 and isinstance(vectors_list[0], list):
+                        # 直接使用这个预先计算好的加权平均向量
+                        avg_vector = vectors_list[0]
+                        try:
+                            # 创建一个一维张量
+                            vectors = torch.tensor(avg_vector, device=self.device)
+                            logger.debug(f"Successfully created weighted average tensor for '{name}' with shape {vectors.shape}")
+                        except Exception as e:
+                            logger.error(f"Could not convert weighted average vector to tensor for '{name}': {e}", exc_info=True)
+                    else:
+                        logger.warning(f"Vector data for '{name}' is not in the expected weighted average format (list with a single vector). Skipping.")
                 else:
-                    logger.warning(f"Vector list for '{name}' is empty after extraction. Skipping tensor creation.")
+                    logger.warning(f"No 'vectors' key in vectors_payload for '{name}'.")
             else:
                 logger.warning(f"No valid 'vectors_data' key in vector_data for '{name}'.")
             
-            # A baseline is only useful if it has vectors.
-            if vectors is not None:
+            # A baseline is only useful if it has a vector.
+            if vectors is not None and vectors.numel() > 0:
                 # Correctly extract keywords from the nested 'baseline_data' field
-                keywords = b.get('baseline_data', {}).get('skills_list', [])
+                keywords_data = b.get('baseline_data', {}).get('skills_list', [])
+                
+                # Robustly extract skill names, whether the list contains strings or dicts
+                keywords = []
+                if keywords_data:
+                    if isinstance(keywords_data[0], dict):
+                        keywords = [item['skill'] for item in keywords_data if 'skill' in item]
+                    elif isinstance(keywords_data[0], str):
+                        keywords = keywords_data # Handle old format
+                
                 if baseline_type in self.semantic_baselines:
                     self.semantic_baselines[baseline_type][name] = {
                         "vectors": vectors,
@@ -129,6 +144,40 @@ class ResourceManager:
         logger.debug(f"Number of 'industry' baselines: {len(self.semantic_baselines.get('industry', {}))}")
         logger.debug(f"Number of 'global' baselines: {len(self.semantic_baselines.get('global', {}))}")
 
+    def _create_boilerplate_baseline(self):
+        """Creates a baseline for common boilerplate text to filter out false positives."""
+        logger.info("Creating boilerplate baseline for filtering...")
+        boilerplate_texts = [
+            "severely disabled persons will be given preferential consideration", "equal qualifications",
+            "applications from severely disabled persons with equal qualifications are welcome",
+            "we welcome applications from people of all backgrounds, genders, and orientations",
+            "application deadline", "apply now", "contact person", "reference number",
+            "full-time", "part-time", "unsolicited applications", "privacy policy",
+            "all genders welcome", "diversity and inclusion", "equal opportunity employer",
+            "company policy", "legal requirements", "candidate profile", "what we offer",
+            "benefits", "salary", "location", "start date"
+        ]
+        
+        try:
+            # We need an embedding processor instance here. We can create a temporary one
+            # or ensure this is called after the main one is initialized.
+            # For simplicity, let's create one.
+            from ..utils.embedding_processor import BatchEmbeddingProcessor
+            from ..config import PipelineConfig, CacheConfig # Assuming default configs are okay here
+            
+            # This is a bit of a workaround. A cleaner way would be to pass the processor.
+            embedding_processor = BatchEmbeddingProcessor(
+                embedding_model=self.embedding_model,
+                batch_size=PipelineConfig().batch_size,
+                cache_size=CacheConfig().cache_size
+            )
+            
+            boilerplate_vectors = embedding_processor.encode_chunks(boilerplate_texts)
+            if boilerplate_vectors.numel() > 0:
+                self.boilerplate_baseline = torch.mean(boilerplate_vectors, dim=0, keepdim=True)
+                logger.info(f"Successfully created boilerplate baseline with shape {self.boilerplate_baseline.shape}")
+        except Exception as e:
+            logger.error(f"Failed to create boilerplate baseline: {e}", exc_info=True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """

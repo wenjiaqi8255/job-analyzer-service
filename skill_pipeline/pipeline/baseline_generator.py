@@ -44,16 +44,23 @@ class BaselineGenerator:
         """生成全局基线"""
         logger.info("🌍 生成全局基线...")
 
-        all_skills = set()
+        all_skills_with_weights = []
         for categories in role_classifications.values():
             for skills in categories.values():
-                all_skills.update(skills)
+                all_skills_with_weights.extend(skills)
 
         for categories in industry_classifications.values():
             for skills in categories.values():
-                all_skills.update(skills)
+                all_skills_with_weights.extend(skills)
 
-        all_skills = list(all_skills)
+        # 按技能名称去重，保留最高权重
+        skill_map = {}
+        for s in all_skills_with_weights:
+            if s['skill'] not in skill_map or s['weight'] > skill_map[s['skill']]['weight']:
+                skill_map[s['skill']] = s
+        
+        unique_skills_with_weights = sorted(list(skill_map.values()), key=lambda x: x['skill'])
+        all_skills = [s['skill'] for s in unique_skills_with_weights]
 
         # 统计信息
         role_distribution = {role: sum(len(skills) for skills in categories.values())
@@ -64,7 +71,7 @@ class BaselineGenerator:
         # 分离语义数据和向量数据
         semantic_data = {
             'total_skills': len(all_skills),
-            'skills_list': sorted(all_skills),  # 技能列表（人类可读）
+            'skills_list': unique_skills_with_weights,  # 技能列表（包含权重）
             'statistics': {
                 'role_distribution': role_distribution,
                 'industry_distribution': industry_distribution,
@@ -80,7 +87,7 @@ class BaselineGenerator:
         }
 
         # 生成向量数据
-        vector_data = self._generate_vectors_for_skills(all_skills)
+        vector_data = self._generate_vectors_for_skills(unique_skills_with_weights)
 
         return {
             'semantic_data': semantic_data,
@@ -94,20 +101,28 @@ class BaselineGenerator:
         role_baselines = {}
 
         for role, categories in role_classifications.items():
-            all_role_skills = []
+            all_role_skills_with_weights = []
             for skills in categories.values():
-                all_role_skills.extend(skills)
+                all_role_skills_with_weights.extend(skills)
+            
+            # 按技能名去重，保留最高权重 (因为一个技能可能通过显式和语义两种方式分配到同一个角色)
+            skill_map = {}
+            for s in all_role_skills_with_weights:
+                if s['skill'] not in skill_map or s['weight'] > skill_map[s['skill']]['weight']:
+                    skill_map[s['skill']] = s
+            
+            unique_skills_with_weights = sorted(list(skill_map.values()), key=lambda x: x['weight'], reverse=True)
 
-            if len(all_role_skills) < self.config.min_skills_for_baseline:
-                logger.warning(f"角色 {role} 技能数量不足，跳过基线生成")
+            if len(unique_skills_with_weights) < self.config.min_skills_for_baseline:
+                logger.warning(f"角色 {role} 技能数量不足 ({len(unique_skills_with_weights)}), 跳过基线生成")
                 continue
 
             # 语义数据（人类可读）
             semantic_data = {
                 'role_name': role,
-                'categories': categories,
-                'total_skills': len(all_role_skills),
-                'skills_list': sorted(list(set(all_role_skills))),
+                'categories': categories, # categories already contain weights
+                'total_skills': len(unique_skills_with_weights),
+                'skills_list': unique_skills_with_weights,
                 'statistics': {
                     'category_distribution': {cat: len(skills) for cat, skills in categories.items() if skills}
                 },
@@ -119,7 +134,7 @@ class BaselineGenerator:
             }
 
             # 向量数据
-            vector_data = self._generate_vectors_for_skills(list(set(all_role_skills)))
+            vector_data = self._generate_vectors_for_skills(unique_skills_with_weights)
 
             role_baselines[role] = {
                 'semantic_data': semantic_data,
@@ -135,20 +150,28 @@ class BaselineGenerator:
         industry_baselines = {}
 
         for industry, categories in industry_classifications.items():
-            all_industry_skills = []
+            all_industry_skills_with_weights = []
             for skills in categories.values():
-                all_industry_skills.extend(skills)
+                all_industry_skills_with_weights.extend(skills)
 
-            if len(all_industry_skills) < self.config.min_skills_for_baseline:
-                logger.warning(f"行业 {industry} 技能数量不足，跳过基线生成")
+            # 按技能名去重
+            skill_map = {}
+            for s in all_industry_skills_with_weights:
+                if s['skill'] not in skill_map or s['weight'] > skill_map[s['skill']]['weight']:
+                    skill_map[s['skill']] = s
+            unique_skills_with_weights = sorted(list(skill_map.values()), key=lambda x: x['weight'], reverse=True)
+
+
+            if len(unique_skills_with_weights) < self.config.min_skills_for_baseline:
+                logger.warning(f"行业 {industry} 技能数量不足 ({len(unique_skills_with_weights)}), 跳过基线生成")
                 continue
 
             # 语义数据（人类可读）
             semantic_data = {
                 'industry_name': industry,
                 'categories': categories,
-                'total_skills': len(all_industry_skills),
-                'skills_list': sorted(list(set(all_industry_skills))),
+                'total_skills': len(unique_skills_with_weights),
+                'skills_list': unique_skills_with_weights,
                 'statistics': {
                     'category_distribution': {cat: len(skills) for cat, skills in categories.items() if skills}
                 },
@@ -160,7 +183,7 @@ class BaselineGenerator:
             }
 
             # 向量数据
-            vector_data = self._generate_vectors_for_skills(list(set(all_industry_skills)))
+            vector_data = self._generate_vectors_for_skills(unique_skills_with_weights)
 
             industry_baselines[industry] = {
                 'semantic_data': semantic_data,
@@ -169,22 +192,32 @@ class BaselineGenerator:
 
         return industry_baselines
 
-    def _generate_vectors_for_skills(self, skills: List[str]) -> Dict:
-        """为技能列表生成符合BaselineVectorSet schema的向量数据字典"""
-        if not skills:
+    def _generate_vectors_for_skills(self, skills_with_weights: List[Dict]) -> Dict:
+        """
+        为技能列表生成符合BaselineVectorSet schema的向量数据字典。
+        现在接收一个包含技能和权重的字典列表，并计算加权平均向量。
+        """
+        if not skills_with_weights:
             return {}
 
-        unique_skills = sorted(list(set(skills))) # 保证顺序稳定
+        skills = [item['skill'] for item in skills_with_weights]
+        weights = np.array([item['weight'] for item in skills_with_weights])
 
         try:
-            skill_embeddings = self.vector_model.encode(unique_skills)
+            skill_embeddings = self.vector_model.encode(skills)
             
+            # 计算加权平均向量
+            weighted_average_vector = np.average(skill_embeddings, axis=0, weights=weights)
+
             # 创建符合BaselineVectorSet schema的字典
+            # 注意：'vectors' 字段现在存储的是单个加权平均向量
             vector_set = BaselineVectorSet(
-                vectors=[embedding.tolist() for embedding in skill_embeddings],
-                skill_map={skill: i for i, skill in enumerate(unique_skills)},
-                model='all-MiniLM-L6-v2',
-                dimension=384
+                vectors=[weighted_average_vector.tolist()],  # 这是一个列表，包含一个向量
+                skill_map={skill: i for i, skill in enumerate(skills)}, # skill_map 保持不变
+                model='all-MiniLM-L6-v2_weighted_avg', # 更新模型名称以反映变化
+                dimension=384,
+                # 可以选择性地添加权重信息
+                weights={item['skill']: item['weight'] for item in skills_with_weights}
             )
             
             # Pydantic模型转为字典以便JSON序列化
