@@ -8,3 +8,4 @@ torch
 rich
 sentence-transformers==2.2.2
 cachetools
+huggingface-hub<0.15

@@ -1,0 +1,92 @@
+name: Job Analyzer Service
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Run daily analysis at 3 AM UTC
+  push:
+    branches: [ "main" ]
+    paths:
+      - "analyzer/**"
+      - "main.py"
+      - "requirements.txt"
+      - ".github/workflows/python-app.yml"
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of jobs to process (if not analyzing all)'
+        required: false
+        default: '50'
+      analyze_all:
+        description: 'Analyze all unprocessed jobs'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        cache: 'pip'
+    
+    - name: Cache spaCy models
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/spacy
+          /opt/hostedtoolcache/Python/*/x64/lib/python*/site-packages/de_core_news_sm
+          /opt/hostedtoolcache/Python/*/x64/lib/python*/site-packages/en_core_web_sm
+        key: spacy-models-${{ runner.os }}-v2-${{ hashFiles('requirements.txt') }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+        # Download spaCy models if not restored from cache
+        if ! python -c "import spacy; spacy.load('de_core_news_sm')" 2>/dev/null; then
+          echo "Downloading German spaCy model..."
+          python -m spacy download de_core_news_sm
+        fi
+        if ! python -c "import spacy; spacy.load('en_core_web_sm')" 2>/dev/null; then
+          echo "Downloading English spaCy model..."  
+          python -m spacy download en_core_web_sm
+        fi
+    
+    - name: Run job analyzer
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        TZ: 'Europe/Berlin'
+      run: |
+        # Scheduled runs and manual 'analyze_all' runs should process everything
+        if [[ "${{ github.event_name }}" == "schedule" || "${{ github.event.inputs.analyze_all }}" == "true" ]]; then
+          echo "Starting full analysis of all unprocessed jobs..."
+          python main.py --supabase --analyze-all
+        else
+          # Manual runs without 'analyze_all' use the batch size
+          batch_size=${{ github.event.inputs.batch_size || '50' }}
+          echo "Starting batch analysis with batch size: $batch_size"
+          python main.py --supabase --batch-size $batch_size
+        fi
+
+    - name: Generate summary
+      if: always()
+      run: |
+        echo "## Job Analysis Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "- **Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Status:** ❌ Failed" >> $GITHUB_STEP_SUMMARY
+        fi
